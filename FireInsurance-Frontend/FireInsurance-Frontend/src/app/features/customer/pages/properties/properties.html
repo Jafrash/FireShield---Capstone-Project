@@ -1,0 +1,424 @@
+<div class="content-container min-h-screen py-8">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="page-title">My Properties</h1>
+      <p class="text-gray-600 text-[16px]">Manage and monitor your insured properties</p>
+    </div>
+    <button (click)="openAddModal()" 
+            class="btn btn-primary">
+      <span class="material-icons text-[20px]">add_home</span>
+      <span>Add Property</span>
+    </button>
+  </div>
+
+  <!-- Success Message -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      <span class="material-icons text-[20px]">check_circle</span>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  <!-- Error Message -->
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      <span class="material-icons text-[20px]">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading() && properties().length === 0) {
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && properties().length === 0) {
+    <div class="empty-state-card">
+      <span class="material-icons empty-state-icon">home</span>
+      <h3 class="empty-state-title">No Properties Yet</h3>
+      <p class="empty-state-description">Add your first property to get started with comprehensive insurance coverage and protection.</p>
+      <button (click)="openAddModal()" 
+              class="btn btn-primary">
+        <span class="material-icons text-[20px]">add_home</span>
+        <span>Add Your First Property</span>
+      </button>
+    </div>
+  }
+
+  <!-- Properties Grid -->
+  @if (properties().length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (property of properties(); track property.propertyId) {
+        <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
+          <!-- Property Header with Gradient -->
+          <div class="bg-linear-to-br from-claret to-fuchsia p-6 text-white relative overflow-hidden">
+            <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="relative flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="material-icons text-3xl">home</span>
+                  <span class="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold uppercase tracking-wide">
+                    {{ property.propertyType }}
+                  </span>
+                </div>
+                <h3 class="text-lg font-bold mb-1">{{ property.address }}</h3>
+              </div>
+              <div class="flex items-center gap-2">
+                <button 
+                  (click)="openEditModal(property)" 
+                  class="p-2 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-colors"
+                  [disabled]="isLoading()"
+                  title="Edit Property">
+                  <span class="material-icons text-white">edit</span>
+                </button>
+                <button 
+                  (click)="deleteProperty(property.propertyId)" 
+                  class="p-2 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-colors"
+                  [disabled]="isLoading()"
+                  title="Delete Property">
+                  <span class="material-icons text-white">delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Property Details -->
+          <div class="p-6 space-y-4">
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+              <div class="flex items-center gap-3">
+                <span class="material-icons text-gray-400">square_foot</span>
+                <span class="text-sm font-medium text-gray-600">Square Footage</span>
+              </div>
+              <span class="text-sm font-bold text-gray-900">{{ property.areaSqft | number }} sq ft</span>
+            </div>
+
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+              <div class="flex items-center gap-3">
+                <span class="material-icons text-gray-400">construction</span>
+                <span class="text-sm font-medium text-gray-600">Construction</span>
+              </div>
+              <span class="text-sm font-bold text-gray-900">{{ property.constructionType }}</span>
+            </div>
+
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+              <div class="flex items-center gap-3">
+                <span class="material-icons text-gray-400">health_and_safety</span>
+                <span class="text-sm font-medium text-gray-600">Risk Score</span>
+              </div>
+              <span class="text-sm font-bold text-gray-900">
+                @if (property.riskScore != null) {
+                  <span [ngClass]="{
+                    'text-green-600': property.riskScore < 30,
+                    'text-yellow-600': property.riskScore >= 30 && property.riskScore < 70,
+                    'text-red-600': property.riskScore >= 70
+                  }">{{ property.riskScore }}/100</span>
+                } @else {
+                  <span class="text-gray-400">Pending</span>
+                }
+              </span>
+            </div>
+            
+            <div class="flex items-center justify-between py-3">
+              <div class="flex items-center gap-3">
+                <span class="material-icons text-gray-400">fact_check</span>
+                <span class="text-sm font-medium text-gray-600">Status</span>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                ACTIVE
+              </span>
+            </div>
+          </div>
+
+          <!-- Document Upload -->
+          <div class="px-6 pb-6 bg-gray-50 border-t border-gray-100">
+            <app-document-upload
+              [title]="'Property Documents'"
+              [documentType]="'PROPERTY_DOCUMENT'"
+              [linkedEntityType]="'PROPERTY'"
+              [linkedEntityId]="property.propertyId"
+              [requiredDocuments]="['Ownership proof', 'Building plan', 'Fire safety certificate', 'Electrical safety certificate']"
+            ></app-document-upload>
+          </div>
+
+          <!-- Property Footer -->
+          <div class="px-6 py-4 bg-gray-100 border-t border-gray-200">
+            <div class="flex items-center gap-2 text-xs text-green-600 font-medium">
+              <span class="material-icons text-sm">verified</span>
+              <span>Registered Property</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Add Property Modal -->
+@if (showAddModal()) {
+  <div class="modal-overlay" (click)="closeAddModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2 class="text-2xl font-bold bg-linear-to-r from-claret to-fuchsia bg-clip-text text-transparent">Add New Property</h2>
+        <p class="text-sm text-gray-500 mt-1">Fill in the details to add a new property to your portfolio</p>
+      </div>
+      <button (click)="closeAddModal()" class="btn-close">&times;</button>
+    </div>
+
+    <form [formGroup]="addPropertyForm" (ngSubmit)="addProperty()" class="p-6">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="propertyType">
+            <span class="flex items-center gap-2">
+              <span class="material-icons text-sm text-claret">home_work</span>
+              Property Type *
+            </span>
+          </label>
+          <select 
+            id="propertyType"
+            formControlName="propertyType"
+            [class.error]="addPropertyForm.get('propertyType')?.invalid && addPropertyForm.get('propertyType')?.touched">
+            <option value="">Select type</option>
+            @for (type of propertyTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+          @if (addPropertyForm.get('propertyType')?.invalid && addPropertyForm.get('propertyType')?.touched) {
+            <span class="error-message">
+              <span class="material-icons text-sm">error</span>
+              {{ getFieldError('propertyType') }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="constructionType">
+            <span class="flex items-center gap-2">
+              <span class="material-icons text-sm text-claret">construction</span>
+              Construction Type *
+            </span>
+          </label>
+          <select 
+            id="constructionType"
+            formControlName="constructionType"
+            [class.error]="addPropertyForm.get('constructionType')?.invalid && addPropertyForm.get('constructionType')?.touched">
+            <option value="">Select type</option>
+            @for (type of constructionTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+          @if (addPropertyForm.get('constructionType')?.invalid && addPropertyForm.get('constructionType')?.touched) {
+            <span class="error-message">
+              <span class="material-icons text-sm">error</span>
+              {{ getFieldError('constructionType') }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group full-width">
+          <label for="address">
+            <span class="flex items-center gap-2">
+              <span class="material-icons text-sm text-claret">location_on</span>
+              Address *
+            </span>
+          </label>
+          <input 
+            id="address"
+            type="text" 
+            formControlName="address"
+            placeholder="123 Main St, City, State"
+            [class.error]="addPropertyForm.get('address')?.invalid && addPropertyForm.get('address')?.touched">
+          @if (addPropertyForm.get('address')?.invalid && addPropertyForm.get('address')?.touched) {
+            <span class="error-message">
+              <span class="material-icons text-sm">error</span>
+              {{ getFieldError('address') }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="areaSqft">
+            <span class="flex items-center gap-2">
+              <span class="material-icons text-sm text-claret">square_foot</span>
+              Area (sq ft) *
+            </span>
+          </label>
+          <input 
+            id="areaSqft"
+            type="number" 
+            formControlName="areaSqft"
+            placeholder="1000"
+            [class.error]="addPropertyForm.get('areaSqft')?.invalid && addPropertyForm.get('areaSqft')?.touched">
+          @if (addPropertyForm.get('areaSqft')?.invalid && addPropertyForm.get('areaSqft')?.touched) {
+            <span class="error-message">
+              <span class="material-icons text-sm">error</span>
+              {{ getFieldError('areaSqft') }}
+            </span>
+          }
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          (click)="closeAddModal()" 
+          class="btn btn-secondary"
+          [disabled]="isLoading()">
+          <span class="material-icons text-sm">close</span>
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="isLoading() || addPropertyForm.invalid">
+          @if (isLoading()) {
+            <span class="material-icons animate-spin text-sm">refresh</span>
+            <span>Adding...</span>
+          } @else {
+            <span class="material-icons text-sm">add_home</span>
+            <span>Add Property</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+  </div>
+}
+
+<!-- Edit Property Modal -->
+@if (showEditModal()) {
+  <div class="modal-overlay" (click)="closeEditModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2 class="text-2xl font-bold bg-linear-to-r from-claret to-fuchsia bg-clip-text text-transparent">Edit Property</h2>
+        <p class="text-sm text-gray-500 mt-1">Update your property details</p>
+      </div>
+      <button (click)="closeEditModal()" class="btn-close">&times;</button>
+    </div>
+
+    <form [formGroup]="editPropertyForm" (ngSubmit)="updateProperty()" class="p-6">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="editPropertyType">
+            <span class="flex items-center gap-2">
+              <span class="material-icons text-sm text-claret">home_work</span>
+              Property Type *
+            </span>
+          </label>
+          <select 
+            id="editPropertyType"
+            formControlName="propertyType"
+            [class.error]="editPropertyForm.get('propertyType')?.invalid && editPropertyForm.get('propertyType')?.touched">
+            <option value="">Select type</option>
+            @for (type of propertyTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+          @if (editPropertyForm.get('propertyType')?.invalid && editPropertyForm.get('propertyType')?.touched) {
+            <span class="error-message">
+              <span class="material-icons text-sm">error</span>
+              {{ getEditFieldError('propertyType') }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="editConstructionType">
+            <span class="flex items-center gap-2">
+              <span class="material-icons text-sm text-claret">construction</span>
+              Construction Type *
+            </span>
+          </label>
+          <select 
+            id="editConstructionType"
+            formControlName="constructionType"
+            [class.error]="editPropertyForm.get('constructionType')?.invalid && editPropertyForm.get('constructionType')?.touched">
+            <option value="">Select type</option>
+            @for (type of constructionTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+          @if (editPropertyForm.get('constructionType')?.invalid && editPropertyForm.get('constructionType')?.touched) {
+            <span class="error-message">
+              <span class="material-icons text-sm">error</span>
+              {{ getEditFieldError('constructionType') }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group full-width">
+          <label for="editAddress">
+            <span class="flex items-center gap-2">
+              <span class="material-icons text-sm text-claret">location_on</span>
+              Address *
+            </span>
+          </label>
+          <input 
+            id="editAddress"
+            type="text" 
+            formControlName="address"
+            placeholder="123 Main St, City, State"
+            [class.error]="editPropertyForm.get('address')?.invalid && editPropertyForm.get('address')?.touched">
+          @if (editPropertyForm.get('address')?.invalid && editPropertyForm.get('address')?.touched) {
+            <span class="error-message">
+              <span class="material-icons text-sm">error</span>
+              {{ getEditFieldError('address') }}
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="editAreaSqft">
+            <span class="flex items-center gap-2">
+              <span class="material-icons text-sm text-claret">square_foot</span>
+              Area (sq ft) *
+            </span>
+          </label>
+          <input 
+            id="editAreaSqft"
+            type="number" 
+            formControlName="areaSqft"
+            placeholder="1000"
+            [class.error]="editPropertyForm.get('areaSqft')?.invalid && editPropertyForm.get('areaSqft')?.touched">
+          @if (editPropertyForm.get('areaSqft')?.invalid && editPropertyForm.get('areaSqft')?.touched) {
+            <span class="error-message">
+              <span class="material-icons text-sm">error</span>
+              {{ getEditFieldError('areaSqft') }}
+            </span>
+          }
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          (click)="closeEditModal()" 
+          class="btn btn-secondary"
+          [disabled]="isLoading()">
+          <span class="material-icons text-sm">close</span>
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="isLoading() || editPropertyForm.invalid">
+          @if (isLoading()) {
+            <span class="material-icons animate-spin text-sm">refresh</span>
+            <span>Updating...</span>
+          } @else {
+            <span class="material-icons text-sm">save</span>
+            <span>Update Property</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+  </div>
+}

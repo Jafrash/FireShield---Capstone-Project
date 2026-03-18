@@ -1,0 +1,554 @@
+<div class="content-container min-h-screen py-8">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="page-title">My Subscriptions & Policies</h1>
+      <p class="text-gray-600 text-[16px]">Manage your insurance policies and subscriptions</p>
+    </div>
+    <button (click)="openSubscribeModal()" class="btn btn-primary" [disabled]="properties().length === 0">
+      <span class="material-icons text-[20px]">card_membership</span>
+      Subscribe to Policy
+    </button>
+  </div>
+
+  <!-- Success Message -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      <span class="material-icons text-[20px]">check_circle</span>
+      {{ successMessage() }}
+    </div>
+  }
+
+  <!-- Error Message -->
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      <span class="material-icons text-[20px]">error</span>
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading() && subscriptions().length === 0 && pendingSubscriptions().length === 0) {
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- No Properties Warning -->
+  @if (properties().length === 0) {
+    <div class="empty-state-card">
+      <span class="material-icons empty-state-icon">home</span>
+      <h3 class="empty-state-title">Add a Property First</h3>
+      <p class="empty-state-description">You need to add a property before subscribing to a policy.</p>
+      <a routerLink="/customer/properties" class="btn btn-primary">
+        <span class="material-icons text-[20px]">add_home</span>
+        Add Property
+      </a>
+    </div>
+  }
+
+  <!-- Active Policies Section -->
+  @if (properties().length > 0) {
+    <div class="mb-8">
+      <h2 class="section-title mb-6">Active Policies</h2>
+    
+    @if (subscriptions().length === 0) {
+      <div class="empty-state-card">
+        <span class="material-icons empty-state-icon">card_membership</span>
+        <h3 class="empty-state-title">No Active Policies</h3>
+        <p class="empty-state-description">Subscribe to a policy to get insurance coverage for your properties.</p>
+        <button (click)="openSubscribeModal()" class="btn btn-primary">
+          <span class="material-icons text-[20px]">add</span>
+          Subscribe Now
+        </button>
+      </div>
+    }
+
+    @if (subscriptions().length > 0) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (policy of subscriptions(); track policy.subscriptionId) {
+          <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
+            <!-- Header with Gradient -->
+            <div class="bg-linear-to-br from-claret to-fuchsia p-6 text-white relative overflow-hidden">
+              <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div class="relative flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="material-icons text-3xl">policy</span>
+                    <span class="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold uppercase tracking-wide">
+                      #SUB-{{ policy.subscriptionId }}
+                    </span>
+                  </div>
+                  <h3 class="text-lg font-bold mb-1">{{ policy.policyName }}</h3>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-green-100 text-green-700': policy.status === 'ACTIVE',
+                        'bg-yellow-100 text-yellow-700': policy.status === 'PENDING',
+                        'bg-red-100 text-red-700': policy.status === 'CANCELLED' || policy.status === 'REJECTED',
+                        'bg-gray-100 text-gray-700': policy.status === 'EXPIRED'
+                      }">
+                  {{ policy.status }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 space-y-4">
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                  <span class="material-icons text-gray-400">home</span>
+                  <span class="text-sm font-medium text-gray-600">Property</span>
+                </div>
+                <span class="text-sm font-bold text-gray-900 truncate max-w-[150px]" title="{{ getPropertyAddress(policy.propertyId) }}">{{ getPropertyAddress(policy.propertyId) }}</span>
+              </div>
+
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                  <span class="material-icons text-gray-400">payments</span>
+                  <span class="text-sm font-medium text-gray-600">Premium</span>
+                </div>
+                @if (policy.basePremiumAmount && policy.riskScore !== undefined && policy.riskMultiplier) {
+                  <div class="text-right">
+                    <div class="text-sm font-bold text-gray-900">{{ policy.premiumAmount | currency:'INR':'symbol' }}</div>
+                    @if (getMonthlyInstallment(policy); as monthlyInstallment) {
+                      <div class="text-[10px] text-claret font-semibold mt-0.5">
+                        {{ monthlyInstallment | currency:'INR':'symbol' }} / month
+                      </div>
+                    }
+                    <div class="text-[10px] text-gray-500 mt-0.5">
+                      Base: {{ policy.basePremiumAmount | currency:'INR':'symbol' }} × {{ policy.riskMultiplier }}x
+                    </div>
+                    <div class="inline-flex items-center gap-1 mt-1">
+                      <span class="text-[10px] text-gray-500">Risk: {{ policy.riskScore }}/10</span>
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold" [ngClass]="getRiskClass(policy.riskScore)">
+                        {{ getRiskLabel(policy.riskScore) }}
+                      </span>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="text-right">
+                    <div class="text-sm font-bold text-gray-900">{{ policy.premiumAmount | currency:'INR':'symbol' }}</div>
+                    @if (getMonthlyInstallment(policy); as monthlyInstallment) {
+                      <div class="text-[10px] text-claret font-semibold mt-0.5">
+                        {{ monthlyInstallment | currency:'INR':'symbol' }} / month
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                  <span class="material-icons text-gray-400">event</span>
+                  <span class="text-sm font-medium text-gray-600">Start Date</span>
+                </div>
+                <span class="text-sm font-bold text-gray-900">{{ policy.startDate | date:'mediumDate' }}</span>
+              </div>
+
+              <div class="flex items-center justify-between py-3">
+                <div class="flex items-center gap-3">
+                  <span class="material-icons text-gray-400">event_busy</span>
+                  <span class="text-sm font-medium text-gray-600">End Date</span>
+                </div>
+                <span class="text-sm font-bold text-gray-900">{{ policy.endDate | date:'mediumDate' }}</span>
+              </div>
+
+              @if (policy.coverNoteFileName || policy.policyDocumentFileName) {
+                <div class="pt-3 border-t border-gray-100">
+                  <div class="flex items-center gap-2 mb-2 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    <span class="material-icons text-[16px] text-gray-400">description</span>
+                    Legal Documents
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <button class="px-3 py-1.5 text-xs font-semibold border border-claret/30 text-claret rounded-lg hover:bg-claret/5"
+                            (click)="downloadCoverNote(policy)">
+                      Download Cover Note
+                    </button>
+                    <button class="px-3 py-1.5 text-xs font-semibold border border-fuchsia/30 text-fuchsia rounded-lg hover:bg-fuchsia/5"
+                            (click)="downloadPolicyDocument(policy)">
+                      Download Policy Document
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <div class="pt-3 border-t border-gray-100">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    <span class="material-icons text-[16px] text-gray-400">edit_note</span>
+                    Endorsements
+                  </div>
+                  <div class="flex items-center gap-2">
+                    @if (canViewPremiumBreakdown(policy)) {
+                      <button class="px-3 py-1.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200"
+                              (click)="openPremiumBreakdown(policy)">
+                        View Breakdown
+                      </button>
+                    }
+                    <button class="px-3 py-1.5 text-xs font-semibold bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200"
+                            (click)="openEndorsementModal(policy.subscriptionId)">
+                      Request Change
+                    </button>
+                  </div>
+                </div>
+                @if (getEndorsements(policy.subscriptionId).length === 0) {
+                  <p class="text-xs text-gray-500">No endorsements yet.</p>
+                }
+                @if (getEndorsements(policy.subscriptionId).length > 0) {
+                  <div class="space-y-2 max-h-28 overflow-auto pr-1">
+                    @for (endorsement of getEndorsements(policy.subscriptionId); track endorsement.endorsementId) {
+                      <div class="text-xs rounded-lg border border-gray-200 p-2">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                          <span class="font-semibold text-gray-700">{{ endorsement.changeType }}</span>
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                                [ngClass]="{
+                                  'bg-yellow-100 text-yellow-700': endorsement.status === 'REQUESTED',
+                                  'bg-green-100 text-green-700': endorsement.status === 'APPROVED',
+                                  'bg-red-100 text-red-700': endorsement.status === 'REJECTED'
+                                }">
+                            {{ endorsement.status }}
+                          </span>
+                        </div>
+                        <p class="text-gray-600 line-clamp-2">{{ endorsement.reason }}</p>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+    </div>
+  }
+
+  <!-- Subscription Requests Section -->
+  <div class="mt-12 mb-8">
+    <h2 class="section-title mb-6 text-xl font-bold text-gray-900">Subscription Requests</h2>
+    
+    @if (pendingSubscriptions().length === 0) {
+      <div class="bg-gray-50 border border-gray-100 rounded-xl p-8 text-center text-gray-500">
+        <span class="material-icons text-4xl mb-3 text-gray-300">history</span>
+        <p class="font-medium">No pending subscription requests.</p>
+        <p class="text-sm mt-1">Your recent policy applications will appear here while awaiting review.</p>
+      </div>
+    }
+
+    @if (pendingSubscriptions().length > 0) {
+      <div class="overflow-x-auto bg-white rounded-xl shadow-md border border-gray-100 hide-scrollbar">
+        <table class="w-full text-left border-collapse whitespace-nowrap">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200 text-sm font-semibold text-gray-600">
+              <th class="px-6 py-4">Property</th>
+              <th class="px-6 py-4">Policy Status</th>
+              <th class="px-6 py-4">Total Premium</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (subscription of pendingSubscriptions(); track subscription.subscriptionId) {
+              <ng-container>
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 border-t border-gray-100">
+                    <div class="flex items-center gap-3">
+                      <span class="material-icons text-gray-400">home</span>
+                      <span class="font-medium text-gray-900">{{ getPropertyAddress(subscription.propertyId) }}</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 border-t border-gray-100">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                          [ngClass]="{
+                            'bg-yellow-100 text-yellow-700': subscription.status === 'PENDING' || subscription.status === 'REQUESTED' || subscription.status === 'SUBMITTED' || subscription.status === 'INSPECTION_PENDING' || subscription.status === 'UNDER_REVIEW',
+                            'bg-blue-100 text-blue-700': subscription.status === 'PAYMENT_PENDING',
+                            'bg-red-100 text-red-700': subscription.status === 'REJECTED',
+                            'bg-green-100 text-green-700': subscription.status === 'ACTIVE'
+                          }">
+                      {{ subscription.status }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 font-semibold text-gray-900 border-t border-gray-100">
+                    <div class="flex items-center justify-between gap-3">
+                      <div>
+                        <div>{{ subscription.premiumAmount ? (subscription.premiumAmount | currency:'INR':'symbol') : '-' }}</div>
+                        @if (getMonthlyInstallment(subscription); as monthlyInstallment) {
+                          <div class="text-[11px] text-claret font-semibold mt-0.5">
+                            {{ monthlyInstallment | currency:'INR':'symbol' }} / month
+                          </div>
+                        }
+                      </div>
+                      @if (canViewPremiumBreakdown(subscription)) {
+                        <button class="px-3 py-1.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200"
+                                (click)="openPremiumBreakdown(subscription)">
+                          View Breakdown
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+                <!-- Status Message Row -->
+                @if (subscription.status === 'REQUESTED' || subscription.status === 'SUBMITTED' || subscription.status === 'PENDING' || subscription.status === 'INSPECTION_PENDING' || subscription.status === 'UNDER_REVIEW') {
+                  <tr class="bg-blue-50/30">
+                    <td colspan="3" class="px-6 py-4 border-t border-dashed border-gray-100 text-sm">
+                      <div class="flex items-center gap-2 text-blue-700">
+                        <span class="material-icons text-blue-600 text-[18px]">hourglass_empty</span>
+                        <span class="font-medium">Application submitted and documents attached. Awaiting admin review...</span>
+                      </div>
+                    </td>
+                  </tr>
+                }
+
+                @if (subscription.status === 'PAYMENT_PENDING') {
+                  <tr class="bg-green-50/30">
+                    <td colspan="3" class="px-6 py-4 border-t border-dashed border-gray-100 text-sm">
+                      <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 text-green-700">
+                          <span class="material-icons text-green-600 text-[18px]">payments</span>
+                          <span class="font-medium">Policy approved. Click Pay Now to activate your policy.</span>
+                        </div>
+                        <button (click)="payNow(subscription.subscriptionId)" [disabled]="isPaying()"
+                                class="px-4 py-2 bg-green-600 text-white text-xs font-semibold rounded-lg hover:bg-green-700 disabled:opacity-60">
+                          {{ isPaying() ? 'Processing...' : 'Pay Now' }}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </ng-container>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Subscribe to Policy Modal -->
+@if (showSubscribeModal()) {
+  <div class="modal-overlay" (click)="closeSubscribeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+      <h2>Subscribe to Policy</h2>
+      <button (click)="closeSubscribeModal()" class="btn-close">&times;</button>
+    </div>
+
+    <form [formGroup]="subscribeForm" (ngSubmit)="subscribeToPolicy()">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="propertyId">Select Property *</label>
+          <select 
+            id="propertyId"
+            formControlName="propertyId"
+            [class.error]="subscribeForm.get('propertyId')?.invalid && subscribeForm.get('propertyId')?.touched">
+            <option [value]="0">Select a property</option>
+            @for (property of properties(); track property.propertyId) {
+              <option [value]="property.propertyId">
+                {{ property.address }} ({{ property.propertyType }})
+              </option>
+            }
+          </select>
+          @if (subscribeForm.get('propertyId')?.invalid && subscribeForm.get('propertyId')?.touched) {
+            <span class="error-message">
+            {{ getFieldError('propertyId') }}
+          </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="policyId">Select Policy *</label>
+          <select 
+            id="policyId"
+            formControlName="policyId"
+            [class.error]="subscribeForm.get('policyId')?.invalid && subscribeForm.get('policyId')?.touched">
+            <option [value]="0">Select a policy</option>
+            @for (policy of availablePolicies(); track policy.policyId) {
+              <option [value]="policy.policyId">
+                {{ policy.policyName }} — ₹{{ policy.basePremium | number:'1.0-0' }}/year (up to ₹{{ policy.maxCoverageAmount | number:'1.0-0' }})
+              </option>
+            }
+          </select>
+          @if (availablePolicies().length === 0) {
+            <span class="error-message">No policies available. Please contact an administrator.</span>
+          }
+          @if (subscribeForm.get('policyId')?.invalid && subscribeForm.get('policyId')?.touched) {
+            <span class="error-message">
+              {{ getFieldError('policyId') }}
+            </span>
+          }
+        </div>
+
+        <div class="info-box">
+          <strong>Note:</strong> Your subscription request will be reviewed by our team. 
+          Once approved, your policy will be activated and you'll receive a confirmation.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          (click)="closeSubscribeModal()" 
+          class="btn btn-secondary"
+          [disabled]="isLoading()">
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="isLoading() || subscribeForm.invalid">
+          {{ isLoading() ? 'Submitting...' : 'Submit Request' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  </div>
+}
+
+@if (showPremiumBreakdownModal()) {
+  <div class="modal-overlay" (click)="closePremiumBreakdownModal()">
+    <div class="modal-content max-w-3xl" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Premium Breakdown</h2>
+        <button (click)="closePremiumBreakdownModal()" class="btn-close">&times;</button>
+      </div>
+
+      <div class="modal-body space-y-6">
+        @if (isLoadingPremiumBreakdown()) {
+          <div class="flex items-center justify-center py-12 text-gray-500">
+            <span class="material-icons animate-spin mr-2">refresh</span>
+            Loading premium breakdown...
+          </div>
+        } @else if (premiumBreakdown(); as breakdown) {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Total Premium</p>
+              <p class="mt-2 text-2xl font-bold text-gray-900">{{ breakdown.totalPremium | currency:'INR':'symbol' }}</p>
+              <p class="mt-1 text-sm text-gray-600">Authoritative premium calculated after underwriting and inspection.</p>
+            </div>
+            <div class="rounded-xl border border-claret/20 bg-claret/5 p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-claret">Monthly Premium</p>
+              <p class="mt-2 text-2xl font-bold text-claret">{{ breakdown.monthlyPremium | currency:'INR':'symbol' }}</p>
+              <p class="mt-1 text-sm text-gray-600">Shown as {{ breakdown.installmentMonths }} monthly installment(s) for customer clarity.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div class="rounded-xl border border-gray-200 p-4">
+              <p class="text-gray-500">Approved Coverage</p>
+              <p class="mt-1 font-bold text-gray-900">{{ breakdown.approvedCoverage | currency:'INR':'symbol' }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 p-4">
+              <p class="text-gray-500">Base Policy Premium</p>
+              <p class="mt-1 font-bold text-gray-900">{{ breakdown.basePremiumReference | currency:'INR':'symbol' }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 p-4">
+              <p class="text-gray-500">Risk Score</p>
+              <p class="mt-1 font-bold text-gray-900">{{ breakdown.riskScore }}/10</p>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-gray-200 overflow-hidden">
+            <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+              <h3 class="text-sm font-bold text-gray-900">How your premium was calculated</h3>
+            </div>
+            <div class="divide-y divide-gray-100">
+              @for (item of breakdown.lineItems; track item.label) {
+                <div class="px-4 py-3 flex items-start justify-between gap-4">
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-gray-900">{{ item.label }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ item.description }}</p>
+                  </div>
+                  <p class="text-sm font-bold whitespace-nowrap" [ngClass]="getBreakdownAmountClass(item.kind)">
+                    {{ item.amount >= 0 ? '+' : '' }}{{ item.amount | currency:'INR':'symbol' }}
+                  </p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-700 space-y-2">
+            <div class="flex items-center justify-between gap-3">
+              <span>Base premium for approved coverage</span>
+              <span class="font-semibold text-gray-900">{{ breakdown.basePremiumForCoverage | currency:'INR':'symbol' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span>Risk factor used</span>
+              <span class="font-semibold text-gray-900">{{ breakdown.finalRiskFactor }}x</span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span>Derived base rate</span>
+              <span class="font-semibold text-gray-900">{{ breakdown.derivedBaseRate | number:'1.3-4' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3 border-t border-gray-100 pt-3">
+              <span class="font-semibold">Final total premium</span>
+              <span class="text-lg font-bold text-gray-900">{{ breakdown.totalPremium | currency:'INR':'symbol' }}</span>
+            </div>
+          </div>
+        } @else {
+          <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            Premium breakdown is not available yet for this subscription.
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" (click)="closePremiumBreakdownModal()" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showEndorsementModal()) {
+  <div class="modal-overlay" (click)="closeEndorsementModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Request Endorsement</h2>
+        <button (click)="closeEndorsementModal()" class="btn-close">&times;</button>
+      </div>
+
+      <form [formGroup]="endorsementForm" (ngSubmit)="submitEndorsement()">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="changeType">Change Type *</label>
+            <select id="changeType" formControlName="changeType">
+              <option value="Coverage Change">Coverage Change</option>
+              <option value="Occupancy Update">Occupancy Update</option>
+              <option value="Hazard Declaration Update">Hazard Declaration Update</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="requestedCoverage">Requested Coverage (optional)</label>
+            <input id="requestedCoverage" type="number" min="0" formControlName="requestedCoverage" />
+          </div>
+
+          <div class="form-group">
+            <label for="newOccupancyType">New Occupancy Type (optional)</label>
+            <input id="newOccupancyType" type="text" formControlName="newOccupancyType" />
+          </div>
+
+          <div class="form-group">
+            <label for="newHazardousGoods">Hazardous Goods (optional)</label>
+            <input id="newHazardousGoods" type="text" formControlName="newHazardousGoods" />
+          </div>
+
+          <div class="form-group">
+            <label for="reason">Reason *</label>
+            <textarea id="reason" rows="3" formControlName="reason"></textarea>
+            @if (endorsementForm.get('reason')?.invalid && endorsementForm.get('reason')?.touched) {
+              <span class="error-message">Reason must be at least 8 characters.</span>
+            }
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" (click)="closeEndorsementModal()" class="btn btn-secondary" [disabled]="isSubmittingEndorsement()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmittingEndorsement() || endorsementForm.invalid">
+            {{ isSubmittingEndorsement() ? 'Submitting...' : 'Submit Endorsement' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,0 +1,159 @@
+<div class="content-container min-h-screen py-8">
+  <!-- Page Header -->
+  <div class="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div>
+      <h1 class="text-[32px] md:text-[40px] font-black text-gray-900 leading-tight">Customer <span class="text-claret">Dashboard</span></h1>
+      <p class="text-gray-500 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Elite Protection Overview</p>
+    </div>
+    <div class="glass-card px-6 py-3 rounded-2xl flex items-center gap-4 shadow-sm border-claret/5">
+      <div class="flex flex-col">
+        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Global Status</span>
+        <span class="text-sm font-black text-green-600 flex items-center gap-1">
+          <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          SECURE
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-12">
+      <div class="w-12 h-12 border-4 border-gray-200 border-t-claret rounded-full animate-spin"></div>
+      <p class="ml-4 text-gray-600">Loading dashboard data...</p>
+    </div>
+  }
+
+  <!-- Summary Cards -->
+  @if (!isLoading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+      @for (card of dashboardCards(); track $index) {
+        <div class="glass-card p-6 hover-lift group cursor-default">
+          <div class="flex flex-col items-center text-center">
+            <div class="p-4 rounded-2xl mb-4 bg-gradient-to-br transition-all duration-300 group-hover:scale-110 shadow-inner" 
+                 [style.background-image]="'linear-gradient(to bottom right, ' + card.color + '10, ' + card.color + '25)'">
+              <span class="material-icons text-3xl" [style.color]="card.color">{{ card.icon }}</span>
+            </div>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ card.title }}</p>
+            <p class="text-2xl font-black text-gray-900 group-hover:text-claret transition-colors">{{ card.value }}</p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Recent Policies Section -->
+    <div class="glass-card mb-12 overflow-hidden border-none shadow-2xl">
+      <div class="px-8 py-6 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex justify-between items-center">
+        <h2 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+          <span class="material-icons text-claret">shield_with_heart</span>
+          Active Coverages
+        </h2>
+        <button routerLink="/customer/subscriptions" class="text-xs font-bold text-claret hover:text-fuchsia uppercase tracking-widest flex items-center gap-1 transition-colors">
+          View All Plans <span class="material-icons text-sm">arrow_forward</span>
+        </button>
+      </div>
+      
+      @if (recentPolicies().length === 0) {
+        <div class="text-center py-16 px-8">
+          <span class="material-icons text-6xl text-gray-400 mb-4">description</span>
+          <p class="text-xl font-semibold text-gray-900 mb-2">No Policies Yet</p>
+          <p class="text-gray-600 mb-6">You don't have any active policies at the moment.</p>
+          <button routerLink="/customer/subscriptions" class="inline-flex items-center gap-2 px-5 py-2.5 bg-claret text-white rounded-lg font-medium hover:bg-claret/90 transition-colors">
+            <span class="material-icons">add</span>
+            <span>Subscribe to Policy</span>
+          </button>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50/50">
+                <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Asset ID</th>
+                <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Policy Tier</th>
+                <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Premium</th>
+                <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Start Date</th>
+                <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">End Date</th>
+                <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              @for (policy of recentPolicies(); track $index) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900">#SUB-{{ policy.subscriptionId }}</td>
+                  <td class="px-6 py-4 text-sm text-gray-700">{{ policy.policyName }}</td>
+                  <td class="px-6 py-4 text-sm text-gray-900">
+                    <div class="font-semibold">₹{{ policy.premiumAmount | number:'1.0-0' }}</div>
+                    @if (getMonthlyPremium(policy); as monthlyPremium) {
+                      <div class="text-[11px] font-semibold text-claret mt-0.5">₹{{ monthlyPremium | number:'1.0-0' }}/month</div>
+                    }
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-700">{{ formatDate(policy.startDate) }}</td>
+                  <td class="px-6 py-4 text-sm text-gray-700">{{ formatDate(policy.endDate) }}</td>
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" [ngClass]="getStatusClass(policy.status)">
+                      {{ getStatusLabel(policy.status) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <!-- Recent Claims Section -->
+    <div class="glass-card overflow-hidden border-none shadow-2xl">
+      <div class="px-8 py-6 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex justify-between items-center">
+        <h2 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+          <span class="material-icons text-fuchsia">history_edu</span>
+          Incident Reports
+        </h2>
+        <button routerLink="/customer/claims" class="text-xs font-bold text-claret hover:text-fuchsia uppercase tracking-widest flex items-center gap-1 transition-colors">
+          File New Claim <span class="material-icons text-sm">add_circle</span>
+        </button>
+      </div>
+      
+      @if (recentClaims().length === 0) {
+        <div class="text-center py-16 px-8">
+          <span class="material-icons text-6xl text-gray-400 mb-4">assignment</span>
+          <p class="text-xl font-semibold text-gray-900 mb-2">No Claims Filed</p>
+          <p class="text-gray-600 mb-6">You haven't filed any claims yet.</p>
+          <button routerLink="/customer/claims" class="inline-flex items-center gap-2 px-5 py-2.5 bg-claret text-white rounded-lg font-medium hover:bg-claret/90 transition-colors">
+            <span class="material-icons">add</span>
+            <span>File a Claim</span>
+          </button>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Claim Number</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Description</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Claim Amount</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Filed Date</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              @for (claim of recentClaims(); track $index) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ claim.claimNumber || '#CLM-' + claim.claimId }}</td>
+                  <td class="px-6 py-4 text-sm text-gray-700">{{ claim.description }}</td>
+                  <td class="px-6 py-4 text-sm font-semibold text-gray-900">₹{{ claim.claimAmount | number:'1.0-0' }}</td>
+                  <td class="px-6 py-4 text-sm text-gray-700">{{ formatDate(claim.claimDate || claim.incidentDate || claim.createdAt) }}</td>
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" [ngClass]="getStatusClass(claim.status)">
+                      {{ getStatusLabel(claim.status) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

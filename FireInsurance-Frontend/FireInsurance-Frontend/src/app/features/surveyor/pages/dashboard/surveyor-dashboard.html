@@ -1,0 +1,146 @@
+<div class="content-container min-h-screen py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="page-title">Surveyor Dashboard</h1>
+    <p class="text-gray-600 mt-1">Welcome back! Here's an overview of your inspection assignments.</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-16">
+      <div class="w-12 h-12 border-4 border-gray-200 border-t-[#8B1E3F] rounded-full animate-spin"></div>
+      <p class="ml-4 text-gray-600">Loading dashboard data...</p>
+    </div>
+  }
+
+  @if (!isLoading()) {
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      @for (card of dashboardCards(); track card.title) {
+        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 p-6 border border-gray-100 cursor-pointer"
+             [routerLink]="card.route || null">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 rounded-xl" [style.background-color]="card.color + '20'">
+              <span class="material-icons text-2xl" [style.color]="card.color">{{ card.icon }}</span>
+            </div>
+            @if (card.route) {
+              <span class="material-icons text-gray-400 text-sm">arrow_forward</span>
+            }
+          </div>
+          <p class="text-3xl font-bold text-gray-900 mb-1">{{ card.value }}</p>
+          <p class="text-gray-600 text-sm font-medium">{{ card.title }}</p>
+        </div>
+      }
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <a routerLink="/surveyor/property-inspections"
+         class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all group">
+        <div class="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors">
+          <span class="material-icons text-3xl">home_work</span>
+        </div>
+        <div>
+          <p class="text-lg font-bold">Property Inspections</p>
+          <p class="text-blue-100 text-sm">View and submit property inspection reports</p>
+        </div>
+        <span class="material-icons ml-auto opacity-70">chevron_right</span>
+      </a>
+      <a routerLink="/surveyor/claim-inspections"
+         class="flex items-center gap-4 p-6 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl shadow-md hover:shadow-lg transition-all group">
+        <div class="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors">
+          <span class="material-icons text-3xl">assignment_turned_in</span>
+        </div>
+        <div>
+          <p class="text-lg font-bold">Claim Inspections</p>
+          <p class="text-orange-100 text-sm">Verify fire damage claims and submit reports</p>
+        </div>
+        <span class="material-icons ml-auto opacity-70">chevron_right</span>
+      </a>
+    </div>
+
+    <!-- Recent Property Inspections -->
+    <div class="bg-white rounded-xl shadow-md border border-gray-200 mb-6">
+      <div class="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="section-title">Recent Property Inspections</h2>
+        <a routerLink="/surveyor/property-inspections" class="text-sm text-[#8B1E3F] hover:underline font-medium">View all →</a>
+      </div>
+      @if (recentPropertyInspections().length === 0) {
+        <div class="text-center py-10 text-gray-500">
+          <span class="material-icons text-4xl text-gray-300 mb-2">home_work</span>
+          <p>No property inspections assigned yet.</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Inspection ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Property ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Risk Score</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (insp of recentPropertyInspections(); track insp.inspectionId) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900">#INS-{{ insp.inspectionId }}</td>
+                  <td class="px-6 py-4 text-sm text-gray-600">#PROP-{{ insp.propertyId }}</td>
+                  <td class="px-6 py-4 text-sm text-gray-700">{{ insp.assessedRiskScore ?? '—' }}</td>
+                  <td class="px-6 py-4">
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full" [ngClass]="getStatusClass(insp.status)">
+                      {{ insp.status }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <!-- Recent Claim Inspections -->
+    <div class="bg-white rounded-xl shadow-md border border-gray-200">
+      <div class="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="section-title">Recent Claim Inspections</h2>
+        <a routerLink="/surveyor/claim-inspections" class="text-sm text-[#8B1E3F] hover:underline font-medium">View all →</a>
+      </div>
+      @if (recentClaimInspections().length === 0) {
+        <div class="text-center py-10 text-gray-500">
+          <span class="material-icons text-4xl text-gray-300 mb-2">assignment</span>
+          <p>No claim inspections assigned yet.</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Inspection ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Claim ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Estimated Loss</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (ci of recentClaimInspections(); track ci.inspectionId) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900">#CI-{{ ci.inspectionId }}</td>
+                  <td class="px-6 py-4 text-sm text-gray-600">#CLM-{{ ci.claimId }}</td>
+                  <td class="px-6 py-4 text-sm font-semibold text-gray-900">
+                    {{ ci.estimatedLoss != null ? ('$' + ci.estimatedLoss.toLocaleString()) : '—' }}
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full" [ngClass]="getStatusClass(ci.status)">
+                      {{ ci.status }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

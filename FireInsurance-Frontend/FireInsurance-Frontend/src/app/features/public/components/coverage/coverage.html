@@ -1,0 +1,53 @@
+<div class="bg-white py-16 sm:py-24">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">Available Coverage Options</h2>
+      <p class="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
+        We offer a variety of plans tailored to secure your property effectively against fire damage.
+      </p>
+    </div>
+
+    @if (isLoading()) {
+      <div class="flex justify-center mt-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-claret"></div>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="mt-12 max-w-lg mx-auto bg-red-50 border border-red-200 text-red-700 p-4 rounded-md flex items-center gap-3">
+        <span class="material-icons">error_outline</span>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    @if (!isLoading() && policies.length > 0) {
+      <div class="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        @for (policy of policies; track policy.policyId) {
+          <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+            <div class="px-6 py-8 bg-gradient-to-br from-warmgray to-white border-b border-gray-100 text-center">
+              <h3 class="text-2xl font-bold text-gray-900">{{ policy.policyName }}</h3>
+              <p class="mt-4 flex items-baseline outline-none justify-center text-5xl font-extrabold text-claret">
+                ₹{{ policy.basePremium | number:'1.0-0' }}
+                <span class="ml-1 text-xl font-medium text-gray-500">/year</span>
+              </p>
+              <p class="mt-2 text-sm text-gray-500 font-medium tracking-wide">Duration: {{ policy.durationMonths }} months | Up to ₹{{ policy.maxCoverageAmount | number:'1.0-0' }}</p>
+            </div>
+            <div class="px-6 pt-6 pb-8 flex-1 flex flex-col justify-between">
+              <p class="text-gray-600 mb-6 text-center italic">"{{ policy.coverageDetails }}"</p>
+              <a routerLink="/auth/register" class="w-full block text-center bg-white text-claret hover:bg-warmgray font-semibold py-3 px-4 rounded-lg transition-colors border border-claret/20 shadow-sm cursor-pointer">
+                Learn More
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!isLoading() && policies.length === 0 && !errorMessage()) {
+      <div class="text-center mt-12 text-gray-500 p-8 border border-dashed border-gray-300 rounded-lg max-w-2xl mx-auto">
+        <span class="material-icons text-4xl mb-2 text-gray-400">inventory_2</span>
+        <p>No coverage options available right now. Please check back later.</p>
+      </div>
+    }
+  </div>
+</div>

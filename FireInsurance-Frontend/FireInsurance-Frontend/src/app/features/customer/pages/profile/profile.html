@@ -1,0 +1,338 @@
+<div class="content-container min-h-screen py-8">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="page-title">My Profile</h1>
+      <p class="text-gray-600 text-[16px]">Manage your account information</p>
+    </div>
+    @if (!isEditing() && customer()) {
+    <button (click)="toggleEdit()" class="btn btn-primary" [disabled]="isLoading()">
+      <span class="material-icons text-[20px]">edit</span>
+      Edit Profile
+    </button>
+    }
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading() && !customer()) {
+  <div class="loading">
+    <div class="spinner"></div>
+  </div>
+  }
+
+  <!-- Error Message -->
+  @if (errorMessage()) {
+  <div class="alert alert-error">
+    <span class="material-icons text-[20px]">error</span>
+    {{ errorMessage() }}
+  </div>
+  }
+
+  <!-- Success Message -->
+  @if (successMessage()) {
+  <div class="alert alert-success">
+    <span class="material-icons text-[20px]">check_circle</span>
+    {{ successMessage() }}
+  </div>
+  }
+
+  <!-- Profile Content -->
+  @if (customer()) {
+  <!-- Profile Header Card -->
+  <div class="profile-card p-8 mb-6">
+    <div class="flex items-center gap-6">
+      <!-- Avatar -->
+      <div class="w-24 h-24 rounded-2xl flex items-center justify-center text-[36px] font-bold text-white shadow-lg"
+        style="background: linear-gradient(135deg, #8B1538, #E91E63);">
+        {{ customer()!.username.substring(0, 2).toUpperCase() }}
+      </div>
+
+      <!-- User Info -->
+      <div class="flex-1">
+        <h2 class="text-[24px] font-bold text-gray-900 mb-1">
+          {{ (customer()!.firstName || customer()!.first_name) ? ((customer()!.firstName || customer()!.first_name) + '
+          ' + (customer()!.lastName || customer()!.last_name)) : customer()!.username }}
+        </h2>
+        <p class="text-gray-600 text-[16px] mb-3">{{ customer()!.email }}</p>
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1.5 bg-claret/10 rounded-lg text-[13px] font-semibold text-claret">
+          <span class="material-icons text-[16px]">badge</span>
+          <span>Customer Account</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Personal Information Card -->
+  <div class="profile-card p-8 mb-6">
+    <h3 class="section-title mb-6">Personal Information</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-2">
+        <label class="field-label">Username</label>
+        <p class="field-value">{{ customer()!.username || '-' }}</p>
+      </div>
+
+      <div class="space-y-2">
+        <label class="field-label">Email Address</label>
+        <p class="field-value">{{ customer()!.email || '-' }}</p>
+      </div>
+
+      <div class="space-y-2">
+        <label class="field-label">First Name</label>
+        <p class="field-value">{{ customer()!.firstName || customer()!.first_name || '-' }}</p>
+      </div>
+
+      <div class="space-y-2">
+        <label class="field-label">Last Name</label>
+        <p class="field-value">{{ customer()!.lastName || customer()!.last_name || '-' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Information Card -->
+  <div class="profile-card p-8 mb-6">
+    <h3 class="section-title mb-6">Contact Information</h3>
+
+    @if (isEditing()) {
+    <form [formGroup]="profileForm">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="form-group">
+          <label for="firstName" class="field-label">First Name *</label>
+          <input id="firstName" type="text" formControlName="firstName" placeholder="John"
+            [class.error]="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched">
+          @if (profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched) {
+          <span class="error-message">
+            <span class="material-icons text-[16px]">error</span>
+            {{ getFieldError('firstName') }}
+          </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="lastName" class="field-label">Last Name *</label>
+          <input id="lastName" type="text" formControlName="lastName" placeholder="Doe"
+            [class.error]="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched">
+          @if (profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched) {
+          <span class="error-message">
+            <span class="material-icons text-[16px]">error</span>
+            {{ getFieldError('lastName') }}
+          </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber" class="field-label">Phone Number *</label>
+          <input id="phoneNumber" type="text" formControlName="phoneNumber" placeholder="1234567890"
+            [class.error]="profileForm.get('phoneNumber')?.invalid && profileForm.get('phoneNumber')?.touched">
+          @if (profileForm.get('phoneNumber')?.invalid && profileForm.get('phoneNumber')?.touched) {
+          <span class="error-message">
+            <span class="material-icons text-[16px]">error</span>
+            {{ getFieldError('phoneNumber') }}
+          </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="address" class="field-label">Address *</label>
+          <input id="address" type="text" formControlName="address" placeholder="123 Main St"
+            [class.error]="profileForm.get('address')?.invalid && profileForm.get('address')?.touched">
+          @if (profileForm.get('address')?.invalid && profileForm.get('address')?.touched) {
+          <span class="error-message">
+            <span class="material-icons text-[16px]">error</span>
+            {{ getFieldError('address') }}
+          </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="city" class="field-label">City *</label>
+          <input id="city" type="text" formControlName="city" placeholder="City"
+            [class.error]="profileForm.get('city')?.invalid && profileForm.get('city')?.touched">
+          @if (profileForm.get('city')?.invalid && profileForm.get('city')?.touched) {
+          <span class="error-message">
+            <span class="material-icons text-[16px]">error</span>
+            {{ getFieldError('city') }}
+          </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="state" class="field-label">State *</label>
+          <input id="state" type="text" formControlName="state" placeholder="State"
+            [class.error]="profileForm.get('state')?.invalid && profileForm.get('state')?.touched">
+          @if (profileForm.get('state')?.invalid && profileForm.get('state')?.touched) {
+          <span class="error-message">
+            <span class="material-icons text-[16px]">error</span>
+            {{ getFieldError('state') }}
+          </span>
+          }
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3">
+        <button type="button" (click)="toggleEdit()" class="btn btn-secondary" [disabled]="isLoading()">
+          <span class="material-icons text-[20px]">close</span>
+          Cancel
+        </button>
+        <button type="button" (click)="saveProfile()" class="btn btn-primary"
+          [disabled]="isLoading() || profileForm.invalid">
+          <span class="material-icons text-[20px]">save</span>
+          {{ isLoading() ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </form>
+    } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-2">
+        <label class="field-label">Phone Number</label>
+        <p class="field-value">{{ customer()!.phoneNumber || customer()!.phone || '-' }}</p>
+      </div>
+
+      <div class="space-y-2">
+        <label class="field-label">Address</label>
+        <p class="field-value">{{ customer()!.address || '-' }}</p>
+      </div>
+
+      <div class="space-y-2">
+        <label class="field-label">City</label>
+        <p class="field-value">{{ customer()!.city || '-' }}</p>
+      </div>
+
+      <div class="space-y-2">
+        <label class="field-label">State</label>
+        <p class="field-value">{{ customer()!.state || '-' }}</p>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Account Details Card -->
+  <div class="profile-card p-8 mb-6">
+    <h3 class="section-title mb-6">Account Details</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-2">
+        <label class="field-label">Member Since</label>
+        <p class="field-value">
+          {{ (customer()!.createdAt || customer()!.created_at || customer()!.createdDate || customer()!.joiningDate ||
+          customer()!.registeredDate || customer()!.memberSince) | date:'mediumDate' }}
+          {{ !(customer()!.createdAt || customer()!.created_at || customer()!.createdDate || customer()!.joiningDate ||
+          customer()!.registeredDate || customer()!.memberSince) ? 'Information not available' : '' }}
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <label class="field-label">Last Updated</label>
+        <p class="field-value">
+          {{ (customer()!.updatedAt || customer()!.updated_at || customer()!.updatedDate) | date:'medium' }}
+          {{ !(customer()!.updatedAt || customer()!.updated_at || customer()!.updatedDate) ? 'Recently updated' : '' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Notification Preferences Card -->
+  <div class="profile-card p-8">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <span class="material-icons text-claret text-[28px]">notifications</span>
+        <h3 class="section-title m-0">Email Notification Preferences</h3>
+      </div>
+      @if (!isEditingNotifications() && notificationPreferences()) {
+      <button (click)="toggleEditNotifications()" class="btn btn-primary" [disabled]="notificationsLoading()">
+        <span class="material-icons text-[20px]">edit</span>
+        Edit Preferences
+      </button>
+      }
+    </div>
+
+    <!-- Loading State -->
+    @if (notificationsLoading() && !notificationPreferences()) {
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+    }
+
+    <!-- Error Message -->
+    @if (notificationError()) {
+    <div class="alert alert-error">
+      <span class="material-icons text-[20px]">error</span>
+      {{ notificationError() }}
+    </div>
+    }
+
+    <!-- Success Message -->
+    @if (notificationSuccess()) {
+    <div class="alert alert-success">
+      <span class="material-icons text-[20px]">check_circle</span>
+      {{ notificationSuccess() }}
+    </div>
+    }
+
+    @if (notificationPreferences()) {
+    @if (isEditingNotifications()) {
+    <!-- Edit Mode -->
+    <form [formGroup]="notificationsForm">
+      <div class="mb-6">
+        <label class="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition">
+          <input type="checkbox" formControlName="emailEnabled" class="w-4 h-4 rounded border-gray-300">
+          <div>
+            <div class="font-semibold text-gray-900">Enable Email Notifications</div>
+            <div class="text-sm text-gray-600">Receive email updates for selected events</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="mb-6">
+        <h4 class="text-[16px] font-semibold text-gray-900 mb-4">Notification Events</h4>
+        <div class="space-y-3">
+          @for (eventKey of allEventKeys; track eventKey) {
+          <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition">
+            <input type="checkbox" [formControlName]="eventKey"
+              class="w-4 h-4 rounded border-gray-300">
+            <span class="text-gray-700">{{ eventLabels[eventKey] }}</span>
+          </label>
+          }
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3">
+        <button type="button" (click)="toggleEditNotifications()" class="btn btn-secondary" [disabled]="notificationsLoading()">
+          <span class="material-icons text-[20px]">close</span>
+          Cancel
+        </button>
+        <button type="button" (click)="saveNotificationPreferences()" class="btn btn-primary"
+          [disabled]="notificationsLoading() || notificationsForm.invalid">
+          <span class="material-icons text-[20px]">save</span>
+          {{ notificationsLoading() ? 'Saving...' : 'Save Preferences' }}
+        </button>
+      </div>
+    </form>
+    } @else {
+    <!-- View Mode -->
+    <div class="mb-6">
+      <label class="field-label">Email Notifications</label>
+      <p class="field-value">{{ notificationPreferences()!.emailEnabled ? 'Enabled' : 'Disabled' }}</p>
+    </div>
+
+    <div>
+      <h4 class="text-[16px] font-semibold text-gray-900 mb-4">Active Notifications</h4>
+      @if (notificationPreferences()!.enabledEventKeys && notificationPreferences()!.enabledEventKeys.length > 0) {
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @for (eventKey of notificationPreferences()!.enabledEventKeys; track eventKey) {
+        <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+          <span class="material-icons text-green-600 text-[20px]">check_circle</span>
+          <span class="text-gray-700">{{ eventLabels[eventKey] }}</span>
+        </div>
+        }
+      </div>
+      } @else {
+      <p class="text-gray-600 text-center py-4">No active notification events</p>
+      }
+    </div>
+    }
+    }
+  </div>
+  }
+</div>

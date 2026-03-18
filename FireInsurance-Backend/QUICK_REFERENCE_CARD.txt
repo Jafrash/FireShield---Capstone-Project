@@ -1,0 +1,179 @@
+╔════════════════════════════════════════════════════════════════╗
+║         DOCUMENT UPLOAD FIX - QUICK REFERENCE CARD             ║
+╚════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────┐
+│ 🔧 THE FIX                                                  │
+└─────────────────────────────────────────────────────────────┘
+
+✅ Added to application.properties:
+   spring.servlet.multipart.enabled=true
+
+✅ Added comprehensive logging to:
+   - DocumentController.java
+   - DocumentService.java
+
+✅ Created complete frontend integration files:
+   - ANGULAR_DOCUMENT_SERVICE.ts
+   - ANGULAR_DOCUMENT_COMPONENT.ts
+   - ANGULAR_DOCUMENT_TEMPLATE.html
+   - ANGULAR_AUTH_INTERCEPTOR.ts
+
+┌─────────────────────────────────────────────────────────────┐
+│ 🚀 QUICK START                                              │
+└─────────────────────────────────────────────────────────────┘
+
+Backend (Already Fixed):
+  cd FireInsurance-Backend
+  .\mvnw.cmd spring-boot:run
+
+Test in Swagger:
+  http://localhost:8080/swagger-ui/index.html
+  → Authorize as customer
+  → Try POST /api/documents/upload/customer
+
+Frontend (Copy files):
+  1. Copy ANGULAR_DOCUMENT_SERVICE.ts → src/app/services/
+  2. Copy ANGULAR_DOCUMENT_COMPONENT.ts → src/app/components/
+  3. Copy ANGULAR_DOCUMENT_TEMPLATE.html → src/app/components/
+  4. Update interceptor using ANGULAR_AUTH_INTERCEPTOR.ts
+
+┌─────────────────────────────────────────────────────────────┐
+│ 🎯 CRITICAL INTERCEPTOR FIX                                 │
+└─────────────────────────────────────────────────────────────┘
+
+In your Angular HTTP Interceptor:
+
+  if (req.body instanceof FormData) {
+    // ✅ DO NOT set Content-Type
+    // ✅ ONLY add Authorization header
+    const cloned = req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` }
+    });
+    return next.handle(cloned);
+  }
+
+┌─────────────────────────────────────────────────────────────┐
+│ 📋 API ENDPOINTS                                            │
+└─────────────────────────────────────────────────────────────┘
+
+Upload Customer Document:
+  POST /api/documents/upload/customer
+  Auth: Bearer <token>
+  Role: CUSTOMER
+  Form Data:
+    - file: File
+    - documentType: PROPERTY_DEED | CLAIM_FORM | etc.
+    - documentStage: UNDERWRITING | CLAIM_PROCESSING
+    - propertyId: Long (optional)
+    - claimId: Long (optional)
+
+Upload Surveyor Document:
+  POST /api/documents/upload/surveyor
+  Auth: Bearer <token>
+  Role: SURVEYOR
+  Form Data:
+    - file: File
+    - documentType: INSPECTION_REPORT | etc.
+    - documentStage: INSPECTION
+    - claimId: Long (optional)
+
+Download Document:
+  GET /api/documents/download/{documentId}
+  Auth: Bearer <token>
+
+┌─────────────────────────────────────────────────────────────┐
+│ 📊 DOCUMENT TYPES                                           │
+└─────────────────────────────────────────────────────────────┘
+
+• PROPERTY_DEED       - Property ownership document
+• INSURANCE_POLICY    - Insurance policy document
+• CLAIM_FORM          - Claim submission form
+• INSPECTION_REPORT   - Surveyor inspection report
+• OTHER               - Other supporting documents
+
+┌─────────────────────────────────────────────────────────────┐
+│ 📊 DOCUMENT STAGES                                          │
+└─────────────────────────────────────────────────────────────┘
+
+• UNDERWRITING        - During policy application
+• CLAIM_PROCESSING    - During claim submission
+• INSPECTION          - During property/claim inspection
+
+┌─────────────────────────────────────────────────────────────┐
+│ ✅ VERIFICATION CHECKLIST                                   │
+└─────────────────────────────────────────────────────────────┘
+
+Backend:
+  ☑ spring.servlet.multipart.enabled=true in config
+  ☑ Backend restarted
+  ☑ Swagger UI accessible
+  ☑ Upload test successful
+
+Frontend:
+  ☐ Service file copied
+  ☐ Component file copied
+  ☐ Template file copied
+  ☐ Interceptor updated (FormData check)
+  ☐ FormsModule imported
+  ☐ Upload test successful
+
+┌─────────────────────────────────────────────────────────────┐
+│ 🔍 TROUBLESHOOTING                                          │
+└─────────────────────────────────────────────────────────────┘
+
+500 Error?
+  → Check backend logs (emoji logs)
+  → Verify multipart.enabled=true
+  → Restart backend
+
+Content-Type Wrong?
+  → Fix interceptor to skip Content-Type for FormData
+  → Verify: if (req.body instanceof FormData)
+
+File Empty?
+  → Check FormData: formData.append('file', file)
+  → NOT: file[0]
+
+Customer Not Found?
+  → Verify customer exists in database
+  → Check JWT token validity
+  → Ensure username matches
+
+┌─────────────────────────────────────────────────────────────┐
+│ 📚 DOCUMENTATION FILES                                      │
+└─────────────────────────────────────────────────────────────┘
+
+All files are in: FireInsurance-Backend/
+
+• DOCUMENT_UPLOAD_FIX.md
+  Complete fix guide with troubleshooting
+
+• DOCUMENT_UPLOAD_IMPLEMENTATION_CHECKLIST.md
+  Step-by-step implementation guide
+
+• ANGULAR_DOCUMENT_SERVICE.ts
+  Complete Angular service code
+
+• ANGULAR_DOCUMENT_COMPONENT.ts
+  Complete Angular component code
+
+• ANGULAR_DOCUMENT_TEMPLATE.html
+  Complete HTML template with CSS
+
+• ANGULAR_AUTH_INTERCEPTOR.ts
+  Fixed interceptor code
+
+┌─────────────────────────────────────────────────────────────┐
+│ 🎉 STATUS                                                   │
+└─────────────────────────────────────────────────────────────┘
+
+Backend:  ✅ FIXED & READY
+Frontend: ✅ CODE PROVIDED
+Docs:     ✅ COMPLETE
+Testing:  ✅ GUIDE PROVIDED
+
+════════════════════════════════════════════════════════════════
+         🚀 DOCUMENT UPLOAD PIPELINE READY FOR USE! 🚀
+════════════════════════════════════════════════════════════════
+

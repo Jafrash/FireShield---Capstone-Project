@@ -1,0 +1,8 @@
+{
+  "/api/users*": "/users$1",
+  "/api/properties*": "/properties$1",
+  "/api/policies*": "/policies$1",
+  "/api/claims*": "/claims$1",
+  "/api/inspections*": "/inspections$1",
+  "/api/documents*": "/documents$1"
+}

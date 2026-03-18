@@ -1,0 +1,223 @@
+<div class="content-container py-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="page-title">Manage Subscriptions</h1>
+      <p class="text-gray-600 mt-2">Review and manage all policy subscription requests</p>
+    </div>
+  </div>
+
+  @if (successMessage()) {
+    <div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center gap-2">
+      <span class="material-icons text-lg">check_circle</span>
+      {{ successMessage() }}
+    </div>
+  }
+  @if (errorMessage() && !isLoading()) {
+    <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-2">
+      <span class="material-icons text-lg">error</span>
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Filter Tabs -->
+  <div class="flex items-center gap-2 mb-6 flex-wrap">
+    @for (filter of ['ALL', 'REQUESTED', 'PENDING', 'INSPECTING', 'INSPECTED', 'ACTIVE', 'REJECTED', 'CANCELLED']; track filter) {
+      <button
+        (click)="setFilter(filter)"
+        [class]="activeFilter() === filter
+          ? 'px-4 py-2 rounded-lg text-white bg-[#8B1E3F] font-medium text-sm shadow-md'
+          : 'px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors'">
+        {{ filter === 'ALL' ? 'All' : filter.charAt(0) + filter.slice(1).toLowerCase() }}
+        <span class="ml-1 text-xs opacity-75">({{ getCount(filter) }})</span>
+      </button>
+    }
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-xl shadow-md border border-gray-200">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200">
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Policy</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Property ID</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Sum Insured</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Total Premium</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Start Date</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">End Date</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          @if (isLoading()) {
+            <tr>
+              <td colspan="8" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center gap-3">
+                  <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#8B1E3F]"></div>
+                  <p class="text-gray-600">Loading subscriptions...</p>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @if (!isLoading() && filteredSubscriptions().length === 0) {
+            <tr>
+              <td colspan="8" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center gap-2">
+                  <span class="material-icons text-5xl text-gray-300">inbox</span>
+                  <p class="text-gray-500 font-medium">No subscriptions found</p>
+                  <p class="text-sm text-gray-400">There are no subscription requests matching this filter.</p>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @for (sub of filteredSubscriptions(); track sub.subscriptionId || sub.id) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 text-sm font-medium text-gray-900">#SUB-{{ sub.subscriptionId || sub.id }}</td>
+              <td class="px-6 py-4 text-sm text-gray-700 font-medium">{{ sub.policyName || sub.requestedPolicyType || 'N/A' }}</td>
+              <td class="px-6 py-4 text-sm text-gray-700">#{{ sub.propertyId }}</td>
+              
+              <!-- Sum Insured -->
+              <td class="px-6 py-4 text-sm text-gray-900 font-semibold">
+                ₹{{ (sub.requestedCoverage || 0) | number:'1.0-0' }}
+              </td>
+
+              <td class="px-6 py-4">
+                @if (sub.premiumAmount && sub.basePremiumAmount && sub.riskScore !== undefined) {
+                  <div class="text-sm">
+                    <div class="font-bold text-gray-900 mb-1">₹{{ sub.premiumAmount | number:'1.0-0' }}/mo</div>
+                    <div class="text-xs text-gray-500 space-y-0.5">
+                      <div>Base: ₹{{ sub.basePremiumAmount | number:'1.0-0' }}</div>
+                      <div class="flex items-center gap-1">
+                        <span>Risk: {{ sub.riskScore }}/10</span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold" [ngClass]="getRiskClass(sub.riskScore)">
+                          {{ getRiskLabel(sub.riskScore) }}
+                        </span>
+                      </div>
+                      <div>Multiplier: {{ sub.riskMultiplier }}x</div>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="text-sm">
+                    <div class="font-semibold text-gray-900">₹{{ (sub.premiumAmount || sub.requestedCoverage) | number:'1.0-0' }}</div>
+                    <div class="text-xs text-gray-400 mt-1">Awaiting inspection</div>
+                  </div>
+                }
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700">{{ sub.startDate || sub.subscriptionDate || sub.createdAt || 'Awaiting Approval' }}</td>
+              <td class="px-6 py-4 text-sm text-gray-700">{{ sub.endDate || '—' }}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="getStatusClass(sub.status)">
+                  {{ sub.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex flex-col gap-2">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button (click)="viewDocuments(sub)"
+                            class="px-3 py-1.5 bg-gray-600 text-white text-xs rounded-lg hover:bg-gray-700 transition-colors font-medium mr-1 whitespace-nowrap inline-flex items-center shadow-sm">
+                      <span class="material-icons text-[14px] mr-1">attachment</span> Docs
+                    </button>
+
+                    @if (sub.status === 'PENDING' || sub.status === 'REQUESTED' || sub.status === 'INSPECTING' || sub.status === 'INSPECTED' || sub.status === 'UNDER_INSPECTION') {
+                      
+                      @if (sub.status === 'UNDER_INSPECTION' || sub.status === 'INSPECTING' || (inspections()[sub.subscriptionId || sub.id || 0] && inspections()[sub.subscriptionId || sub.id || 0].status !== 'COMPLETED')) {
+                        <span class="text-xs text-purple-800 bg-purple-100 px-3 py-1.5 rounded-lg whitespace-nowrap font-medium border border-purple-200 mr-2">
+                          Inspection Assigned: {{ inspections()[sub.subscriptionId || sub.id || 0]?.surveyorName || 'Surveyor' }}
+                        </span>
+                      }
+                    }
+                    @if (sub.underwriterId) {
+                      <span class="text-xs text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg whitespace-nowrap font-medium border border-purple-200">
+                        <span class="material-icons text-[14px] align-middle mr-1">person</span> Underwriter Assigned
+                      </span>
+                    } @else if (sub.status !== 'ACTIVE' && sub.status !== 'REJECTED' && sub.status !== 'CANCELLED' && sub.status !== 'EXPIRED' && sub.status !== 'APPROVED') {
+                      <span class="text-xs text-gray-400">Pending UW Assignment</span>
+                    }
+                  </div>
+
+                  <!-- Assign Underwriter -->
+                  @if (!sub.underwriterId && sub.status !== 'CANCELLED' && sub.status !== 'REJECTED' && sub.status !== 'EXPIRED' && sub.status !== 'ACTIVE' && sub.status !== 'APPROVED') {
+                    <div class="flex items-center gap-2 bg-purple-50 p-1.5 rounded-lg border border-purple-200 shadow-sm w-max">
+                      <select (change)="onUnderwriterSelect(sub.subscriptionId || sub.id || 0, $event)"
+                              class="text-xs border-purple-300 rounded-md shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-500 focus:ring-opacity-50 py-1 pl-2 pr-6 text-gray-700 bg-white border">
+                        <option value="">Select UW ▼</option>
+                        @for (uw of underwriters(); track uw.underwriterId) {
+                          <option [value]="uw.underwriterId">{{ uw.username }}</option>
+                        }
+                      </select>
+                      <button (click)="assignUnderwriter(sub)"
+                              class="px-3 py-1.5 bg-purple-600 text-white text-xs rounded-lg hover:bg-purple-700 transition-colors font-medium whitespace-nowrap shadow-sm">
+                        Assign UW
+                      </button>
+                    </div>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Documents Modal -->
+@if (showDocsModal() && selectedSubscriptionForDocs()) {
+  <div class="fixed inset-0 bg-black/60 shadow-lg backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
+      <div class="bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] p-5 text-white rounded-t-2xl flex justify-between items-center z-10">
+        <div>
+          <h2 class="text-xl font-bold flex items-center gap-2"><span class="material-icons">folder</span> Policy Documents</h2>
+          <p class="text-xs text-white/90 mt-1">Subscription #SUB-{{ selectedSubscriptionForDocs()!.subscriptionId || selectedSubscriptionForDocs()!.id }}</p>
+        </div>
+        <button (click)="closeDocsModal()" class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="p-6 max-h-[60vh] overflow-y-auto bg-gray-50">
+        @if (docsLoading()) {
+          <div class="flex flex-col items-center justify-center p-8">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#8B1E3F] mb-3"></div>
+            <p class="text-gray-500 text-sm">Fetching documents...</p>
+          </div>
+        } @else if (currentDocs().length === 0) {
+          <div class="text-center p-8 bg-white border border-gray-200 rounded-xl shadow-sm">
+            <span class="material-icons text-5xl mb-3 text-gray-300">folder_off</span>
+            <p class="text-gray-600 font-medium">No documents uploaded.</p>
+            <p class="text-sm text-gray-400 mt-1">This application was submitted without attachments.</p>
+          </div>
+        } @else {
+          <ul class="space-y-4">
+            @for (doc of currentDocs(); track doc.documentId) {
+              <li class="flex items-center justify-between p-4 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-4 overflow-hidden">
+                  <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-lg">
+                    <span class="material-icons text-blue-600 text-xl">description</span>
+                  </div>
+                  <div class="flex flex-col overflow-hidden">
+                    <span class="text-sm font-bold text-gray-800 truncate" [title]="doc.fileName">{{ doc.fileName || 'Document' }}</span>
+                    <span class="text-xs text-gray-500 font-medium mt-0.5">{{ doc.documentType.replace('_', ' ') }}</span>
+                  </div>
+                </div>
+                <button (click)="downloadDocument(doc)" 
+                   class="px-4 py-2 text-sm bg-blue-50 text-blue-700 font-bold border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1 shadow-sm">
+                  <span class="material-icons text-[16px]">file_download</span>
+                  View
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="p-5 border-t border-gray-200 flex justify-end bg-white rounded-b-2xl">
+        <button (click)="closeDocsModal()" class="px-6 py-2.5 bg-gray-100 shadow-sm border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-200 hover:-translate-y-0.5 transition-all">Close</button>
+      </div>
+    </div>
+  </div>
+}

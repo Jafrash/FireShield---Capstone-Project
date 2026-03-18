@@ -1,0 +1,26 @@
+<div class="flex flex-col min-h-screen bg-gray-50 text-gray-900 font-sans">
+  <app-public-navbar></app-public-navbar>
+  
+  <main class="grow">
+    <app-hero id="hero"></app-hero>
+    <app-services id="services"></app-services>
+    <app-coverage id="coverage"></app-coverage>
+
+    <section class="py-12 px-4 bg-white border-y border-gray-200">
+      <div class="max-w-4xl mx-auto text-center space-y-4">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900">Existing Customer?</h2>
+        <p class="text-gray-600">Sign in securely with your FireShield account, including Google customer sign-in when enabled.</p>
+        <a
+          routerLink="/auth/login"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-claret to-fuchsia text-white font-semibold shadow hover:shadow-lg transition-all"
+          aria-label="Go to customer login"
+        >
+          <span class="material-icons text-base">login</span>
+          Go to Customer Login
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <app-footer></app-footer>
+</div>

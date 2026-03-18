@@ -1,0 +1,207 @@
+<div class="content-container min-h-screen py-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="page-title">Property Inspections</h1>
+      <p class="text-gray-600 mt-1">View assigned property inspections and submit your reports</p>
+    </div>
+    <button (click)="loadInspections()" class="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+      <span class="material-icons text-lg">refresh</span>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Success / Error Messages -->
+  @if (successMessage()) {
+    <div class="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+      <span class="material-icons text-green-600">check_circle</span>
+      {{ successMessage() }}
+    </div>
+  }
+  @if (errorMessage() && !showReportModal()) {
+    <div class="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+      <span class="material-icons text-red-600">error</span>
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Filter Tabs -->
+  <div class="flex gap-2 mb-6 bg-white rounded-xl p-2 shadow-sm border border-gray-200 w-fit">
+    @for (filter of ['ALL', 'ASSIGNED', 'COMPLETED', 'REJECTED']; track filter) {
+      <button (click)="applyFilter(filter)"
+        class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+        [class]="activeFilter() === filter
+          ? 'bg-[#8B1E3F] text-white shadow-sm'
+          : 'text-gray-600 hover:bg-gray-100'">
+        {{ filter }}
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-16">
+      <div class="w-10 h-10 border-4 border-gray-200 border-t-[#8B1E3F] rounded-full animate-spin"></div>
+      <p class="ml-3 text-gray-600">Loading inspections...</p>
+    </div>
+  }
+
+  <!-- Table -->
+  @if (!isLoading()) {
+    <div class="bg-white rounded-xl shadow-md border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <p class="text-sm text-gray-600">
+          Showing <span class="font-semibold text-gray-900">{{ filteredInspections().length }}</span> of
+          <span class="font-semibold text-gray-900">{{ inspections().length }}</span> inspections
+        </p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Inspection ID</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Property ID</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Inspection Date</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Risk Score</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @if (filteredInspections().length === 0) {
+              <tr>
+                <td colspan="6" class="px-6 py-16 text-center">
+                  <span class="material-icons text-5xl text-gray-300 mb-3 block">home_work</span>
+                  <p class="text-gray-500 font-medium">No inspections found</p>
+                  <p class="text-gray-400 text-sm mt-1">Check back when the admin assigns inspections to you</p>
+                </td>
+              </tr>
+            }
+            @for (insp of filteredInspections(); track insp.inspectionId) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">
+                  <span class="text-sm font-bold text-gray-900">#INS-{{ insp.inspectionId }}</span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700">
+                  <div class="flex items-center gap-2">
+                    <span class="material-icons text-blue-500 text-lg">home</span>
+                    #PROP-{{ insp.propertyId }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                  {{ insp.inspectionDate ? (insp.inspectionDate | date:'mediumDate') : '—' }}
+                </td>
+                <td class="px-6 py-4 text-sm">
+                  <span [class]="getRiskClass(insp.assessedRiskScore)">
+                    @if (insp.assessedRiskScore != null) {
+                      {{ insp.assessedRiskScore }}/10
+                    } @else {
+                      —
+                    }
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="px-2.5 py-1 text-xs font-semibold rounded-full" [ngClass]="getStatusClass(insp.status)">
+                    {{ insp.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  @if (insp.status === 'ASSIGNED') {
+                    <button (click)="openReportModal(insp)"
+                      class="flex items-center gap-1.5 px-4 py-2 bg-[#8B1E3F] text-white text-sm rounded-lg hover:bg-[#6f1732] transition-colors font-medium">
+                      <span class="material-icons text-sm">upload_file</span>
+                      Submit Report
+                    </button>
+                  } @else {
+                    <span class="text-xs text-gray-400 italic">Report submitted</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Submit Report Modal -->
+@if (showReportModal() && selectedInspection()) {
+  <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" (click)="closeReportModal()">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-[#8B1E3F] to-[#6f1732] px-6 py-4 rounded-t-xl">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-white/20 rounded-lg">
+              <span class="material-icons text-white">home_work</span>
+            </div>
+            <div>
+              <h2 class="text-white font-bold text-lg">Submit Inspection Report</h2>
+              <p class="text-white/80 text-sm">Inspection #INS-{{ selectedInspection()!.inspectionId }}</p>
+            </div>
+          </div>
+          <button (click)="closeReportModal()" class="text-white/70 hover:text-white transition-colors">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6">
+        <form [formGroup]="reportForm" class="space-y-5">
+          <!-- Risk Score -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              Risk Score <span class="text-red-500">*</span>
+              <span class="font-normal text-gray-500 ml-1">(0 = Lowest Risk, 10 = Highest Risk)</span>
+            </label>
+            <input type="number" formControlName="assessedRiskScore" step="0.1" min="0" max="10"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors"
+              placeholder="e.g. 3.5" />
+            @if (reportForm.get('assessedRiskScore')?.touched && reportForm.get('assessedRiskScore')?.invalid) {
+              <p class="text-red-500 text-xs mt-1">Risk score between 0 and 10 is required.</p>
+            }
+          </div>
+
+          <!-- Remarks -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              Inspection Remarks <span class="text-red-500">*</span>
+            </label>
+            <textarea formControlName="remarks" rows="5"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors resize-none"
+              placeholder="Describe the property condition, fire safety measures, risks observed, and your overall assessment..."></textarea>
+            @if (reportForm.get('remarks')?.touched && reportForm.get('remarks')?.invalid) {
+              <p class="text-red-500 text-xs mt-1">Remarks must be at least 20 characters.</p>
+            }
+          </div>
+
+          @if (errorMessage()) {
+            <div class="flex gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
+              <span class="material-icons text-sm mt-0.5">error</span>
+              {{ errorMessage() }}
+            </div>
+          }
+        </form>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 pb-6 flex gap-3 justify-end">
+        <button type="button" (click)="closeReportModal()"
+          class="px-5 py-2.5 text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+          Cancel
+        </button>
+        <button type="button" (click)="submitReport()" [disabled]="isSubmitting() || reportForm.invalid"
+          class="flex items-center gap-2 px-5 py-2.5 bg-[#8B1E3F] text-white font-medium rounded-lg hover:bg-[#6f1732] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          @if (isSubmitting()) {
+            <span class="material-icons animate-spin text-sm">autorenew</span>
+          } @else {
+            <span class="material-icons text-sm">check_circle</span>
+          }
+          {{ isSubmitting() ? 'Submitting...' : 'Submit Report' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,303 @@
+<div class="content-container min-h-screen py-8">
+  <!-- Page Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="page-title">My Profile</h1>
+      <p class="text-gray-600 text-[16px]">Manage your personal information and account settings</p>
+    </div>
+    <button onclick="toggleEditMode()" 
+            id="editProfileBtn"
+            class="flex items-center gap-2 px-6 py-3 bg-[#8B1E3F] text-white rounded-lg hover:bg-[#6f1732] transition-all font-medium shadow-md hover:shadow-lg">
+      <span class="material-icons">edit</span>
+      <span>Edit Profile</span>
+    </button>
+  </div>
+
+  <!-- Personal Information Card -->
+  <div class="bg-white rounded-xl shadow-md p-8 mb-6 border border-gray-100">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-gray-900">Personal Information</h2>
+      <div class="p-3 bg-[#8B1E3F] bg-opacity-10 rounded-full">
+        <span class="material-icons text-2xl text-[#8B1E3F]">person</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Username -->
+      <div class="space-y-1">
+        <label class="text-sm font-semibold text-gray-600">Username</label>
+        <p class="text-base text-gray-900 font-medium">john.doe</p>
+      </div>
+
+      <!-- Email -->
+      <div class="space-y-1">
+        <label class="text-sm font-semibold text-gray-600">Email Address</label>
+        <p class="text-base text-gray-900 font-medium">john.doe@email.com</p>
+      </div>
+
+      <!-- First Name -->
+      <div class="space-y-1">
+        <label class="text-sm font-semibold text-gray-600">First Name</label>
+        <input type="text" 
+               id="firstName" 
+               value="John" 
+               disabled
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 disabled:opacity-75">
+      </div>
+
+      <!-- Last Name -->
+      <div class="space-y-1">
+        <label class="text-sm font-semibold text-gray-600">Last Name</label>
+        <input type="text" 
+               id="lastName" 
+               value="Doe" 
+               disabled
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 disabled:opacity-75">
+      </div>
+
+      <!-- Phone -->
+      <div class="space-y-1">
+        <label class="text-sm font-semibold text-gray-600">Phone Number</label>
+        <input type="tel" 
+               id="phone" 
+               value="+1 (555) 123-4567" 
+               disabled
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 disabled:opacity-75">
+      </div>
+
+      <!-- Date of Birth -->
+      <div class="space-y-1">
+        <label class="text-sm font-semibold text-gray-600">Date of Birth</label>
+        <input type="date" 
+               id="dob" 
+               value="1985-06-15" 
+               disabled
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 disabled:opacity-75">
+      </div>
+    </div>
+
+    <!-- Edit Mode Buttons -->
+    <div id="editButtons" class="hidden mt-6 gap-3 justify-end pt-6 border-t border-gray-200">
+      <button onclick="cancelEdit()" 
+              class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-all font-medium">
+        Cancel
+      </button>
+      <button onclick="saveProfile()" 
+              class="px-6 py-3 bg-[#8B1E3F] text-white rounded-lg hover:bg-[#6f1732] transition-all font-medium shadow-md hover:shadow-lg">
+        Save Changes
+      </button>
+    </div>
+  </div>
+
+  <!-- Contact Information Card -->
+  <div class="bg-white rounded-xl shadow-md p-8 mb-6 border border-gray-100">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-gray-900">Contact Information</h2>
+      <div class="p-3 bg-[#8B1E3F] bg-opacity-10 rounded-full">
+        <span class="material-icons text-2xl text-[#8B1E3F]">location_on</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Address -->
+      <div class="space-y-1 md:col-span-2">
+        <label class="text-sm font-semibold text-gray-600">Street Address</label>
+        <input type="text" 
+               id="address" 
+               value="123 Main Street" 
+               disabled
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 disabled:opacity-75">
+      </div>
+
+      <!-- City -->
+      <div class="space-y-1">
+        <label class="text-sm font-semibold text-gray-600">City</label>
+        <input type="text" 
+               id="city" 
+               value="San Francisco" 
+               disabled
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 disabled:opacity-75">
+      </div>
+
+      <!-- State -->
+      <div class="space-y-1">
+        <label class="text-sm font-semibold text-gray-600">State</label>
+        <input type="text" 
+               id="state" 
+               value="Connecticut" 
+               disabled
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 disabled:opacity-75">
+      </div>
+
+      <!-- Zip Code -->
+      <div class="space-y-1">
+        <label class="text-sm font-semibold text-gray-600">Zip Code</label>
+        <input type="text" 
+               id="zipCode" 
+               value="06103" 
+               disabled
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 disabled:opacity-75">
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Security Card -->
+  <div class="bg-white rounded-xl shadow-md p-8 border border-gray-100">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Account Security</h2>
+        <p class="text-sm text-gray-600 mt-1">Update your password to keep your account secure</p>
+      </div>
+      <div class="p-3 bg-[#8B1E3F] bg-opacity-10 rounded-full">
+        <span class="material-icons text-2xl text-[#8B1E3F]">lock</span>
+      </div>
+    </div>
+
+    <form class="space-y-5">
+      <!-- Current Password -->
+      <div class="space-y-1">
+        <label for="currentPassword" class="block text-sm font-semibold text-gray-700">
+          Current Password *
+        </label>
+        <div class="relative">
+          <input type="password" 
+                 id="currentPassword" 
+                 placeholder="Enter your current password"
+                 class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1E3F] focus:border-transparent transition-all text-gray-900">
+          <button type="button" 
+                  onclick="togglePassword('currentPassword')"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <span class="material-icons text-xl">visibility</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- New Password -->
+      <div class="space-y-1">
+        <label for="newPassword" class="block text-sm font-semibold text-gray-700">
+          New Password *
+        </label>
+        <div class="relative">
+          <input type="password" 
+                 id="newPassword" 
+                 placeholder="Enter new password"
+                 class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1E3F] focus:border-transparent transition-all text-gray-900">
+          <button type="button" 
+                  onclick="togglePassword('newPassword')"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <span class="material-icons text-xl">visibility</span>
+          </button>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">
+          Must be at least 8 characters with uppercase, lowercase, number, and special character
+        </p>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="space-y-1">
+        <label for="confirmPassword" class="block text-sm font-semibold text-gray-700">
+          Confirm New Password *
+        </label>
+        <div class="relative">
+          <input type="password" 
+                 id="confirmPassword" 
+                 placeholder="Re-enter new password"
+                 class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1E3F] focus:border-transparent transition-all text-gray-900">
+          <button type="button" 
+                  onclick="togglePassword('confirmPassword')"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <span class="material-icons text-xl">visibility</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="pt-4">
+        <button type="button"
+                onclick="changePassword()"
+                class="w-full md:w-auto px-8 py-3 bg-[#8B1E3F] text-white rounded-lg hover:bg-[#6f1732] transition-all font-medium shadow-md hover:shadow-lg">
+          Change Password
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- JavaScript for Edit Mode and Password Toggle -->
+<script>
+function toggleEditMode() {
+  const inputs = ['firstName', 'lastName', 'phone', 'dob', 'address', 'city', 'state', 'zipCode'];
+  const editBtn = document.getElementById('editProfileBtn');
+  const editButtons = document.getElementById('editButtons');
+  
+  inputs.forEach(id => {
+    const input = document.getElementById(id);
+    input.disabled = !input.disabled;
+    input.classList.toggle('bg-gray-50');
+    input.classList.toggle('bg-white');
+  });
+  
+  editBtn.classList.toggle('hidden');
+  editButtons.classList.toggle('hidden');
+}
+
+function cancelEdit() {
+  // Reset all values (in real scenario, restore original values)
+  document.getElementById('firstName').value = 'John';
+  document.getElementById('lastName').value = 'Doe';
+  document.getElementById('phone').value = '+1 (555) 123-4567';
+  document.getElementById('dob').value = '1985-06-15';
+  document.getElementById('address').value = '123 Main Street';
+  document.getElementById('city').value = 'San Francisco';
+  document.getElementById('state').value = 'Connecticut';
+  document.getElementById('zipCode').value = '06103';
+  
+  toggleEditMode();
+}
+
+function saveProfile() {
+  // In real scenario, send data to backend
+  alert('Profile updated successfully!');
+  toggleEditMode();
+}
+
+function togglePassword(inputId) {
+  const input = document.getElementById(inputId);
+  const button = input.nextElementSibling.querySelector('.material-icons');
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    button.textContent = 'visibility_off';
+  } else {
+    input.type = 'password';
+    button.textContent = 'visibility';
+  }
+}
+
+function changePassword() {
+  const current = document.getElementById('currentPassword').value;
+  const newPass = document.getElementById('newPassword').value;
+  const confirm = document.getElementById('confirmPassword').value;
+  
+  if (!current || !newPass || !confirm) {
+    alert('Please fill in all password fields');
+    return;
+  }
+  
+  if (newPass !== confirm) {
+    alert('New passwords do not match');
+    return;
+  }
+  
+  if (newPass.length < 8) {
+    alert('Password must be at least 8 characters long');
+    return;
+  }
+  
+  // In real scenario, send to backend
+  alert('Password changed successfully!');
+  document.getElementById('currentPassword').value = '';
+  document.getElementById('newPassword').value = '';
+  document.getElementById('confirmPassword').value = '';
+}
+</script>

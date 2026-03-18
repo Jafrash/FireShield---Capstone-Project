@@ -1,0 +1,906 @@
+<div class="content-container min-h-screen py-8">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <h1 class="page-title">Available Fire Insurance Policies</h1>
+    <p class="text-gray-600 text-lg mt-2">Browse and apply for comprehensive fire insurance coverage for your properties</p>
+  </div>
+
+  <!-- Success Message -->
+  @if (successMessage()) {
+    <div class="alert alert-success mb-6">
+      <span class="material-icons text-xl">check_circle</span>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  <!-- Error Message -->
+  @if (errorMessage() && !showApplyModal()) {
+    <div class="alert alert-error mb-6">
+      <span class="material-icons text-xl">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p class="mt-4 text-gray-600">Loading policies...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && policies().length === 0) {
+    <div class="empty-state-card">
+      <span class="material-icons empty-state-icon">policy</span>
+      <h3 class="empty-state-title">No Policies Available</h3>
+      <p class="empty-state-description">There are currently no fire insurance policies available. Please check back later.</p>
+    </div>
+  }
+
+  <!-- Policies Grid -->
+  @if (!isLoading() && policies().length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (policy of policies(); track policy.policyId) {
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <!-- Policy Header -->
+          <div class="bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] p-6 text-white">
+            <div class="flex items-start justify-between mb-2">
+              <h3 class="text-xl font-bold text-white">{{ policy.policyName }}</h3>
+              @if (policy.policyType) {
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur text-white">
+                  {{ policy.policyType }}
+                </span>
+              }
+            </div>
+            <div class="space-y-2">
+              <div class="text-sm text-white/80 leading-relaxed">
+                Final premium depends on property details, requested coverage, risk profile, and inspection outcome.
+              </div>
+            </div>
+          </div>
+
+          <!-- Policy Body -->
+          <div class="p-6">
+            <!-- Coverage Info -->
+            <div class="space-y-3 mb-4">
+              <div class="flex items-center gap-2 text-sm">
+                <span class="material-icons text-lg text-[#8B1E3F]">shield</span>
+                <span class="text-gray-600">Max Coverage:</span>
+                <span class="font-semibold text-gray-900">₹{{ formatCurrency(policy.maxCoverageAmount) }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm">
+                <span class="material-icons text-lg text-[#8B1E3F]">schedule</span>
+                <span class="text-gray-600">Duration:</span>
+                <span class="font-semibold text-gray-900">{{ getDurationText(policy.durationMonths) }}</span>
+              </div>
+              @if (policy.deductible) {
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-icons text-lg text-blue-600">account_balance_wallet</span>
+                  <span class="text-gray-600">Deductible:</span>
+                  <span class="font-semibold text-gray-900">₹{{ formatCurrency(policy.deductible) }}</span>
+                </div>
+              }
+              @if (policy.claimSettlementRatio) {
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-icons text-lg text-green-600">trending_up</span>
+                  <span class="text-gray-600">Claim Settlement:</span>
+                  <span class="font-semibold text-green-700">{{ policy.claimSettlementRatio }}%</span>
+                </div>
+              }
+            </div>
+
+            <!-- Coverage Details -->
+            <div class="mb-4">
+              <p class="text-sm text-gray-700 line-clamp-3">
+                {{ policy.coverageDetails }}
+              </p>
+            </div>
+
+            <!-- Risks Covered -->
+            @if (policy.risksCovered && policy.risksCovered.length > 0) {
+              <div class="mb-4">
+                <p class="text-xs font-semibold text-gray-600 mb-2">Key Risks Covered:</p>
+                <div class="flex flex-wrap gap-1">
+                  @for (risk of policy.risksCovered.slice(0, 3); track risk) {
+                    <span class="px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
+                      <span class="material-icons text-xs align-middle">check_circle</span>
+                      {{ risk }}
+                    </span>
+                  }
+                  @if (policy.risksCovered.length > 3) {
+                    <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                      +{{ policy.risksCovered.length - 3 }} more
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Subscription Status Badge -->
+            @if (getSubscriptionStatus()(policy.policyId); as subscription) {
+              <div class="mb-4 space-y-3">
+                <!-- Status Badge -->
+                <div class="p-3 rounded-lg border-2" 
+                     [ngClass]="subscription.status === 'ACTIVE' ? 'border-green-200 bg-green-50' : 
+                                subscription.status === 'PENDING' ? 'border-yellow-200 bg-yellow-50' : 
+                                'border-gray-200 bg-gray-50'">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-sm"
+                            [ngClass]="subscription.status === 'ACTIVE' ? 'text-green-600' : 
+                                       subscription.status === 'PENDING' ? 'text-yellow-600' : 
+                                       'text-gray-600'">
+                        {{ subscription.status === 'ACTIVE' ? 'check_circle' : 
+                           subscription.status === 'PENDING' ? 'schedule' : 'info' }}
+                      </span>
+                      <span class="text-xs font-semibold"
+                            [ngClass]="subscription.status === 'ACTIVE' ? 'text-green-800' : 
+                                       subscription.status === 'PENDING' ? 'text-yellow-800' : 
+                                       'text-gray-800'">
+                        Status: {{ subscription.status }}
+                      </span>
+                    </div>
+                    @if (subscription.status === 'ACTIVE' && subscription.daysRemaining !== undefined) {
+                      <span class="text-xs font-medium" [ngClass]="getDaysRemainingText(subscription).color">
+                        {{ getDaysRemainingText(subscription).text }}
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <!-- NCB Badge (for Active policies with claim-free years) -->
+                @if (subscription.status === 'ACTIVE' && subscription.claimFreeYears && subscription.claimFreeYears > 0) {
+                  <div class="p-3 rounded-lg border-2 border-purple-200 bg-purple-50">
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-sm text-purple-600">military_tech</span>
+                      <div class="flex-1">
+                        <div class="text-xs font-semibold text-purple-800">
+                          🎉 No Claim Bonus: {{ subscription.claimFreeYears }} {{ subscription.claimFreeYears === 1 ? 'Year' : 'Years' }} Claim-Free
+                        </div>
+                        <div class="text-xs text-purple-600 mt-0.5">
+                          Current Discount: <span class="font-bold">{{ (subscription.ncbDiscount! * 100).toFixed(0) }}%</span> on renewal
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <!-- Renewal Button (for eligible policies) -->
+                @if (subscription.renewalEligible && subscription.status === 'ACTIVE') {
+                  <button (click)="renewPolicy(subscription)" 
+                          [disabled]="isSubmitting()"
+                          class="w-full px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-medium hover:from-green-700 hover:to-green-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span class="material-icons text-sm align-middle mr-1">autorenew</span>
+                    Renew Policy Now
+                    @if (subscription.ncbDiscount && subscription.ncbDiscount > 0) {
+                      <span class="ml-2 px-2 py-0.5 bg-white/20 rounded text-xs">
+                        Save {{ (subscription.ncbDiscount * 100).toFixed(0) }}%
+                      </span>
+                    }
+                  </button>
+                }
+
+                <!-- Expiring Soon Warning (if not yet eligible for renewal) -->
+                @if (!subscription.renewalEligible && subscription.status === 'ACTIVE' && isExpiringSoon(subscription)) {
+                  <div class="p-2 rounded-lg bg-yellow-50 border border-yellow-200">
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-sm text-yellow-600">warning</span>
+                      <span class="text-xs text-yellow-800">
+                        Renewal available soon ({{ subscription.daysRemaining }} days remaining)
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2">
+              <button (click)="viewDetails(policy)" 
+                      class="flex-1 px-4 py-2.5 border-2 border-[#8B1E3F] text-[#8B1E3F] rounded-lg font-medium hover:bg-[#8B1E3F] hover:text-white transition-colors">
+                <span class="material-icons text-sm align-middle mr-1">visibility</span>
+                View Details
+              </button>
+              <button (click)="openApplyModal(policy)" 
+                      [disabled]="!canApplyForPolicy(policy.policyId)"
+                      class="flex-1 px-4 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      [ngClass]="canApplyForPolicy(policy.policyId) ? 
+                                'bg-[#8B1E3F] text-white hover:bg-[#A0214F]' : 
+                                'bg-gray-300 text-gray-500'">
+                <span class="material-icons text-sm align-middle mr-1">
+                  {{ getSubscriptionStatus()(policy.policyId) ? 'refresh' : 'add_circle' }}
+                </span>
+                {{ getApplyButtonText(policy.policyId) }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Policy Details Modal -->
+@if (showDetailsModal() && selectedPolicy()) {
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" 
+       (click)="closeDetailsModal()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto" 
+         (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="sticky top-0 bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] p-6 text-white">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <h2 class="text-2xl font-bold mb-2">{{ selectedPolicy()!.policyName }}</h2>
+            @if (selectedPolicy()!.policyType) {
+              <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold bg-white/20 backdrop-blur">
+                {{ selectedPolicy()!.policyType }}
+              </span>
+            }
+          </div>
+          <button (click)="closeDetailsModal()" 
+                  class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-6">
+        <!-- Policy Snapshot -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+            <p class="text-xs text-blue-600 font-semibold mb-1 flex items-center gap-1">
+              <span class="material-icons text-sm">shield</span>
+              Max Coverage
+            </p>
+            <p class="text-2xl font-bold text-blue-900">₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}</p>
+          </div>
+          <div class="bg-purple-50 rounded-lg p-4 border-2 border-purple-200">
+            <p class="text-xs text-purple-600 font-semibold mb-1 flex items-center gap-1">
+              <span class="material-icons text-sm">schedule</span>
+              Policy Duration
+            </p>
+            <p class="text-2xl font-bold text-purple-900">{{ getDurationText(selectedPolicy()!.durationMonths) }}</p>
+          </div>
+          <div class="bg-green-50 rounded-lg p-4 border-2 border-green-200">
+            <p class="text-xs text-green-600 font-semibold mb-1 flex items-center gap-1">
+              <span class="material-icons text-sm">analytics</span>
+              Risk Category
+            </p>
+            <p class="text-2xl font-bold text-green-900">{{ getRiskCategory(selectedPolicy()!.maxCoverageAmount) }}</p>
+          </div>
+        </div>
+
+        <!-- Premium Guidance -->
+        <div class="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-5 border-2 border-cyan-200">
+          <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span class="material-icons text-cyan-600">receipt_long</span>
+            Premium Guidance
+          </h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-white rounded-lg p-3 border border-cyan-200">
+              <p class="text-xs text-gray-600 mb-1">Property Details</p>
+              <p class="text-sm font-bold text-cyan-700">Construction, occupancy, age</p>
+            </div>
+            <div class="bg-white rounded-lg p-3 border border-cyan-200">
+              <p class="text-xs text-gray-600 mb-1">Coverage Requested</p>
+              <p class="text-sm font-bold text-gray-900">Sum insured selected for the property</p>
+            </div>
+            <div class="bg-white rounded-lg p-3 border border-cyan-200">
+              <p class="text-xs text-gray-600 mb-1">Risk Assessment</p>
+              <p class="text-sm font-bold text-blue-700">Inspection findings and underwriting review</p>
+            </div>
+            <div class="bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg p-3 border-2 border-green-300">
+              <p class="text-xs text-green-700 font-semibold mb-1">Final Quote</p>
+              <p class="text-sm font-bold text-green-900">Shared after proposal review and approval</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-700 mt-4 leading-relaxed">
+            This page shows policy features only. Your actual premium is calculated after we review the insured property and the coverage amount you request.
+          </p>
+        </div>
+
+        <!-- Policy Benefits & Rewards Section -->
+        <div class="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 rounded-xl p-6 border-2 border-green-300">
+          <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span class="material-icons text-green-600 text-2xl">card_giftcard</span>
+            Policy Benefits & Rewards
+          </h3>
+          
+          <div class="space-y-4">
+            <!-- No Claim Bonus -->
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-green-200">
+              <div class="flex items-start gap-3">
+                <div class="bg-green-100 rounded-full p-2">
+                  <span class="material-icons text-green-700">emoji_events</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-bold text-gray-900 mb-2">No Claim Bonus (NCB)</h4>
+                  <p class="text-sm text-gray-700 mb-3">Earn premium discounts for claim-free years:</p>
+                  <div class="grid grid-cols-5 gap-2">
+                    <div class="text-center">
+                      <div class="bg-gradient-to-br from-green-100 to-emerald-100 rounded p-2 mb-1">
+                        <p class="text-xs text-gray-600">1 Year</p>
+                        <p class="font-bold text-green-700">10%</p>
+                      </div>
+                    </div>
+                    <div class="text-center">
+                      <div class="bg-gradient-to-br from-green-100 to-emerald-100 rounded p-2 mb-1">
+                        <p class="text-xs text-gray-600">2 Years</p>
+                        <p class="font-bold text-green-700">20%</p>
+                      </div>
+                    </div>
+                    <div class="text-center">
+                      <div class="bg-gradient-to-br from-green-200 to-emerald-200 rounded p-2 mb-1">
+                        <p class="text-xs text-gray-600">3 Years</p>
+                        <p class="font-bold text-green-800">25%</p>
+                      </div>
+                    </div>
+                    <div class="text-center">
+                      <div class="bg-gradient-to-br from-green-200 to-emerald-200 rounded p-2 mb-1">
+                        <p class="text-xs text-gray-600">4 Years</p>
+                        <p class="font-bold text-green-800">35%</p>
+                      </div>
+                    </div>
+                    <div class="text-center">
+                      <div class="bg-gradient-to-br from-green-300 to-emerald-300 rounded p-2 mb-1">
+                        <p class="text-xs text-gray-600">5+ Years</p>
+                        <p class="font-bold text-green-900">50%</p>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="text-xs text-green-700 mt-2 font-semibold">💰 Save up to 50% on renewal premium!</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tax Benefits -->
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-blue-200">
+              <div class="flex items-start gap-3">
+                <div class="bg-blue-100 rounded-full p-2">
+                  <span class="material-icons text-blue-700">account_balance</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-bold text-gray-900 mb-1">Tax Benefits Under Section 80C</h4>
+                  <p class="text-sm text-gray-700">Premium paid is eligible for tax deduction up to <span class="font-bold text-blue-700">₹1,50,000</span> per financial year</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lifetime Renewability -->
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-purple-200">
+              <div class="flex items-start gap-3">
+                <div class="bg-purple-100 rounded-full p-2">
+                  <span class="material-icons text-purple-700">autorenew</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-bold text-gray-900 mb-1">Lifetime Renewability</h4>
+                  <p class="text-sm text-gray-700">Policy renewable for life with no age restrictions. Lock in your coverage today!</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Claim Settlement -->
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-orange-200">
+              <div class="flex items-start gap-3">
+                <div class="bg-orange-100 rounded-full p-2">
+                  <span class="material-icons text-orange-700">speed</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-bold text-gray-900 mb-1">Fast Claim Settlement</h4>
+                  <p class="text-sm text-gray-700">
+                    Claims settled within <span class="font-bold text-orange-700">{{ getClaimSettlementDays(selectedPolicy()!) }}</span> of approval
+                  </p>
+                  <p class="text-xs text-gray-600 mt-1">Settlement Ratio: <span class="font-semibold text-green-600">{{ selectedPolicy()!.claimSettlementRatio || 95 }}%</span></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 24/7 Support -->
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-indigo-200">
+              <div class="flex items-start gap-3">
+                <div class="bg-indigo-100 rounded-full p-2">
+                  <span class="material-icons text-indigo-700">support_agent</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-bold text-gray-900 mb-1">24/7 Customer Support</h4>
+                  <p class="text-sm text-gray-700">Round-the-clock claim assistance and customer care available</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fire Safety Rewards -->
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-red-200">
+              <div class="flex items-start gap-3">
+                <div class="bg-red-100 rounded-full p-2">
+                  <span class="material-icons text-red-700">local_fire_department</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-bold text-gray-900 mb-1">Fire Safety Equipment Discount</h4>
+                  <p class="text-sm text-gray-700">Up to <span class="font-bold text-red-700">15% discount</span> for installing approved fire safety equipment</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Zero Depreciation -->
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-teal-200">
+              <div class="flex items-start gap-3">
+                <div class="bg-teal-100 rounded-full p-2">
+                  <span class="material-icons text-teal-700">new_releases</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-bold text-gray-900 mb-1">Zero Depreciation Cover (Add-on)</h4>
+                  <p class="text-sm text-gray-700">Get full claim amount without depreciation. Available for properties up to 5 years old</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Policy Review -->
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+              <div class="flex items-start gap-3">
+                <div class="bg-gray-100 rounded-full p-2">
+                  <span class="material-icons text-gray-700">rate_review</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-bold text-gray-900 mb-1">Complimentary Annual Policy Review</h4>
+                  <p class="text-sm text-gray-700">Free annual consultation to optimize your coverage and savings</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Policy Key Features -->
+        <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-5 border-2 border-orange-200">
+          <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <span class="material-icons text-orange-600">star</span>
+            Key Policy Features
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-start gap-3">
+              <span class="material-icons text-green-600 mt-1">check_circle</span>
+              <div>
+                <p class="font-semibold text-gray-900">Duration</p>
+                <p class="text-sm text-gray-700">{{ getDurationText(selectedPolicy()!.durationMonths) }}</p>
+              </div>
+            </div>
+            @if (selectedPolicy()!.deductible) {
+              <div class="flex items-start gap-3">
+                <span class="material-icons text-blue-600 mt-1">account_balance_wallet</span>
+                <div>
+                  <p class="font-semibold text-gray-900">Deductible</p>
+                  <p class="text-sm text-gray-700">₹{{ formatCurrency(selectedPolicy()!.deductible!) }}</p>
+                </div>
+              </div>
+            }
+            @if (selectedPolicy()!.claimSettlementRatio) {
+              <div class="flex items-start gap-3">
+                <span class="material-icons text-purple-600 mt-1">trending_up</span>
+                <div>
+                  <p class="font-semibold text-gray-900">Claim Settlement Ratio</p>
+                  <p class="text-sm text-gray-700">{{ selectedPolicy()!.claimSettlementRatio }}%</p>
+                </div>
+              </div>
+            }
+            @if (selectedPolicy()!.sumInsuredMin) {
+              <div class="flex items-start gap-3">
+                <span class="material-icons text-indigo-600 mt-1">payments</span>
+                <div>
+                  <p class="font-semibold text-gray-900">Minimum Sum Insured</p>
+                  <p class="text-sm text-gray-700">₹{{ formatCurrency(selectedPolicy()!.sumInsuredMin!) }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Coverage Benefits -->
+        @if (selectedPolicy()!.coverageBenefits && selectedPolicy()!.coverageBenefits!.length > 0) {
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span class="material-icons text-[#8B1E3F]">verified</span>
+              Coverage Benefits
+            </h3>
+            <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+              <ul class="space-y-2">
+                @for (benefit of selectedPolicy()!.coverageBenefits!; track benefit) {
+                  <li class="flex items-start gap-2">
+                    <span class="material-icons text-green-600 text-lg mt-0.5">done</span>
+                    <span class="text-gray-800">{{ benefit }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+        }
+
+        <!-- Detailed Description -->
+        @if (selectedPolicy()!.detailedDescription) {
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+              <span class="material-icons text-[#8B1E3F]">description</span>
+              About This Policy
+            </h3>
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <p class="text-gray-700 whitespace-pre-line leading-relaxed">{{ selectedPolicy()!.detailedDescription }}</p>
+            </div>
+          </div>
+        }
+
+        <!-- Coverage Details -->
+        <div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+            <span class="material-icons text-[#8B1E3F]">shield</span>
+            What's Covered
+          </h3>
+          <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+            <p class="text-gray-800 leading-relaxed">{{ selectedPolicy()!.coverageDetails }}</p>
+          </div>
+        </div>
+
+        <!-- Risks Covered -->
+        @if (selectedPolicy()!.risksCovered && selectedPolicy()!.risksCovered!.length > 0) {
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span class="material-icons text-[#8B1E3F]">security</span>
+              Specific Risks Covered
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              @for (risk of selectedPolicy()!.risksCovered!; track risk) {
+                <div class="flex items-center gap-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                  <span class="material-icons text-green-600">verified</span>
+                  <span class="font-medium text-gray-800">{{ risk }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Exclusions -->
+        @if (selectedPolicy()!.exclusions && selectedPolicy()!.exclusions!.length > 0) {
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span class="material-icons text-red-600">block</span>
+              Exclusions (Not Covered)
+            </h3>
+            <div class="bg-red-50 rounded-lg p-4 border-2 border-red-200">
+              <ul class="space-y-2">
+                @for (exclusion of selectedPolicy()!.exclusions!; track exclusion) {
+                  <li class="flex items-start gap-2">
+                    <span class="material-icons text-red-600 text-lg mt-0.5">cancel</span>
+                    <span class="text-gray-800">{{ exclusion }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+        }
+
+        <!-- Add-Ons / Optional Riders -->
+        @if (selectedPolicy()!.addOns && selectedPolicy()!.addOns!.length > 0) {
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span class="material-icons text-[#8B1E3F]">add_circle</span>
+              Available Add-Ons (Optional)
+            </h3>
+            <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+              <ul class="space-y-2">
+                @for (addon of selectedPolicy()!.addOns!; track addon) {
+                  <li class="flex items-start gap-2">
+                    <span class="material-icons text-purple-600 text-lg mt-0.5">add_box</span>
+                    <span class="text-gray-800">{{ addon }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+        }
+
+        <!-- Claim Settlement Information -->
+        <div class="bg-indigo-50 rounded-xl p-5 border-2 border-indigo-200">
+          <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span class="material-icons text-indigo-600">calculate</span>
+            Claim Settlement Example
+          </h3>
+          <div class="space-y-3">
+            <p class="text-sm text-gray-700 mb-3">
+              Example: If you file a claim for ₹10,00,000 damage
+            </p>
+            <div class="bg-white rounded-lg p-4 space-y-2">
+              <div class="flex justify-between items-center pb-2 border-b">
+                <span class="text-gray-700">Claim Amount:</span>
+                <span class="font-bold text-gray-900">₹{{ formatCurrency(1000000) }}</span>
+              </div>
+              @if (selectedPolicy()!.deductible) {
+                <div class="flex justify-between items-center pb-2 border-b">
+                  <span class="text-gray-700">Less: Deductible</span>
+                  <span class="font-semibold text-red-600">- ₹{{ formatCurrency(selectedPolicy()!.deductible!) }}</span>
+                </div>
+              }
+              <div class="flex justify-between items-center pb-2 border-b">
+                <span class="text-gray-700">Settlement Ratio:</span>
+                <span class="font-semibold text-blue-600">{{ selectedPolicy()!.claimSettlementRatio || 100 }}%</span>
+              </div>
+              <div class="flex justify-between items-center pt-2 bg-green-50 rounded p-3 mt-2">
+                <span class="font-bold text-gray-900">You Will Receive:</span>
+                <span class="text-2xl font-bold text-green-700">₹{{ formatCurrency(calculateClaimSettlement(selectedPolicy()!, 1000000)) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Eligible Property Types -->
+        @if (selectedPolicy()!.propertyTypesEligible && selectedPolicy()!.propertyTypesEligible!.length > 0) {
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span class="material-icons text-[#8B1E3F]">home_work</span>
+              Eligible Property Types
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              @for (type of selectedPolicy()!.propertyTypesEligible!; track type) {
+                <span class="px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 rounded-lg font-medium border border-purple-200">
+                  {{ type }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Sum Insured Recommendations -->
+        <div class="bg-yellow-50 rounded-xl p-5 border-2 border-yellow-200">
+          <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <span class="material-icons text-yellow-600">lightbulb</span>
+            Sum Insured Recommendations
+          </h3>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-white rounded-lg p-3 border border-gray-200">
+              <p class="text-xs text-gray-600 mb-1">Minimum</p>
+              <p class="text-lg font-bold text-gray-900">₹{{ formatCurrency(getSumInsuredRecommendations(selectedPolicy()!).minimum) }}</p>
+            </div>
+            <div class="bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg p-3 border-2 border-green-300">
+              <p class="text-xs text-green-700 font-semibold mb-1">✓ Recommended</p>
+              <p class="text-lg font-bold text-green-900">₹{{ formatCurrency(getSumInsuredRecommendations(selectedPolicy()!).recommended) }}</p>
+            </div>
+            <div class="bg-white rounded-lg p-3 border border-gray-200">
+              <p class="text-xs text-gray-600 mb-1">Maximum</p>
+              <p class="text-lg font-bold text-gray-900">₹{{ formatCurrency(getSumInsuredRecommendations(selectedPolicy()!).maximum) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terms and Conditions -->
+        @if (selectedPolicy()!.termsAndConditions) {
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+              <span class="material-icons text-[#8B1E3F]">gavel</span>
+              Terms & Conditions
+            </h3>
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 max-h-60 overflow-y-auto">
+              <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{{ selectedPolicy()!.termsAndConditions }}</p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="sticky bottom-0 bg-gray-50 p-6 border-t border-gray-200 flex gap-3">
+        <button (click)="closeDetailsModal()" 
+                class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+          Close
+        </button>
+        <button (click)="closeDetailsModal(); openApplyModal(selectedPolicy()!)" 
+                [disabled]="!canApplyForPolicy(selectedPolicy()!.policyId)"
+                class="flex-1 px-6 py-3 bg-[#8B1E3F] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          <span class="material-icons text-sm align-middle mr-1">add_circle</span>
+          {{ getApplyButtonText(selectedPolicy()!.policyId) }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Apply for Policy Modal -->
+@if (showApplyModal() && selectedPolicy()) {
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] p-6 text-white rounded-t-2xl">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-2xl font-bold mb-1">Apply for Policy</h2>
+            <p class="text-sm opacity-90">{{ selectedPolicy()!.policyName }}</p>
+          </div>
+          <button (click)="closeApplyModal()" 
+                  class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <form [formGroup]="applicationForm" (ngSubmit)="submitApplication()" class="p-6">
+        @if (errorMessage() && showApplyModal()) {
+          <div class="alert alert-error mb-4">
+            <span class="material-icons text-sm">error</span>
+            <span class="text-sm">{{ errorMessage() }}</span>
+          </div>
+        }
+
+        @if (!isUploadStep()) {
+          <!-- Policy Info Display -->
+          <div class="bg-blue-50 rounded-lg p-4 mb-6 border border-blue-200">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs text-blue-600 font-semibold mb-1">Premium Quote</p>
+                <p class="text-sm font-bold text-blue-900">Calculated after property review</p>
+              </div>
+              <div>
+                <p class="text-xs text-blue-600 font-semibold mb-1">Max Coverage</p>
+                <p class="text-xl font-bold text-blue-900">₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Property Selection -->
+          <div class="form-group mb-4">
+            <label class="form-label">
+              <span class="material-icons text-sm align-middle mr-1">home</span>
+              Select Property to Insure *
+            </label>
+            <select formControlName="propertyId" 
+                    class="form-input"
+                    [ngClass]="{'border-red-500': applicationForm.get('propertyId')?.invalid && applicationForm.get('propertyId')?.touched}">
+              <option [value]="null">Choose a property...</option>
+              @for (property of properties(); track property.propertyId) {
+                <option [value]="property.propertyId">
+                  {{ property.address }} ({{ property.propertyType }})
+                </option>
+              }
+            </select>
+            @if (applicationForm.get('propertyId')?.invalid && applicationForm.get('propertyId')?.touched) {
+              <p class="form-error">Please select a property</p>
+            }
+            @if (properties().length === 0) {
+              <p class="text-sm text-orange-600 mt-1 flex items-center gap-1">
+                <span class="material-icons text-sm">info</span>
+                You need to add a property first. 
+                <a routerLink="/customer/properties" class="underline hover:text-orange-700">Add Property</a>
+              </p>
+            }
+          </div>
+
+          <!-- Requested Coverage Amount -->
+          <div class="form-group mb-6">
+            <label class="form-label">
+              <span class="material-icons text-sm align-middle mr-1">account_balance</span>
+              Requested Coverage Amount (₹) *
+            </label>
+            <input type="number" 
+                   formControlName="requestedCoverage" 
+                   class="form-input"
+                   [ngClass]="{'border-red-500': applicationForm.get('requestedCoverage')?.invalid && applicationForm.get('requestedCoverage')?.touched}"
+                   placeholder="Enter amount (max ₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }})">
+            @if (applicationForm.get('requestedCoverage')?.invalid && applicationForm.get('requestedCoverage')?.touched) {
+              <p class="form-error">
+                @if (applicationForm.get('requestedCoverage')?.hasError('required')) {
+                  Coverage amount is required
+                }
+                @if (applicationForm.get('requestedCoverage')?.hasError('min')) {
+                  Amount must be greater than 0
+                }
+                @if (applicationForm.get('requestedCoverage')?.hasError('max')) {
+                  Amount cannot exceed ₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}
+                }
+              </p>
+            }
+            <p class="text-xs text-gray-500 mt-1">
+              <span class="material-icons text-xs align-middle">info</span>
+              Maximum coverage available: ₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}
+            </p>
+          </div>
+
+          <!-- Optional Proposal Details for Underwriting -->
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+            <p class="text-sm font-semibold text-gray-800 mb-3">Underwriting Details (Optional but Recommended)</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="form-label text-xs">Construction Type</label>
+                <input type="text" formControlName="constructionType" class="form-input" placeholder="RCC / Wood / Steel">
+              </div>
+              <div>
+                <label class="form-label text-xs">Roof Type</label>
+                <input type="text" formControlName="roofType" class="form-input" placeholder="Concrete / Metal sheet">
+              </div>
+              <div>
+                <label class="form-label text-xs">No. of Floors</label>
+                <input type="number" formControlName="numberOfFloors" class="form-input" min="1" placeholder="e.g. 2">
+              </div>
+              <div>
+                <label class="form-label text-xs">Occupancy Type</label>
+                <input type="text" formControlName="occupancyType" class="form-input" placeholder="Residential / Commercial / Industrial">
+              </div>
+              <div class="md:col-span-2">
+                <label class="form-label text-xs">Manufacturing Process</label>
+                <textarea formControlName="manufacturingProcess" class="form-input" rows="2" placeholder="If applicable, describe process"></textarea>
+              </div>
+              <div class="md:col-span-2">
+                <label class="form-label text-xs">Hazardous Goods</label>
+                <textarea formControlName="hazardousGoods" class="form-input" rows="2" placeholder="Fuel, chemicals, gas cylinders, etc."></textarea>
+              </div>
+              <div class="md:col-span-2">
+                <label class="form-label text-xs">Previous Loss History</label>
+                <textarea formControlName="previousLossHistory" class="form-input" rows="2" placeholder="Any prior fire losses/claims"></textarea>
+              </div>
+              <div>
+                <label class="form-label text-xs">Property Value (₹)</label>
+                <input type="number" formControlName="propertyValue" class="form-input" min="1" placeholder="e.g. 5000000">
+              </div>
+              <label class="flex items-center gap-2 mt-6 text-sm text-gray-700">
+                <input type="checkbox" formControlName="insuranceDeclinedBefore">
+                Insurance declined before
+              </label>
+            </div>
+          </div>
+
+          <!-- Important Note -->
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div class="flex gap-2">
+              <span class="material-icons text-yellow-600 text-xl">info</span>
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-yellow-900 mb-1">Important Information</p>
+                <p class="text-xs text-yellow-800">
+                  Your application will be reviewed by our admin team. A property inspection may be required before policy activation. 
+                  Your final premium will be shared only after underwriting review based on your property details and requested coverage.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="flex gap-3">
+            <button type="button" 
+                    (click)="closeApplyModal()" 
+                    class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                    [disabled]="isSubmitting()">
+              Cancel
+            </button>
+            <button type="submit" 
+                    class="flex-1 px-6 py-3 bg-[#8B1E3F] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    [disabled]="applicationForm.invalid || isSubmitting() || properties().length === 0">
+              @if (isSubmitting()) {
+                <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span>Submitting...</span>
+              } @else {
+                <span class="material-icons text-sm">send</span>
+                <span>Submit Application</span>
+              }
+            </button>
+          </div>
+        } @else {
+          <!-- Document Upload Step View -->
+          <div class="animate-fadeIn">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-2">
+              <app-document-upload
+                [title]="'Upload Required Policy Documents'"
+                [documentType]="'POLICY_APPLICATION_DOCUMENT'"
+                [linkedEntityType]="'POLICY_SUBSCRIPTION'"
+                [linkedEntityId]="propertyIdForUpload()!"
+                [requiredDocuments]="['Property valuation proof', 'Insurance proposal form']"
+              ></app-document-upload>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-4 border-t border-gray-100 pt-5">
+              <button type="button" 
+                      (click)="closeApplyModal()" 
+                      class="px-6 py-3 bg-[#8B1E3F] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors flex items-center gap-2 shadow-md">
+                <span class="material-icons text-sm">done_all</span>
+                Finish Application
+              </button>
+            </div>
+          </div>
+        }
+      </form>
+    </div>
+  </div>
+}

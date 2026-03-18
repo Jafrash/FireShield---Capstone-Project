@@ -1,0 +1,235 @@
+<div class="content-container py-8">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="page-title">Manage Claims</h1>
+      <p class="text-gray-600 mt-2">Review, approve, and manage all insurance claims</p>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="bg-white rounded-xl shadow-md border border-gray-200 mb-6 p-6">
+    <div class="flex items-center gap-4">
+      <div class="flex-1 relative">
+        <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+        <input type="text" placeholder="Search by claim ID, status, or description..."
+          class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1E3F] focus:border-[#8B1E3F] outline-none transition-all"
+          (input)="searchClaims($any($event.target).value)" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  @if (errorMessage()) {
+  <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-2">
+    <span class="material-icons">error</span> {{ errorMessage() }}
+    <button (click)="loadClaims()" class="ml-auto px-3 py-1 bg-red-600 text-white text-xs rounded-lg">Retry</button>
+  </div>
+  }
+
+  <!-- Claims Table -->
+  <div class="bg-white rounded-xl shadow-md border border-gray-200">
+    <div class="px-6 py-5 border-b border-gray-200">
+      <h2 class="section-title">All Claims</h2>
+      <p class="text-sm text-gray-600 mt-1">Total of {{ filteredClaims().length }} claims</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200">
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Claim ID</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Subscription
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Description
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Amount</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Filed On</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <!-- Loading State -->
+          @if (isLoading()) {
+          <tr>
+            <td colspan="7" class="px-6 py-12 text-center">
+              <div class="flex flex-col items-center gap-3">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#8B1E3F]"></div>
+                <p class="text-gray-600">Loading claims...</p>
+              </div>
+            </td>
+          </tr>
+          }
+
+          <!-- Empty State -->
+          @if (!isLoading() && filteredClaims().length === 0) {
+          <tr>
+            <td colspan="7" class="px-6 py-12 text-center">
+              <div class="flex flex-col items-center gap-2">
+                <span class="material-icons text-5xl text-gray-300">assignment</span>
+                <p class="text-gray-500 font-medium">No claims found</p>
+                <p class="text-sm text-gray-400">Claims will appear here once customers file them.</p>
+              </div>
+            </td>
+          </tr>
+          }
+
+          <!-- Dynamic Claim Rows -->
+          @for (claim of filteredClaims(); track claim.claimId) {
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">#CLM-{{ claim.claimId }}</td>
+            <td class="px-6 py-4 text-sm text-gray-700">#SUB-{{ claim.subscriptionId }}</td>
+            <td class="px-6 py-4 text-sm text-gray-700 max-w-[200px] truncate" [title]="claim.description">{{
+              claim.description }}</td>
+            <td class="px-6 py-4">
+              <div class="flex flex-col">
+                <span class="text-sm font-semibold text-gray-900">₹{{ claim.claimAmount | number:'1.0-0' }}</span>
+                @if (claim.status === 'APPROVED' || claim.status === 'SETTLED') {
+                <div class="mt-1 p-2 bg-green-50 rounded border border-green-100 text-[10px] space-y-0.5">
+                  <div class="flex justify-between gap-4 text-gray-600">
+                    <span>Est. Loss:</span>
+                    <span class="font-medium text-gray-900">₹{{ claim.estimatedLoss | number:'1.0-0' }}</span>
+                  </div>
+                  <div class="flex justify-between gap-4 text-gray-600">
+                    <span>Deductible:</span>
+                    <span class="font-medium text-red-600">-₹{{ claim.deductible | number:'1.0-0' }}</span>
+                  </div>
+                  <div class="flex justify-between gap-4 text-gray-600">
+                    <span>Depreciation:</span>
+                    <span class="font-medium text-red-600">-₹{{ claim.depreciation | number:'1.0-0' }}</span>
+                  </div>
+                  <div class="flex justify-between gap-4 pt-1 border-t border-green-200 text-green-800 font-bold">
+                    <span>Settlement:</span>
+                    <span>₹{{ claim.settlementAmount | number:'1.0-0' }}</span>
+                  </div>
+                </div>
+                }
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" [ngClass]="{
+                        'bg-blue-100 text-blue-800': claim.status === 'SUBMITTED',
+                        'bg-yellow-100 text-yellow-800': claim.status === 'INSPECTING',
+                        'bg-purple-100 text-purple-800': claim.status === 'INSPECTED',
+                        'bg-green-100 text-green-800': claim.status === 'APPROVED',
+                        'bg-red-100 text-red-800': claim.status === 'REJECTED'
+                      }">
+                {{ claim.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-700">{{ claim.createdAt | date:'mediumDate' }}</td>
+            <td class="px-6 py-4">
+              <div class="flex flex-col gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                  <button (click)="viewDocuments(claim)"
+                    class="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs rounded-lg border border-gray-300 hover:bg-gray-200 transition-all font-medium flex items-center gap-1 shadow-sm">
+                    <span class="material-icons text-[16px]">folder</span> Docs
+                  </button>
+
+                  @if (claim.underwriterId) {
+                    <span class="text-xs text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg whitespace-nowrap font-medium border border-purple-200 shadow-sm">
+                      <span class="material-icons text-[14px] align-middle mr-1">person</span> Underwriter Assigned
+                    </span>
+                  } @else if (claim.status === 'SUBMITTED' || claim.status === 'INSPECTED' || claim.status === 'UNDER_REVIEW') {
+                    <span class="text-xs text-gray-400 font-medium">Pending UW Assignment</span>
+                  } @else if (claim.status === 'INSPECTING') {
+                  <span
+                    class="text-xs text-yellow-600 italic bg-yellow-50 px-2 py-1 rounded-md border border-yellow-100 shadow-sm font-medium">Surveyor verifying...</span>
+                  } @else {
+                  <span
+                    class="text-xs text-gray-400 italic bg-gray-50 px-2 py-1.5 rounded-md border border-gray-100 shadow-sm">Resolved</span>
+                  }
+                </div>
+
+                <!-- Assign Underwriter -->
+                @if (!claim.underwriterId && claim.status !== 'SETTLED' && claim.status !== 'REJECTED' && claim.status !== 'APPROVED') {
+                  <div class="flex items-center gap-2 bg-purple-50 p-1.5 rounded-lg border border-purple-200 shadow-sm w-max">
+                    <select [(ngModel)]="selectedUnderwriters[claim.claimId]"
+                      class="text-xs bg-white border border-purple-300 rounded-md px-2 py-1.5 focus:ring-purple-500 focus:border-purple-500 w-32 font-medium">
+                      <option [value]="undefined">Select Underwriter</option>
+                      @for (uw of underwriters(); track uw.underwriterId) {
+                      <option [value]="uw.underwriterId">{{ uw.username }}</option>
+                      }
+                    </select>
+                    <button (click)="assignUnderwriter(claim)"
+                      class="px-3 py-1.5 bg-purple-600 text-white text-xs rounded-md shadow-sm hover:bg-purple-700 hover:-translate-y-0.5 transition-all font-bold">
+                      Assign UW
+                    </button>
+                  </div>
+                }
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Info Footer -->
+    <div class="px-6 py-4 border-t border-gray-200">
+      <p class="text-sm text-gray-600">Showing {{ filteredClaims().length }} of {{ claims().length }} claims</p>
+    </div>
+  </div>
+</div>
+
+<!-- Documents Modal -->
+@if (selectedClaimForDocs()) {
+<div class="fixed inset-0 bg-black/60 shadow-lg backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
+    <div
+      class="bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] p-5 text-white rounded-t-2xl flex justify-between items-center z-10 shadow-sm">
+      <div>
+        <h2 class="text-xl font-bold flex items-center gap-2"><span class="material-icons">folder</span> Claim Documents
+        </h2>
+        <p class="text-xs text-white/90 mt-1">Claim #CLM-{{ selectedClaimForDocs()!.claimId }}</p>
+      </div>
+      <button (click)="closeDocsModal()" class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="p-6 max-h-[60vh] overflow-y-auto bg-gray-50/50">
+      @if (isDocsLoading()) {
+      <div class="flex flex-col items-center justify-center p-8">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#8B1E3F] mb-3"></div>
+        <p class="text-gray-500 font-medium text-sm">Fetching claim documents...</p>
+      </div>
+      } @else if (claimDocuments().length === 0) {
+      <div class="text-center p-8 bg-white border border-gray-200 rounded-xl shadow-sm">
+        <span class="material-icons text-5xl mb-3 text-gray-300">folder_off</span>
+        <p class="text-gray-600 font-medium">No documents uploaded.</p>
+        <p class="text-sm text-gray-400 mt-1">The customer or surveyor hasn't attached any files yet.</p>
+      </div>
+      } @else {
+      <ul class="space-y-4">
+        @for (doc of claimDocuments(); track doc.documentId) {
+        <li
+          class="flex items-center justify-between p-4 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-4 overflow-hidden">
+            <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-lg shadow-sm">
+              <span class="material-icons text-blue-600 text-xl">description</span>
+            </div>
+            <div class="flex flex-col overflow-hidden">
+              <span class="text-sm font-bold text-gray-800 truncate" [title]="doc.fileName">{{ doc.fileName ||
+                'Document' }}</span>
+              <span class="text-xs text-gray-500 font-medium mt-0.5">{{ doc.documentType.replace('_', ' ') }}</span>
+            </div>
+          </div>
+          <button (click)="downloadDocument(doc)"
+            class="px-4 py-2 text-sm bg-blue-50 text-blue-700 font-bold border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1 shadow-sm hover:-translate-y-0.5">
+            <span class="material-icons text-[16px]">file_download</span>
+            View
+          </button>
+        </li>
+        }
+      </ul>
+      }
+    </div>
+
+    <div class="p-5 border-t border-gray-200 flex justify-end bg-white rounded-b-2xl shadow-inner">
+      <button (click)="closeDocsModal()"
+        class="px-6 py-2.5 bg-gray-100 shadow-sm border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-200 hover:-translate-y-0.5 transition-all">Close</button>
+    </div>
+  </div>
+</div>
+}

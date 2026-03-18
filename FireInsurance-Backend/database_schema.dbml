@@ -1,0 +1,303 @@
+// Fire Insurance Management System - Database Schema
+// Use this at: https://dbdiagram.io/d
+// Simply copy-paste this entire content
+
+Project FireInsurance {
+  database_type: 'MySQL/PostgreSQL'
+  Note: 'Fire Insurance Management System - Complete Database Schema'
+}
+
+// ============ CORE AUTHENTICATION ============
+
+Table users {
+  user_id bigint [pk, increment, note: 'Primary Key']
+  username varchar(100) [unique, not null, note: 'Unique username']
+  email varchar(255) [unique, not null, note: 'Unique email']
+  password varchar(255) [not null, note: 'Encrypted password']
+  phone_number varchar(20)
+  role varchar(50) [note: 'ADMIN, CUSTOMER, SURVEYOR']
+  active boolean [default: true]
+  created_at timestamp [default: `now()`]
+
+  Note: 'Central authentication entity. One user can have one role-based profile.'
+}
+
+// ============ USER PROFILES ============
+
+Table customers {
+  customer_id bigint [pk, increment]
+  user_id bigint [ref: - users.user_id, not null, note: 'One-to-One with User']
+  address varchar(500)
+  city varchar(100)
+  state varchar(100)
+
+  Note: 'Customer profile extension. Owns properties and subscriptions.'
+}
+
+Table surveyors {
+  surveyor_id bigint [pk, increment]
+  user_id bigint [ref: - users.user_id, not null, note: 'One-to-One with User']
+  license_number varchar(50) [unique]
+  experience_years int
+  assigned_region varchar(100)
+
+  Note: 'Surveyor profile extension. Conducts property and claim inspections.'
+}
+
+// ============ PROPERTY MANAGEMENT ============
+
+Table properties {
+  property_id bigint [pk, increment]
+  customer_id bigint [ref: > customers.customer_id, note: 'Many-to-One']
+  property_type varchar(100) [note: 'Residential, Commercial, Industrial']
+  address varchar(500)
+  area_sqft double
+  construction_type varchar(100) [note: 'RCC, Brick, Wood, etc.']
+  risk_score double [note: 'Calculated risk score']
+  property_age int [default: 0]
+
+  Note: 'Insurable assets owned by customers. Requires inspection before policy.'
+}
+
+// ============ POLICY CATALOG ============
+
+Table policies {
+  policy_id bigint [pk, increment]
+  policy_name varchar(255) [not null]
+  coverage_details text
+  base_premium double [not null]
+  max_coverage_amount double
+  duration_months int [note: '12, 24, 36 months']
+  deductible double [default: 0.0]
+
+  Note: 'Policy templates/catalog. Not customer-specific. Used to create subscriptions.'
+}
+
+// ============ POLICY SUBSCRIPTIONS ============
+
+Table policy_subscriptions {
+  subscription_id bigint [pk, increment]
+  customer_id bigint [ref: > customers.customer_id, not null]
+  policy_id bigint [ref: > policies.policy_id, not null]
+  property_id bigint [ref: > properties.property_id, not null]
+  prop_inspection_id bigint [ref: > inspections.inspection_id, note: 'Link to inspection']
+
+  start_date date
+  end_date date
+  status varchar(50) [note: 'REQUESTED, PENDING, INSPECTING, INSPECTED, ACTIVE, EXPIRED, CANCELLED, REJECTED']
+
+  premium_amount double [note: 'Final premium after risk adjustment']
+  base_premium_amount double [note: 'Base premium from policy']
+  risk_score double [note: 'From inspection']
+  risk_multiplier double [note: 'Applied multiplier']
+
+  // Renewal fields
+  renewal_eligible boolean [default: false]
+  previous_subscription_id bigint [ref: > policy_subscriptions.subscription_id, note: 'Self-reference for renewal chain']
+  renewal_count int [default: 0]
+  renewal_reminder_sent boolean [default: false]
+
+  // No Claim Bonus (NCB) fields
+  claim_free_years int [default: 0]
+  ncb_discount double [default: 0.0]
+  last_claim_date timestamp
+
+  Note: 'Active policy instances. Tracks renewals, NCB, and risk-adjusted premiums.'
+}
+
+// ============ INSPECTIONS ============
+
+Table inspections {
+  inspection_id bigint [pk, increment]
+  property_id bigint [ref: > properties.property_id, not null]
+  surveyor_id bigint [ref: > surveyors.surveyor_id, not null]
+  inspection_date timestamp
+  assessed_risk_score double [note: 'Risk score assigned by surveyor']
+  remarks text
+  status varchar(50) [note: 'ASSIGNED, COMPLETED, REJECTED']
+
+  Note: 'Property risk assessment. Done before policy approval.'
+}
+
+// ============ CLAIMS ============
+
+Table claims {
+  claim_id bigint [pk, increment]
+  subscription_id bigint [ref: > policy_subscriptions.subscription_id, not null]
+  incident_date date [not null]
+  claim_amount double [not null]
+  description text
+  status varchar(50) [note: 'SUBMITTED, UNDER_REVIEW, INSPECTING, INSPECTED, APPROVED, REJECTED, SETTLED']
+  fraud_score double [note: 'AI-based fraud detection score']
+  created_at timestamp [default: `now()`]
+  estimated_loss double [default: 0.0]
+  settlement_amount double
+
+  Note: 'Insurance claims filed by customers for incidents.'
+}
+
+Table claim_inspections {
+  claim_inspection_id bigint [pk, increment]
+  claim_id bigint [ref: - claims.claim_id, not null, note: 'One-to-One']
+  surveyor_id bigint [ref: > surveyors.surveyor_id, not null]
+  inspection_date timestamp
+  estimated_loss double [note: 'Damage estimation by surveyor']
+  damage_report text [note: 'Detailed damage assessment']
+  status varchar(50) [note: 'ASSIGNED, UNDER_REVIEW, APPROVED, REJECTED']
+
+  Note: 'Claim damage assessment. Done by surveyor to validate claim.'
+}
+
+// ============ DOCUMENTS ============
+
+Table documents {
+  document_id bigint [pk, increment]
+
+  // Flexible linking (nullable foreign keys)
+  claim_id bigint [ref: > claims.claim_id, null, note: 'Link to claim (optional)']
+  property_id bigint [ref: > properties.property_id, null, note: 'Link to property (optional)']
+  customer_id bigint [ref: > customers.customer_id, null, note: 'Link to customer (optional)']
+  surveyor_id bigint [ref: > surveyors.surveyor_id, null, note: 'Link to surveyor (optional)']
+
+  file_name varchar(255) [not null]
+  file_path varchar(1000) [not null]
+  document_type varchar(100) [note: 'PROPOSAL_FORM, KYC_AADHAR, CLAIM_FORM, RISK_INSPECTION_REPORT, etc.']
+  document_stage varchar(50) [note: 'POLICY_STAGE, INSPECTION_STAGE, CLAIM_STAGE']
+  file_size bigint [note: 'File size in bytes']
+  content_type varchar(100) [note: 'MIME type: application/pdf, image/jpeg, etc.']
+  upload_date timestamp [default: `now()`]
+  uploaded_by varchar(100) [note: 'Username who uploaded']
+
+  Note: 'Document metadata. Links to multiple entities based on document stage.'
+}
+
+// ============ INDEXES ============
+
+// Add indexes for frequently queried fields
+TableGroup AuthenticationIndexes {
+  users
+}
+
+TableGroup BusinessIndexes {
+  customers
+  properties
+  policy_subscriptions
+  claims
+}
+
+// ============ ENUMS (for reference) ============
+
+Enum UserRole {
+  ADMIN
+  CUSTOMER
+  SURVEYOR
+}
+
+Enum SubscriptionStatus {
+  REQUESTED
+  PENDING
+  INSPECTING
+  INSPECTED
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  REJECTED
+}
+
+Enum ClaimStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  INSPECTING
+  INSPECTED
+  APPROVED
+  REJECTED
+  SETTLED
+}
+
+Enum InspectionStatus {
+  ASSIGNED
+  COMPLETED
+  REJECTED
+}
+
+Enum ClaimInspectionStatus {
+  ASSIGNED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+Enum DocumentType {
+  // Customer Documents (Policy Stage)
+  PROPOSAL_FORM
+  KYC_AADHAR
+  KYC_PAN
+  ADDRESS_PROOF
+  OWNERSHIP_PROOF
+
+  // Property Documents
+  BUILDING_PLAN
+  CONSTRUCTION_DETAILS
+  FIRE_SAFETY_CERTIFICATE
+
+  // Surveyor Documents (Property Inspection)
+  RISK_INSPECTION_REPORT
+  SITE_PHOTOS
+  HAZARD_ASSESSMENT
+
+  // Customer Documents (Claim Stage)
+  CLAIM_FORM
+  FIRE_BRIGADE_REPORT
+  DAMAGE_PHOTOS
+
+  // Surveyor Documents (Claim Stage)
+  SPOT_SURVEY_REPORT
+  FINAL_SURVEY_REPORT
+  LOSS_ASSESSMENT_SHEET
+
+  // Other
+  OTHER
+}
+
+Enum DocumentStage {
+  POLICY_STAGE
+  INSPECTION_STAGE
+  CLAIM_STAGE
+}
+
+// ============ NOTES ============
+
+Note business_flows {
+  '''
+  # Key Business Flows
+
+  ## 1. Policy Subscription Flow
+  CUSTOMER → PROPERTY → INSPECTION (by SURVEYOR)
+  → POLICY_SUBSCRIPTION (with POLICY template) → ACTIVE
+
+  ## 2. Claim Processing Flow
+  CLAIM (on POLICY_SUBSCRIPTION) → CLAIM_INSPECTION (by SURVEYOR)
+  → APPROVED/REJECTED → Settlement
+
+  ## 3. Renewal Flow
+  POLICY_SUBSCRIPTION (expiring) → Create new POLICY_SUBSCRIPTION
+  → Link via previous_subscription_id → renewal_count++
+
+  ## 4. Document Management
+  DOCUMENT → Links to CUSTOMER/SURVEYOR/PROPERTY/CLAIM
+  based on document_stage
+  '''
+}
+
+Note special_relationships {
+  '''
+  # Special Relationships
+
+  1. USER has ONE profile (either CUSTOMER or SURVEYOR)
+  2. POLICY_SUBSCRIPTION self-references for renewal tracking
+  3. DOCUMENT has flexible linking (optional FKs to multiple entities)
+  4. INSPECTION (property) vs CLAIM_INSPECTION (claim damage) are different
+  5. POLICY is a template; POLICY_SUBSCRIPTION is the active instance
+  '''
+}
+

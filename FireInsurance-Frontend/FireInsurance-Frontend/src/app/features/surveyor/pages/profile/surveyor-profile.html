@@ -1,0 +1,234 @@
+<div class="content-container min-h-screen py-8">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="page-title">My Profile</h1>
+      <p class="text-gray-600 text-[16px]">Manage your surveyor profile and credentials</p>
+    </div>
+    @if (!isEditing()) {
+      <button (click)="toggleEdit()" class="btn btn-primary">
+        <span class="material-icons text-[20px]">edit</span>
+        <span>Edit Profile</span>
+      </button>
+    }
+  </div>
+
+  <!-- Success Message -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      <span class="material-icons text-[20px]">check_circle</span>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  <!-- Error Message -->
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      <span class="material-icons text-[20px]">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading() && !surveyor()) {
+    <div class="loading">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- Profile Content -->
+  @if (surveyor()) {
+    <div class="max-w-4xl mx-auto">
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+        <!-- Profile Header -->
+        <div class="bg-gradient-to-br from-claret to-fuchsia p-8 text-white">
+          <div class="flex items-center gap-6">
+            <div class="p-6 rounded-full bg-white/20 backdrop-blur-sm">
+              <span class="material-icons text-5xl">badge</span>
+            </div>
+            <div class="flex-1">
+              <h2 class="text-3xl font-bold mb-2">{{ surveyor()!.username }}</h2>
+              <p class="text-white/90 text-lg">{{ surveyor()!.email }}</p>
+              <div class="mt-3 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full inline-block">
+                <span class="text-sm font-semibold uppercase tracking-wide">Licensed Surveyor</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="p-8">
+          @if (!isEditing()) {
+            <!-- View Mode -->
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="detail-item">
+                  <div class="flex items-center gap-3 mb-2">
+                    <span class="material-icons text-claret">phone</span>
+                    <span class="text-sm font-medium text-gray-600">Phone Number</span>
+                  </div>
+                  <p class="text-lg font-semibold text-gray-900 ml-9">
+                    {{ surveyor()!.phoneNumber || 'Not provided' }}
+                  </p>
+                </div>
+
+                <div class="detail-item">
+                  <div class="flex items-center gap-3 mb-2">
+                    <span class="material-icons text-claret">card_membership</span>
+                    <span class="text-sm font-medium text-gray-600">License Number</span>
+                  </div>
+                  <p class="text-lg font-semibold text-gray-900 ml-9">
+                    {{ surveyor()!.licenseNumber || 'Not provided' }}
+                  </p>
+                </div>
+
+                <div class="detail-item">
+                  <div class="flex items-center gap-3 mb-2">
+                    <span class="material-icons text-claret">work_history</span>
+                    <span class="text-sm font-medium text-gray-600">Experience</span>
+                  </div>
+                  <p class="text-lg font-semibold text-gray-900 ml-9">
+                    {{ surveyor()!.experienceYears || 0 }} years
+                  </p>
+                </div>
+
+                <div class="detail-item">
+                  <div class="flex items-center gap-3 mb-2">
+                    <span class="material-icons text-claret">location_on</span>
+                    <span class="text-sm font-medium text-gray-600">Assigned Region</span>
+                  </div>
+                  <p class="text-lg font-semibold text-gray-900 ml-9">
+                    {{ surveyor()!.assignedRegion || 'Not assigned' }}
+                  </p>
+                </div>
+              </div>
+
+              @if (surveyor()!.createdAt) {
+                <div class="pt-6 border-t border-gray-200">
+                  <p class="text-sm text-gray-500">
+                    <span class="material-icons text-sm align-middle mr-2">schedule</span>
+                    Member since {{ surveyor()!.createdAt | date:'MMM d, y' }}
+                  </p>
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Edit Mode -->
+            <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+              <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="form-group">
+                    <label for="phoneNumber">
+                      <span class="flex items-center gap-2">
+                        <span class="material-icons text-sm text-claret">phone</span>
+                        Phone Number
+                      </span>
+                    </label>
+                    <input 
+                      id="phoneNumber"
+                      type="tel" 
+                      formControlName="phoneNumber"
+                      placeholder="1234567890"
+                      [class.error]="profileForm.get('phoneNumber')?.invalid && profileForm.get('phoneNumber')?.touched">
+                    @if (profileForm.get('phoneNumber')?.invalid && profileForm.get('phoneNumber')?.touched) {
+                      <span class="error-message">
+                        <span class="material-icons text-sm">error</span>
+                        {{ getFieldError('phoneNumber') }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="form-group">
+                    <label for="licenseNumber">
+                      <span class="flex items-center gap-2">
+                        <span class="material-icons text-sm text-claret">card_membership</span>
+                        License Number *
+                      </span>
+                    </label>
+                    <input 
+                      id="licenseNumber"
+                      type="text" 
+                      formControlName="licenseNumber"
+                      placeholder="LIC123456"
+                      [class.error]="profileForm.get('licenseNumber')?.invalid && profileForm.get('licenseNumber')?.touched">
+                    @if (profileForm.get('licenseNumber')?.invalid && profileForm.get('licenseNumber')?.touched) {
+                      <span class="error-message">
+                        <span class="material-icons text-sm">error</span>
+                        {{ getFieldError('licenseNumber') }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="form-group">
+                    <label for="experienceYears">
+                      <span class="flex items-center gap-2">
+                        <span class="material-icons text-sm text-claret">work_history</span>
+                        Experience (Years) *
+                      </span>
+                    </label>
+                    <input 
+                      id="experienceYears"
+                      type="number" 
+                      formControlName="experienceYears"
+                      placeholder="5"
+                      [class.error]="profileForm.get('experienceYears')?.invalid && profileForm.get('experienceYears')?.touched">
+                    @if (profileForm.get('experienceYears')?.invalid && profileForm.get('experienceYears')?.touched) {
+                      <span class="error-message">
+                        <span class="material-icons text-sm">error</span>
+                        {{ getFieldError('experienceYears') }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="form-group">
+                    <label for="assignedRegion">
+                      <span class="flex items-center gap-2">
+                        <span class="material-icons text-sm text-claret">location_on</span>
+                        Assigned Region *
+                      </span>
+                    </label>
+                    <input 
+                      id="assignedRegion"
+                      type="text" 
+                      formControlName="assignedRegion"
+                      placeholder="North Region"
+                      [class.error]="profileForm.get('assignedRegion')?.invalid && profileForm.get('assignedRegion')?.touched">
+                    @if (profileForm.get('assignedRegion')?.invalid && profileForm.get('assignedRegion')?.touched) {
+                      <span class="error-message">
+                        <span class="material-icons text-sm">error</span>
+                        {{ getFieldError('assignedRegion') }}
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <div class="flex gap-4 pt-6 border-t border-gray-200">
+                  <button 
+                    type="button" 
+                    (click)="toggleEdit()" 
+                    class="btn btn-secondary"
+                    [disabled]="isLoading()">
+                    <span class="material-icons text-[20px]">close</span>
+                    <span>Cancel</span>
+                  </button>
+                  <button 
+                    type="submit" 
+                    class="btn btn-primary"
+                    [disabled]="isLoading() || profileForm.invalid">
+                    @if (isLoading()) {
+                      <span class="material-icons animate-spin text-[20px]">refresh</span>
+                      <span>Updating...</span>
+                    } @else {
+                      <span class="material-icons text-[20px]">save</span>
+                      <span>Save Changes</span>
+                    }
+                  </button>
+                </div>
+              </div>
+            </form>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

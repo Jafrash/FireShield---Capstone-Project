@@ -1,0 +1,442 @@
+@import "tailwindcss";
+
+@theme {
+  --color-claret: #8B1538;
+  --color-fuchsia: #E91E63;
+  --color-warmgray: #f5f6fa;
+}
+
+@layer base {
+  html, body { 
+    height: 100%; 
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    @apply bg-warmgray text-gray-900 antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.01em;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Material Icons */
+  .material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'liga';
+  }
+}
+
+@layer components {
+  /* Typography Scale */
+  .text-h1 {
+    @apply text-[40px] leading-tight font-bold tracking-tight;
+  }
+  
+  .text-h2 {
+    @apply text-[32px] leading-tight font-semibold tracking-tight;
+  }
+  
+  .text-h3 {
+    @apply text-[24px] leading-snug font-semibold;
+  }
+  
+  .text-h4 {
+    @apply text-[20px] leading-snug font-semibold;
+  }
+  
+  .text-h5 {
+    @apply text-[18px] leading-normal font-medium;
+  }
+  
+  .text-h6 {
+    @apply text-[16px] leading-normal font-medium;
+  }
+  
+  .text-body {
+    @apply text-[16px] leading-relaxed font-normal;
+  }
+  
+  .text-body-sm {
+    @apply text-[14px] leading-relaxed font-normal;
+  }
+  
+  .text-caption {
+    @apply text-[12px] leading-normal font-medium tracking-wide;
+  }
+
+  /* Button Styles */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-sm {
+    @apply px-4 py-2 text-sm rounded-md;
+  }
+  
+  .btn-md {
+    @apply px-6 py-3 text-base rounded-lg;
+  }
+  
+  .btn-lg {
+    @apply px-8 py-4 text-lg rounded-xl;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-claret to-fuchsia text-white hover:shadow-lg hover:scale-105 active:scale-95 focus:ring-claret/50;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-gray-700 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 focus:ring-gray-300;
+  }
+  
+  .btn-close {
+    @apply text-gray-400 hover:text-gray-600 text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors;
+  }
+  
+  /* Status Badge Styles */
+  .badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full uppercase tracking-wide;
+  }
+  
+  .badge-success {
+    @apply bg-green-100 text-green-800 border border-green-200;
+  }
+  
+  .badge-error,
+  .badge-danger {
+    @apply bg-red-100 text-red-800 border border-red-200;
+  }
+  
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
+  }
+  
+  .badge-info {
+    @apply bg-blue-100 text-blue-800 border border-blue-200;
+  }
+  
+  .badge-pending {
+    @apply bg-orange-100 text-orange-800 border border-orange-200;
+  }
+  
+  .badge-neutral {
+    @apply bg-gray-100 text-gray-800 border border-gray-200;
+  }
+
+  /* Card Styles */
+  .card {
+    @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-100;
+  }
+
+  /* Form Styles */
+  .form-group {
+    @apply space-y-2;
+  }
+  
+  .form-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6 mb-6;
+  }
+  
+  .form-group.full-width {
+    @apply md:col-span-2;
+  }
+  
+  label {
+    @apply block text-sm font-semibold text-gray-700 mb-1;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  textarea,
+  select {
+    @apply w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 transition-all duration-200;
+    @apply focus:border-claret focus:ring-4 focus:ring-claret/10 focus:outline-none;
+    @apply hover:border-gray-300;
+  }
+  
+  input[type="text"]:disabled,
+  input[type="email"]:disabled,
+  input[type="password"]:disabled,
+  input[type="number"]:disabled,
+  textarea:disabled,
+  select:disabled {
+    @apply bg-gray-50 text-gray-500 cursor-not-allowed;
+  }
+  
+  input.error,
+  select.error,
+  textarea.error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500/10;
+  }
+  
+  .error-message {
+    @apply text-sm text-red-600 mt-1 flex items-center gap-1;
+  }
+
+  /* Angular Form Validation - Invalid fields get red border */
+  input.ng-invalid.ng-touched,
+  select.ng-invalid.ng-touched,
+  textarea.ng-invalid.ng-touched {
+    @apply border-red-500 bg-red-50/30 focus:border-red-600 focus:ring-4 focus:ring-red-200;
+  }
+
+  input.ng-invalid.ng-dirty,
+  select.ng-invalid.ng-dirty,
+  textarea.ng-invalid.ng-dirty {
+    @apply border-red-500 bg-red-50/30 focus:border-red-600 focus:ring-4 focus:ring-red-200;
+  }
+
+  /* Valid fields get green border when user has entered data */
+  input.ng-valid.ng-dirty:not([type="checkbox"]),
+  select.ng-valid.ng-dirty,
+  textarea.ng-valid.ng-dirty {
+    @apply border-green-500 focus:border-green-600 focus:ring-4 focus:ring-green-200;
+  }
+  
+  textarea {
+    @apply min-h-32 resize-y;
+  }
+  
+  select {
+    @apply appearance-none bg-no-repeat bg-right;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-size: 1.5rem;
+    padding-right: 2.5rem;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4;
+    animation: fadeIn 0.2s ease-out;
+  }
+  
+  .modal-content {
+    @apply bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto;
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .modal-header {
+    @apply flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10;
+  }
+  
+  .modal-header h2 {
+    @apply text-2xl font-bold text-gray-900;
+  }
+  
+  .modal-body {
+    @apply p-6;
+  }
+  
+  .modal-footer {
+    @apply flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0;
+  }
+
+  /* Alert Styles */
+  .alert {
+    @apply px-4 py-3 rounded-lg flex items-start gap-3;
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  .alert-success {
+    @apply bg-green-50 text-green-800 border-2 border-green-200;
+  }
+  
+  .alert-error {
+    @apply bg-red-50 text-red-800 border-2 border-red-200;
+  }
+  
+  .alert-info {
+    @apply bg-blue-50 text-blue-800 border-2 border-blue-200;
+  }
+
+  /* Loading Spinner */
+  .loading {
+    @apply flex items-center justify-center py-12;
+  }
+  
+  .spinner {
+    @apply w-12 h-12 border-4 border-gray-200 border-t-claret rounded-full animate-spin;
+  }
+
+  /* Empty State */
+  .empty-state {
+    @apply text-center py-16 px-4;
+  }
+  
+  .empty-icon {
+    @apply text-6xl mb-4 opacity-40;
+  }
+  
+  .empty-state h3 {
+    @apply text-xl font-semibold text-gray-900 mb-2;
+  }
+  
+  .empty-state p {
+    @apply text-gray-600 mb-6;
+  }
+
+  /* Page Header */
+  .page-header {
+    @apply mb-8;
+  }
+  
+  .page-header h1 {
+    @apply text-4xl font-bold bg-linear-to-r from-claret to-fuchsia bg-clip-text text-transparent mb-2;
+  }
+  
+  .page-header p {
+    @apply text-gray-600 text-lg;
+  }
+
+  /* Utility Classes */
+  .text-gradient {
+    @apply bg-linear-to-r from-claret to-fuchsia bg-clip-text text-transparent;
+  }
+  
+  .shadow-brand {
+    box-shadow: 0 10px 40px -10px rgba(123, 11, 30, 0.2);
+  }
+  
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  /* Content Container with max-width */
+  .content-container {
+    @apply w-full mx-auto px-8;
+    max-width: 1200px;
+  }
+
+  /* Professional Card Styling */
+  .profile-card {
+    @apply bg-white rounded-2xl shadow-lg border border-gray-100;
+  }
+
+  /* Typography Improvements */
+  .page-title {
+    @apply text-[32px] font-bold text-gray-900 mb-2;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .section-title {
+    @apply text-[20px] font-semibold text-gray-900 mb-4;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .field-label {
+    @apply text-[14px] font-medium text-gray-600 mb-1;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .field-value {
+    @apply text-[16px] font-semibold text-gray-900;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Empty State Styling */
+  .empty-state-card {
+    @apply text-center py-16 px-8 bg-white rounded-2xl shadow-lg border border-gray-100;
+  }
+
+  .empty-state-icon {
+    @apply text-[64px] text-gray-300 mb-4;
+  }
+
+  .empty-state-title {
+    @apply text-[20px] font-semibold text-gray-900 mb-2;
+  }
+
+  .empty-state-description {
+    @apply text-[14px] text-gray-600 mb-6;
+  }
+
+  /* Hero Animation Styles */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) scale(1);
+    }
+    50% {
+      transform: translateY(-20px) scale(1.05);
+    }
+  }
+
+  @keyframes float-delayed {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px);
+    }
+    50% {
+      transform: translateY(-15px) translateX(10px);
+    }
+  }
+
+  @keyframes float-slow {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-25px) rotate(5deg);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float-delayed 8s ease-in-out infinite;
+    animation-delay: 1s;
+  }
+
+  .animate-float-slow {
+    animation: float-slow 10s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+}

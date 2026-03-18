@@ -1,0 +1,405 @@
+<div class="content-container py-8">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="page-title">Manage Policies</h1>
+      <p class="text-gray-600 mt-2">View and manage all insurance policy plans</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button (click)="openTemplatesModal()" class="flex items-center gap-2 px-6 py-3 bg-white border-2 border-[#8B1E3F] text-[#8B1E3F] rounded-lg hover:bg-[#8B1E3F] hover:text-white transition-all font-medium shadow-md hover:shadow-lg">
+        <span class="material-icons text-xl">dashboard</span>
+        <span>Policy Templates</span>
+      </button>
+      <button (click)="openAddModal()" class="flex items-center gap-2 px-6 py-3 bg-[#8B1E3F] text-white rounded-lg hover:bg-[#6f1732] transition-all font-medium shadow-md hover:shadow-lg">
+        <span class="material-icons text-xl">add</span>
+        <span>Add Custom Policy</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="bg-white rounded-xl shadow-md border border-gray-200 mb-6 p-6">
+    <div class="flex items-center gap-4">
+      <div class="flex-1 relative">
+        <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+        <input 
+          type="text" 
+          placeholder="Search by policy name, ID, or coverage type..." 
+          class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1E3F] focus:border-[#8B1E3F] outline-none transition-all"
+          (input)="searchPolicies($any($event.target).value)"
+        />
+      </div>
+      <button class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-medium">
+        <span class="material-icons text-xl">filter_list</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Policies Table -->
+  <div class="bg-white rounded-xl shadow-md border border-gray-200">
+    <div class="px-6 py-5 border-b border-gray-200">
+      <h2 class="section-title">All Policies</h2>
+      <p class="text-sm text-gray-600 mt-1">Total of {{ filteredPolicies().length }} available policy plans</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200">
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Policy ID</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Policy Name</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Coverage (Years)</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Annual Premium</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Risk Coverage</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <!-- Loading State -->
+          @if (isLoading()) {
+            <tr>
+              <td colspan="7" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center gap-3">
+                  <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#8B1E3F]"></div>
+                  <p class="text-gray-600">Loading policies...</p>
+                </div>
+              </td>
+            </tr>
+          }
+
+          <!-- Error State -->
+          @if (errorMessage() && !isLoading()) {
+            <tr>
+              <td colspan="7" class="px-6 py-12 text-center">
+                <p class="text-red-600 mb-4">{{ errorMessage() }}</p>
+                <button (click)="loadPolicies()" class="px-4 py-2 bg-[#8B1E3F] text-white rounded-lg hover:bg-[#6f1732] transition-colors">
+                  Retry
+                </button>
+              </td>
+            </tr>
+          }
+
+          <!-- Empty State -->
+          @if (!isLoading() && filteredPolicies().length === 0 && !errorMessage()) {
+            <tr>
+              <td colspan="7" class="px-6 py-12 text-center">
+                <p class="text-gray-600">No policies found</p>
+              </td>
+            </tr>
+          }
+
+          <!-- Policy Rows -->
+          @for (policy of filteredPolicies(); track policy.policyId) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 text-sm font-medium text-gray-900">#POL-{{ policy.policyId }}</td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="p-2 bg-blue-50 rounded-lg">
+                    <span class="material-icons text-blue-600 text-xl">shield</span>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">{{ policy.policyName }}</p>
+                    <p class="text-xs text-gray-500 max-w-[200px] truncate" [title]="policy.coverageDetails">{{ policy.coverageDetails }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700">{{ policy.durationMonths }} Month(s)</td>
+              <td class="px-6 py-4 text-sm font-semibold text-gray-900">₹{{ policy.basePremium | number:'1.0-0' }}</td>
+              <td class="px-6 py-4 text-sm text-gray-700">Up to ₹{{ policy.maxCoverageAmount | number:'1.0-0' }}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  ACTIVE
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <button class="p-2 text-[#8B1E3F] hover:bg-[#8B1E3F]/10 rounded-lg transition-all" title="Edit">
+                    <span class="material-icons text-lg">edit</span>
+                  </button>
+                  <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Delete"
+                          (click)="deletePolicy(policy.policyId)">
+                    <span class="material-icons text-lg">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+      <p class="text-sm text-gray-600">Showing 1-{{ filteredPolicies().length }} of {{ policies().length }} policies</p>
+      <div class="flex items-center gap-2">
+        <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all">
+          Previous
+        </button>
+        <button class="px-4 py-2 bg-[#8B1E3F] text-white rounded-lg font-medium">1</button>
+        <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Policy Modal -->
+  @if (showAddModal()) {
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+          <h2 class="text-xl font-bold text-gray-900">Add New Policy Plan</h2>
+          <button (click)="closeAddModal()" class="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+
+        <div class="p-6">
+          <form [formGroup]="policyForm" (ngSubmit)="onSubmit()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Policy Name -->
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Policy Name <span class="text-red-500">*</span></label>
+                <input type="text" formControlName="policyName" 
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors"
+                  placeholder="e.g. Standard Fire Protection" />
+                @if (policyForm.get('policyName')?.touched && policyForm.get('policyName')?.invalid) {
+                  <p class="text-red-500 text-xs">Policy name is required (min 3 chars).</p>
+                }
+              </div>
+
+              <!-- Policy Type -->
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Policy Type <span class="text-red-500">*</span></label>
+                <select formControlName="policyType" 
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors">
+                  <option value="">Select policy type</option>
+                  <option value="RESIDENTIAL">Residential</option>
+                  <option value="COMMERCIAL">Commercial</option>
+                  <option value="INDUSTRIAL">Industrial</option>
+                  <option value="MULTI_FAMILY">Multi-Family</option>
+                  <option value="WILDFIRE">Wildfire Protection</option>
+                </select>
+                @if (policyForm.get('policyType')?.touched && policyForm.get('policyType')?.invalid) {
+                  <p class="text-red-500 text-xs">Policy type is required.</p>
+                }
+              </div>
+
+              <!-- Base Premium -->
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Annual Premium (₹) <span class="text-red-500">*</span></label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">₹</span>
+                  <input type="number" formControlName="basePremium" 
+                    class="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors"
+                    placeholder="1500" />
+                </div>
+                @if (policyForm.get('basePremium')?.touched && policyForm.get('basePremium')?.invalid) {
+                  <p class="text-red-500 text-xs">Valid premium required.</p>
+                }
+              </div>
+
+              <!-- Max Coverage Amount -->
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Max Risk Coverage (₹) <span class="text-red-500">*</span></label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">₹</span>
+                  <input type="number" formControlName="maxCoverageAmount" 
+                    class="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors"
+                    placeholder="500000" />
+                </div>
+                @if (policyForm.get('maxCoverageAmount')?.touched && policyForm.get('maxCoverageAmount')?.invalid) {
+                  <p class="text-red-500 text-xs">Valid coverage amount required.</p>
+                }
+              </div>
+
+              <!-- Duration in Months -->
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Duration (Months) <span class="text-red-500">*</span></label>
+                <input type="number" formControlName="durationMonths" 
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors"
+                  placeholder="12" />
+                @if (policyForm.get('durationMonths')?.touched && policyForm.get('durationMonths')?.invalid) {
+                  <p class="text-red-500 text-xs">Valid duration required.</p>
+                }
+              </div>
+
+              <!-- Coverage Details (Summary) -->
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Coverage Summary <span class="text-red-500">*</span></label>
+                <textarea formControlName="coverageDetails" rows="3"
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors resize-none"
+                  placeholder="Brief summary of what this policy covers..."></textarea>
+                @if (policyForm.get('coverageDetails')?.touched && policyForm.get('coverageDetails')?.invalid) {
+                  <p class="text-red-500 text-xs">Coverage details are required (min 10 chars).</p>
+                }
+              </div>
+
+              <!-- Detailed Description -->
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Detailed Description</label>
+                <textarea formControlName="detailedDescription" rows="4"
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors resize-none"
+                  placeholder="Comprehensive explanation of policy benefits, exclusions, and important terms..."></textarea>
+              </div>
+
+              <!-- Risks Covered -->
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Risks Covered</label>
+                <input type="text" formControlName="risksCovered" 
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors"
+                  placeholder="e.g. Fire damage, Smoke damage, Lightning, Explosion (comma-separated)" />
+                <p class="text-xs text-gray-500">Enter risks separated by commas</p>
+              </div>
+
+              <!-- Property Types Eligible -->
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Eligible Property Types</label>
+                <input type="text" formControlName="propertyTypesEligible" 
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors"
+                  placeholder="e.g. Residential, Commercial, Industrial (comma-separated)" />
+                <p class="text-xs text-gray-500">Enter property types separated by commas</p>
+              </div>
+
+              <!-- Terms and Conditions -->
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Terms & Conditions</label>
+                <textarea formControlName="termsAndConditions" rows="5"
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors resize-none"
+                  placeholder="Enter policy terms, conditions, and exclusions..."></textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3 z-10 rounded-b-xl">
+          <button type="button" (click)="closeAddModal()" class="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+            Cancel
+          </button>
+          <button type="button" (click)="onSubmit()" [disabled]="isLoading() || policyForm.invalid" 
+            class="px-6 py-2.5 bg-[#8B1E3F] text-white font-medium rounded-lg hover:bg-[#6f1732] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            @if(isLoading()) {
+              <span class="animate-spin material-icons text-sm">autorenew</span>
+            }
+            {{ isLoading() ? 'Saving...' : 'Save Policy' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Policy Templates Modal -->
+  @if (showTemplatesModal()) {
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] text-white px-6 py-5 flex items-center justify-between z-10 rounded-t-xl">
+          <div>
+            <h2 class="text-2xl font-bold flex items-center gap-3">
+              <span class="material-icons text-3xl">dashboard</span>
+              Fire Insurance Policy Templates
+            </h2>
+            <p class="text-white/90 text-sm mt-1">Choose from professionally designed policy templates</p>
+          </div>
+          <button (click)="closeTemplatesModal()" class="p-2 hover:bg-white/20 rounded-full text-white transition-colors">
+            <span class="material-icons text-2xl">close</span>
+          </button>
+        </div>
+
+        <div class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (template of policyTemplates; track template.name) {
+              <div class="group bg-white border-2 border-gray-200 rounded-xl hover:border-[#8B1E3F] hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                   (click)="selectTemplate(template)">
+                <!-- Header -->
+                <div class="p-6 border-b border-gray-100">
+                  <div class="flex items-start gap-4 mb-3">
+                    <div class="p-3 rounded-lg {{ getTemplateIconColor(template.color) }} group-hover:scale-110 transition-transform">
+                      <span class="material-icons text-3xl">{{ template.icon }}</span>
+                    </div>
+                    <div class="flex-1">
+                      <h3 class="font-bold text-gray-900 text-sm leading-tight mb-1">{{ template.name }}</h3>
+                      <p class="text-xs text-gray-500 line-clamp-2">{{ template.description }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded font-medium">{{ template.type }}</span>
+                    <span class="text-gray-500">{{ template.durationMonths }} months</span>
+                  </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-6 space-y-4">
+                  <!-- Premium Info -->
+                  <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-xs text-gray-600 mb-1">Base Premium</p>
+                        <p class="text-xl font-bold text-green-700">₹{{ template.basePremium | number:'1.0-0' }}/yr</p>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-xs text-gray-600 mb-1">Max Coverage</p>
+                        <p class="text-sm font-bold text-green-700">₹{{ (template.maxCoverageAmount / 100000) | number:'1.1-1' }}L</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Risks Covered -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                      <span class="material-icons text-sm">verified_user</span>
+                      Key Risks Covered
+                    </p>
+                    <div class="flex flex-wrap gap-1">
+                      @for (risk of template.risksCovered.slice(0, 3); track risk) {
+                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-[10px] font-medium">{{ risk }}</span>
+                      }
+                      @if (template.risksCovered.length > 3) {
+                        <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">+{{ template.risksCovered.length - 3 }} more</span>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Property Types -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                      <span class="material-icons text-sm">domain</span>
+                      Eligible Properties
+                    </p>
+                    <div class="flex flex-wrap gap-1">
+                      @for (propType of template.propertyTypesEligible.slice(0, 2); track propType) {
+                        <span class="px-2 py-1 bg-purple-50 text-purple-700 rounded text-[10px] font-medium">{{ propType }}</span>
+                      }
+                      @if (template.propertyTypesEligible.length > 2) {
+                        <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-[10px] font-medium">+{{ template.propertyTypesEligible.length - 2 }} more</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                  <button class="w-full px-4 py-2.5 bg-[#8B1E3F] text-white rounded-lg font-medium hover:bg-[#6f1732] transition-colors flex items-center justify-center gap-2 group-hover:shadow-lg">
+                    <span class="material-icons text-lg">add_circle</span>
+                    Use This Template
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Help Text -->
+          <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <span class="material-icons text-blue-600 text-2xl">info</span>
+              <div>
+                <h4 class="font-semibold text-blue-900 mb-1">How to use templates</h4>
+                <p class="text-sm text-blue-800">Select a template to pre-fill the policy creation form with industry-standard values. You can customize all fields before saving. Templates help you create professional fire insurance policies quickly and accurately.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

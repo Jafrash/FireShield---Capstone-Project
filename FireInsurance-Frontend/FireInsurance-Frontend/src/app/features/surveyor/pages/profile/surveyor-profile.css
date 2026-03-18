@@ -1,0 +1,10 @@
+.detail-item {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background-color: #f9fafb;
+  transition: background-color 0.2s;
+}
+
+.detail-item:hover {
+  background-color: #f3f4f6;
+}

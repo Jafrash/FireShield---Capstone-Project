@@ -1,0 +1,157 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@test.com",
+      "password": "password",
+      "firstName": "John",
+      "lastName": "Admin",
+      "role": "ADMIN",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "email": "customer@test.com",
+      "password": "password",
+      "firstName": "Jane",
+      "lastName": "Customer",
+      "role": "CUSTOMER",
+      "phone": "555-1234",
+      "address": "123 Main St",
+      "createdAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "email": "surveyor@test.com",
+      "password": "password",
+      "firstName": "Mike",
+      "lastName": "Surveyor",
+      "role": "SURVEYOR",
+      "phone": "555-5678",
+      "address": "456 Oak Ave",
+      "certifications": ["Fire Safety Inspector", "Property Assessor"],
+      "createdAt": "2024-02-01T00:00:00.000Z"
+    }
+  ],
+  "properties": [
+    {
+      "id": 1,
+      "customerId": 2,
+      "address": "123 Main St, Boston, MA",
+      "propertyType": "RESIDENTIAL",
+      "squareFootage": 2500,
+      "yearBuilt": 2010,
+      "estimatedValue": 450000,
+      "fireProtectionClass": "CLASS_3",
+      "hasFireAlarm": true,
+      "hasSprinklerSystem": true,
+      "createdAt": "2024-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "customerId": 2,
+      "address": "789 Commercial Blvd, Boston, MA",
+      "propertyType": "COMMERCIAL",
+      "squareFootage": 5000,
+      "yearBuilt": 2015,
+      "estimatedValue": 850000,
+      "fireProtectionClass": "CLASS_2",
+      "hasFireAlarm": true,
+      "hasSprinklerSystem": true,
+      "createdAt": "2024-03-05T00:00:00.000Z"
+    }
+  ],
+  "policies": [
+    {
+      "id": 1,
+      "propertyId": 1,
+      "customerId": 2,
+      "policyNumber": "POL-2024-001",
+      "coverageAmount": 450000,
+      "premium": 1200,
+      "startDate": "2024-03-01",
+      "endDate": "2025-03-01",
+      "status": "ACTIVE",
+      "policyType": "COMPREHENSIVE",
+      "deductible": 5000,
+      "createdAt": "2024-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "propertyId": 2,
+      "customerId": 2,
+      "policyNumber": "POL-2024-002",
+      "coverageAmount": 850000,
+      "premium": 2500,
+      "startDate": "2024-03-05",
+      "endDate": "2025-03-05",
+      "status": "ACTIVE",
+      "policyType": "COMMERCIAL",
+      "deductible": 10000,
+      "createdAt": "2024-03-05T00:00:00.000Z"
+    }
+  ],
+  "claims": [
+    {
+      "id": 1,
+      "policyId": 1,
+      "customerId": 2,
+      "claimNumber": "CLM-2024-001",
+      "claimDate": "2024-02-20",
+      "incidentDate": "2024-02-15",
+      "incidentDescription": "Kitchen fire due to electrical fault",
+      "estimatedLoss": 25000,
+      "status": "UNDER_REVIEW",
+      "priority": "HIGH",
+      "assignedSurveyorId": 3,
+      "createdAt": "2024-02-20T00:00:00.000Z"
+    }
+  ],
+  "inspections": [
+    {
+      "id": 1,
+      "type": "PROPERTY",
+      "propertyId": 1,
+      "surveyorId": 3,
+      "scheduledDate": "2024-02-28",
+      "status": "COMPLETED",
+      "findings": "Property meets fire safety standards. Sprinkler system operational.",
+      "recommendation": "APPROVED",
+      "createdAt": "2024-02-25T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "type": "CLAIM",
+      "claimId": 1,
+      "propertyId": 1,
+      "surveyorId": 3,
+      "scheduledDate": "2024-02-25",
+      "status": "PENDING",
+      "findings": "",
+      "recommendation": "",
+      "createdAt": "2024-02-22T00:00:00.000Z"
+    }
+  ],
+  "documents": [
+    {
+      "id": 1,
+      "propertyId": 1,
+      "claimId": null,
+      "documentType": "PROPERTY_DEED",
+      "fileName": "property_deed_123_main.pdf",
+      "fileSize": 245600,
+      "uploadedBy": 2,
+      "uploadedAt": "2024-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "propertyId": 1,
+      "claimId": 1,
+      "documentType": "CLAIM_PHOTO",
+      "fileName": "kitchen_damage_photo1.jpg",
+      "fileSize": 1024000,
+      "uploadedBy": 2,
+      "uploadedAt": "2024-02-20T00:00:00.000Z"
+    }
+  ]
+}
