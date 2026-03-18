@@ -1,0 +1,234 @@
+
+<style>
+#erd { width: 100%; overflow-x: auto; }
+#erd svg { max-width: 100%; }
+</style>
+<div id="erd"></div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"Anthropic Sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '13px',
+    fontFamily: '"Anthropic Sans", sans-serif',
+    lineColor: dark ? '#9c9a92' : '#73726c',
+    textColor: dark ? '#c2c0b6' : '#3d3d3a',
+  },
+});
+
+const diagram = `erDiagram
+  users {
+    bigint user_id PK
+    varchar username UK
+    varchar email UK
+    varchar password
+    varchar phone_number
+    varchar role
+    boolean active
+    timestamp created_at
+  }
+  customers {
+    bigint customer_id PK
+    bigint user_id FK
+    varchar address
+    varchar city
+    varchar state
+  }
+  surveyors {
+    bigint surveyor_id PK
+    bigint user_id FK
+    varchar license_number UK
+    int experience_years
+    varchar assigned_region
+  }
+  underwriters {
+    bigint underwriter_id PK
+    bigint user_id FK
+    varchar department
+    varchar region
+    int experience_years
+    boolean active
+    timestamp created_at
+  }
+  properties {
+    bigint property_id PK
+    bigint customer_id FK
+    varchar property_type
+    varchar address
+    double area_sqft
+    varchar construction_type
+    double risk_score
+    int property_age
+  }
+  policies {
+    bigint policy_id PK
+    varchar policy_name
+    text coverage_details
+    double base_premium
+    double max_coverage_amount
+    int duration_months
+    double deductible
+  }
+  inspections {
+    bigint inspection_id PK
+    bigint property_id FK
+    bigint surveyor_id FK
+    bigint subscription_id FK
+    timestamp inspection_date
+    double assessed_risk_score
+    varchar status
+    text inspection_report
+    double recommended_premium
+    boolean fire_extinguishers
+    boolean sprinkler_system
+  }
+  policy_subscriptions {
+    bigint subscription_id PK
+    bigint customer_id FK
+    bigint policy_id FK
+    bigint property_id FK
+    bigint prop_inspection_id FK
+    bigint underwriter_id FK
+    bigint previous_subscription_id FK
+    date start_date
+    date end_date
+    varchar status
+    double premium_amount
+    double risk_score
+    double ncb_discount
+    int claim_free_years
+    int renewal_count
+    boolean renewal_eligible
+    boolean payment_received
+  }
+  quotes {
+    bigint quote_id PK
+    bigint customer_id FK
+    bigint policy_subscription_id FK
+    double area_sqft
+    varchar city
+    double estimated_premium
+    varchar status
+    timestamp created_at
+  }
+  claims {
+    bigint claim_id PK
+    bigint subscription_id FK
+    bigint underwriter_id FK
+    date incident_date
+    double claim_amount
+    varchar status
+    double fraud_score
+    double settlement_amount
+    varchar cause_of_fire
+    varchar fir_number
+    timestamp created_at
+  }
+  claim_inspections {
+    bigint claim_inspection_id PK
+    bigint claim_id FK
+    bigint surveyor_id FK
+    timestamp inspection_date
+    double damage_estimation
+    text recommendation
+    double settlement_amount
+    double recommended_settlement
+    boolean under_insurance_detected
+    varchar status
+  }
+  documents {
+    bigint document_id PK
+    bigint claim_id FK
+    bigint property_id FK
+    bigint customer_id FK
+    bigint surveyor_id FK
+    varchar file_name
+    varchar document_type
+    varchar document_stage
+    bigint file_size
+    varchar content_type
+    timestamp upload_date
+    varchar uploaded_by
+  }
+  policy_endorsements {
+    bigint endorsement_id PK
+    bigint subscription_id FK
+    varchar change_type
+    varchar status
+    varchar requested_by
+    double requested_coverage
+    varchar new_occupancy_type
+    text reason
+    timestamp created_at
+  }
+  notification_preferences {
+    bigint id PK
+    bigint user_id FK
+    boolean email_enabled
+    timestamp created_at
+    timestamp updated_at
+  }
+  notification_preference_events {
+    bigint preference_id FK
+    varchar event_key
+  }
+
+  users ||--|| customers : "has profile"
+  users ||--|| surveyors : "has profile"
+  users ||--|| underwriters : "has profile"
+  users ||--|| notification_preferences : "has prefs"
+  notification_preferences ||--o{ notification_preference_events : "subscribes to"
+  customers ||--o{ properties : "owns"
+  customers ||--o{ policy_subscriptions : "holds"
+  customers ||--o{ quotes : "requests"
+  customers ||--o{ documents : "uploads"
+  policies ||--o{ policy_subscriptions : "template for"
+  properties ||--o{ inspections : "assessed via"
+  properties ||--o{ policy_subscriptions : "covered by"
+  properties ||--o{ documents : "has"
+  surveyors ||--o{ inspections : "conducts"
+  surveyors ||--o{ claim_inspections : "conducts"
+  surveyors ||--o{ documents : "submits"
+  underwriters ||--o{ policy_subscriptions : "reviews"
+  underwriters ||--o{ claims : "manages"
+  inspections ||--o{ policy_subscriptions : "enables"
+  policy_subscriptions ||--o{ claims : "source of"
+  policy_subscriptions ||--o{ quotes : "linked to"
+  policy_subscriptions ||--o{ policy_endorsements : "amended by"
+  policy_subscriptions ||--o| policy_subscriptions : "renewed as"
+  claims ||--|| claim_inspections : "assessed by"
+  claims ||--o{ documents : "has"
+`;
+
+const { svg } = await mermaid.render('erd-svg', diagram);
+document.getElementById('erd').innerHTML = svg;
+
+document.querySelectorAll('#erd svg .node').forEach(node => {
+  const firstPath = node.querySelector('path[d]');
+  if (!firstPath) return;
+  const d = firstPath.getAttribute('d');
+  const nums = d.match(/-?[\d.]+/g)?.map(Number);
+  if (!nums || nums.length < 8) return;
+  const xs = [nums[0], nums[2], nums[4], nums[6]];
+  const ys = [nums[1], nums[3], nums[5], nums[7]];
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', x); rect.setAttribute('y', y);
+  rect.setAttribute('width', w); rect.setAttribute('height', h);
+  rect.setAttribute('rx', '8');
+  for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+    if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
+  }
+  firstPath.replaceWith(rect);
+});
+
+document.querySelectorAll('#erd svg .row-rect-odd path, #erd svg .row-rect-even path').forEach(p => {
+  p.setAttribute('stroke', 'none');
+});
+</script>
