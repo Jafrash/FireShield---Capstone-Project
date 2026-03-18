@@ -2,12 +2,15 @@ package org.hartford.fireinsurance.service;
 
 import org.hartford.fireinsurance.dto.SubscribeRequest;
 import org.hartford.fireinsurance.model.*;
+import org.hartford.fireinsurance.repository.NotificationPreferenceRepository;
 import org.hartford.fireinsurance.repository.PolicySubscriptionRepository;
+import org.hartford.fireinsurance.repository.UnderwriterRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,6 +43,18 @@ class PolicySubscriptionServiceTest {
     @Mock
     private SurveyorService surveyorService;
 
+    @Mock
+    private UnderwriterRepository underwriterRepository;
+
+    @Mock
+    private NotificationPreferenceRepository notificationPreferenceRepository;
+
+    @Mock
+    private EmailNotificationService emailNotificationService;
+
+    @Spy
+    private PremiumCalculationService premiumCalculationService = new PremiumCalculationService();
+
     @InjectMocks
     private PolicySubscriptionService service;
 
@@ -70,6 +85,7 @@ class PolicySubscriptionServiceTest {
         policy.setPolicyId(1L);
         policy.setPolicyName("Fire Insurance");
         policy.setBasePremium(10000.0);
+        policy.setMaxCoverageAmount(10000.0);
         policy.setDurationMonths(12);
 
         subscription = new PolicySubscription();
@@ -79,37 +95,38 @@ class PolicySubscriptionServiceTest {
         subscription.setPolicy(policy);
         subscription.setStatus(PolicySubscription.SubscriptionStatus.REQUESTED);
         subscription.setBasePremiumAmount(10000.0);
+        subscription.setRequestedCoverage(10000.0);
         subscription.setRenewalCount(0);
         subscription.setClaimFreeYears(0);
     }
 
     @Test
     void testCalculatePremium_LowRisk() {
-        double premium = service.calculatePremium(10000.0, 2.0);
+        double premium = service.calculatePremium(subscription, 2.0, null);
         assertEquals(8000.0, premium);
     }
 
     @Test
     void testCalculatePremium_NormalRisk() {
-        double premium = service.calculatePremium(10000.0, 4.0);
+        double premium = service.calculatePremium(subscription, 4.0, null);
         assertEquals(10000.0, premium);
     }
 
     @Test
     void testCalculatePremium_ModerateRisk() {
-        double premium = service.calculatePremium(10000.0, 6.0);
+        double premium = service.calculatePremium(subscription, 6.0, null);
         assertEquals(12000.0, premium);
     }
 
     @Test
     void testCalculatePremium_HighRisk() {
-        double premium = service.calculatePremium(10000.0, 8.0);
+        double premium = service.calculatePremium(subscription, 8.0, null);
         assertEquals(15000.0, premium);
     }
 
     @Test
     void testCalculatePremium_VeryHighRisk() {
-        double premium = service.calculatePremium(10000.0, 10.0);
+        double premium = service.calculatePremium(subscription, 10.0, null);
         assertEquals(20000.0, premium);
     }
 
