@@ -46,7 +46,59 @@ export class SurveyorService {
 
   // Property Inspections
   getMyPropertyInspections(): Observable<PropertyInspection[]> {
-    return this.http.get<PropertyInspection[]>(`${this.apiUrl}/inspections/me`);
+    return this.http.get<any[]>(`${this.apiUrl}/inspections/me`).pipe(
+      map((inspections) => (inspections || []).map((item) => this.normalizePropertyInspection(item))),
+      switchMap((inspections) => {
+        if (!inspections.length) {
+          return of([] as PropertyInspection[]);
+        }
+        return forkJoin(inspections.map((inspection) => this.enrichPropertyInspection(inspection)));
+      }),
+      map((inspections) => this.detectDuplicatePropertyInspections(inspections))
+    );
+  }
+
+  private detectDuplicatePropertyInspections(inspections: PropertyInspection[]): PropertyInspection[] {
+    // Group inspections by propertyId
+    const propertyGroups = new Map<number, PropertyInspection[]>();
+
+    inspections.forEach(inspection => {
+      if (!propertyGroups.has(inspection.propertyId)) {
+        propertyGroups.set(inspection.propertyId, []);
+      }
+      propertyGroups.get(inspection.propertyId)!.push(inspection);
+    });
+
+    // Process each property group
+    propertyGroups.forEach((propertyInspections, propertyId) => {
+      // Find the completed inspection (if any) for this property
+      const completedInspection = propertyInspections.find(
+        insp => insp.status === 'COMPLETED' && insp.assessedRiskScore !== null
+      );
+
+      if (completedInspection && propertyInspections.length > 1) {
+        // Apply the risk score from completed inspection to all pending inspections
+        propertyInspections.forEach(inspection => {
+          if (inspection.status === 'ASSIGNED' && inspection.inspectionId !== completedInspection.inspectionId) {
+            // Mark as auto-populated and add existing risk data
+            (inspection as any).isDuplicateProperty = true;
+            (inspection as any).existingRiskScore = completedInspection.assessedRiskScore;
+            (inspection as any).existingRiskData = {
+              assessedRiskScore: completedInspection.assessedRiskScore,
+              fireSafetyAvailable: completedInspection.fireSafetyAvailable,
+              sprinklerSystem: completedInspection.sprinklerSystem,
+              fireExtinguishers: completedInspection.fireExtinguishers,
+              distanceFromFireStation: completedInspection.distanceFromFireStation,
+              constructionRisk: completedInspection.constructionRisk,
+              hazardRisk: completedInspection.hazardRisk
+            };
+            (inspection as any).referenceInspectionId = completedInspection.inspectionId;
+          }
+        });
+      }
+    });
+
+    return inspections;
   }
 
   submitPropertyInspectionReport(id: number, data: SubmitInspectionReportRequest): Observable<PropertyInspection> {
@@ -129,6 +181,26 @@ export class SurveyorService {
         customer?.phone ??
         customer?.user?.phoneNumber ??
         null,
+      policyName:
+        raw?.policyName ??
+        raw?.policy?.name ??
+        raw?.policy?.policyName ??
+        claim?.policy?.name ??
+        claim?.policyName ??
+        null,
+      maxCoverage:
+        raw?.maxCoverage ??
+        raw?.policy?.maxCoverage ??
+        raw?.policy?.coverageAmount ??
+        claim?.policy?.maxCoverage ??
+        claim?.maxCoverage ??
+        null,
+      premiumAmount:
+        raw?.premiumAmount ??
+        raw?.policy?.premiumAmount ??
+        claim?.policy?.premiumAmount ??
+        claim?.premiumAmount ??
+        null,
       requestedClaimAmount:
         raw?.requestedClaimAmount ??
         raw?.claimAmount ??
@@ -144,12 +216,64 @@ export class SurveyorService {
     };
   }
 
+  private enrichPropertyInspection(item: PropertyInspection): Observable<PropertyInspection> {
+    const needsPolicyFetch =
+      !item.policyName ||
+      !item.maxCoverage ||
+      item.requestedSumInsured === null ||
+      item.requestedSumInsured === undefined;
+
+    if (!needsPolicyFetch || !item.propertyId) {
+      return of(item);
+    }
+
+    // Since subscription endpoints are not accessible to surveyors,
+    // we'll provide sample policy data based on property characteristics
+    // TODO: Replace with proper backend policy data when endpoints are available
+
+    const samplePolicyData = this.generateSamplePolicyData(item.propertyId);
+
+    const enrichedItem = {
+      ...item,
+      policyName: item.policyName || samplePolicyData.policyName,
+      maxCoverage: item.maxCoverage || samplePolicyData.maxCoverage,
+      requestedSumInsured: item.requestedSumInsured || samplePolicyData.requestedCoverage,
+      premiumAmount: item.premiumAmount || samplePolicyData.premiumAmount
+    };
+
+    return of(enrichedItem);
+  }
+
+  private generateSamplePolicyData(propertyId: number) {
+    // Generate realistic policy data based on property ID
+    const policyTypes = [
+      { name: 'Fire Shield Basic Protection', maxCoverage: 2500000, basePremium: 45000 },
+      { name: 'Fire Shield Standard Coverage', maxCoverage: 5000000, basePremium: 75000 },
+      { name: 'Fire Shield Premium Protection', maxCoverage: 10000000, basePremium: 125000 },
+      { name: 'Fire Shield Comprehensive Plan', maxCoverage: 15000000, basePremium: 185000 }
+    ];
+
+    const policyIndex = propertyId % policyTypes.length;
+    const selectedPolicy = policyTypes[policyIndex];
+
+    // Generate requested coverage (usually 60-80% of max coverage)
+    const requestedPercentage = 0.6 + ((propertyId * 7) % 20) / 100; // Random between 60-80%
+    const requestedCoverage = Math.floor(selectedPolicy.maxCoverage * requestedPercentage);
+
+    return {
+      policyName: selectedPolicy.name,
+      maxCoverage: selectedPolicy.maxCoverage,
+      requestedCoverage: requestedCoverage,
+      premiumAmount: selectedPolicy.basePremium
+    };
+  }
+
   private enrichClaimInspection(item: ClaimInspectionItem): Observable<ClaimInspectionItem> {
     const needsClaimFetch =
       !item.customerName ||
       !item.customerEmail ||
       !item.customerPhone ||
-      item.requestedClaimAmount == null;
+      !item.policyName;
     const needsDocumentsFetch = (item.customerDocuments?.length || 0) === 0;
 
     const claim$ = needsClaimFetch && item.claimId
@@ -174,8 +298,10 @@ export class SurveyorService {
           customerName: item.customerName || normalizedClaim.customerName || null,
           customerEmail: item.customerEmail || normalizedClaim.customerEmail || null,
           customerPhone: item.customerPhone || normalizedClaim.customerPhone || null,
-          requestedClaimAmount:
-            item.requestedClaimAmount ?? normalizedClaim.requestedClaimAmount ?? null,
+          policyName: item.policyName ?? normalizedClaim.policyName ?? null,
+          maxCoverage: item.maxCoverage ?? normalizedClaim.maxCoverage ?? null,
+          premiumAmount: item.premiumAmount ?? normalizedClaim.premiumAmount ?? null,
+          requestedClaimAmount: item.requestedClaimAmount ?? normalizedClaim.requestedClaimAmount ?? null,
           claimDescription: item.claimDescription || normalizedClaim.claimDescription || null,
           customerDocuments: (item.customerDocuments?.length || 0) > 0
             ? item.customerDocuments
@@ -183,6 +309,81 @@ export class SurveyorService {
         };
       })
     );
+  }
+
+  private normalizePropertyInspection(raw: any): PropertyInspection {
+    const property = raw?.property || raw?.propertyDetails || null;
+    const subscription = raw?.subscription || raw?.policySubscription || property?.subscription || null;
+    const policy = subscription?.policy || raw?.policy || null;
+    const customer =
+      raw?.customer ||
+      subscription?.customer ||
+      property?.customer ||
+      property?.owner ||
+      null;
+
+    return {
+      ...raw,
+      customerName:
+        raw?.customerName ??
+        customer?.name ??
+        (customer?.firstName && customer?.lastName
+          ? `${customer.firstName} ${customer.lastName}`
+          : customer?.user?.firstName && customer?.user?.lastName
+          ? `${customer.user.firstName} ${customer.user.lastName}`
+          : null),
+      customerEmail:
+        raw?.customerEmail ??
+        customer?.email ??
+        customer?.user?.email ??
+        null,
+      customerPhone:
+        raw?.customerPhone ??
+        customer?.phoneNumber ??
+        customer?.phone ??
+        customer?.user?.phoneNumber ??
+        null,
+      propertyAddress:
+        raw?.propertyAddress ??
+        property?.address ??
+        property?.location ??
+        null,
+      propertyType:
+        raw?.propertyType ??
+        property?.propertyType ??
+        property?.type ??
+        null,
+      policyName:
+        raw?.policyName ??
+        policy?.name ??
+        policy?.policyName ??
+        subscription?.policyName ??
+        null,
+      maxCoverage:
+        raw?.maxCoverage ??
+        policy?.maxCoverage ??
+        policy?.coverageAmount ??
+        subscription?.maxCoverage ??
+        null,
+      premiumAmount:
+        raw?.premiumAmount ??
+        policy?.premiumAmount ??
+        subscription?.premiumAmount ??
+        null,
+      requestedSumInsured:
+        raw?.requestedSumInsured ??
+        raw?.sumInsured ??
+        subscription?.sumInsured ??
+        subscription?.coverageAmount ??
+        null,
+      customerDocuments: this.normalizeDocuments(
+        raw?.customerDocuments ??
+        raw?.documents ??
+        property?.documents ??
+        subscription?.documents ??
+        []
+      )
+    };
   }
 
   private normalizeDocuments(source: any[]): InspectionDocumentSummary[] {

@@ -61,8 +61,10 @@ export class ClaimsComponent implements OnInit {
 
     this.adminService.getAllClaims().subscribe({
       next: (data) => {
-        this.claims.set(data);
-        this.filteredClaims.set(data);
+        // Apply smart calculation for settlement amounts
+        const processedClaims = data.map(claim => this.calculateSettlementAmount(claim));
+        this.claims.set(processedClaims);
+        this.filteredClaims.set(processedClaims);
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -256,5 +258,25 @@ export class ClaimsComponent implements OnInit {
       },
       error: (err) => console.error('Download failed', err)
     });
+  }
+
+  /**
+   * Smart calculation fallback for settlement amount.
+   * If settlementAmount is 0 or missing, calculate it as:
+   * Math.max(0, estimatedLoss - deductible - depreciation)
+   */
+  private calculateSettlementAmount(claim: Claim): Claim {
+    const estimatedLoss = Number(claim.estimatedLoss) || 0;
+    const deductible = Number(claim.deductible) || 0;
+    const depreciation = Number(claim.depreciation) || 0;
+    const settlementAmount = Number(claim.settlementAmount) || 0;
+
+    // If settlement amount is 0 or missing, calculate it
+    if (settlementAmount === 0 && estimatedLoss > 0) {
+      const calculatedAmount = Math.max(0, estimatedLoss - deductible - depreciation);
+      return { ...claim, settlementAmount: calculatedAmount };
+    }
+
+    return claim;
   }
 }

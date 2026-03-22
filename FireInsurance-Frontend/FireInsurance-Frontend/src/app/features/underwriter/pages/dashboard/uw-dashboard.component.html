@@ -9,7 +9,7 @@
     <!-- Loading -->
     @if (isLoading()) {
       <div class="flex justify-center items-center py-20">
-        <div class="w-12 h-12 border-4 border-claret border-t-transparent rounded-full animate-spin"></div>
+        <div class="w-12 h-12 border-4 border-fire-red border-t-transparent rounded-full animate-spin"></div>
       </div>
     }
 
@@ -28,7 +28,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">{{ card.title }}</p>
-                <p class="text-4xl font-black text-gray-900 mt-2 group-hover:text-claret transition-colors">
+                <p class="text-4xl font-black text-gray-900 mt-2 group-hover:text-fire-red transition-colors">
                   {{ card.value }}
                 </p>
               </div>
@@ -46,20 +46,20 @@
         <h2 class="text-xl font-black text-gray-900 mb-6 tracking-tight">Quick Actions</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <button routerLink="/underwriter/subscriptions"
-                  class="flex items-center gap-5 p-6 rounded-2xl border-2 border-gray-100 hover:border-claret hover:shadow-xl hover:shadow-claret/10 transition-all group bg-white">
+                  class="flex items-center gap-5 p-6 rounded-2xl border-2 border-gray-100 hover:border-fire-red hover:shadow-xl hover:shadow-fire-red/10 transition-all group bg-white">
             <div class="w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
-                 style="background: #8B1E3F20">
-              <span class="material-icons text-3xl" style="color: #8B1E3F">card_membership</span>
+                 style="background: #C72B3220">
+              <span class="material-icons text-3xl" style="color: #C72B32">card_membership</span>
             </div>
             <div class="text-left">
               <p class="font-black text-gray-900 uppercase tracking-widest text-sm">Policy Subscriptions</p>
               <p class="text-gray-500 text-xs mt-1">Review, assign surveyors &amp; decide</p>
             </div>
-            <span class="material-icons text-gray-300 ml-auto group-hover:text-claret transition-colors">arrow_forward</span>
+            <span class="material-icons text-gray-300 ml-auto group-hover:text-fire-red transition-colors">arrow_forward</span>
           </button>
 
           <button routerLink="/underwriter/claims"
-                  class="flex items-center gap-5 p-6 rounded-2xl border-2 border-gray-100 hover:border-fuchsia hover:shadow-xl hover:shadow-fuchsia/10 transition-all group bg-white">
+                  class="flex items-center gap-5 p-6 rounded-2xl border-2 border-gray-100 hover:border-fire-orange hover:shadow-xl hover:shadow-fire-orange/10 transition-all group bg-white">
             <div class="w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
                  style="background: #D81B6020">
               <span class="material-icons text-3xl" style="color: #D81B60">assignment</span>
@@ -68,7 +68,7 @@
               <p class="font-black text-gray-900 uppercase tracking-widest text-sm">Claims</p>
               <p class="text-gray-500 text-xs mt-1">Assess &amp; approve/reject claims</p>
             </div>
-            <span class="material-icons text-gray-300 ml-auto group-hover:text-fuchsia transition-colors">arrow_forward</span>
+            <span class="material-icons text-gray-300 ml-auto group-hover:text-fire-orange transition-colors">arrow_forward</span>
           </button>
         </div>
       </div>

@@ -18,7 +18,7 @@
 
   @if (isLoading()) {
     <div class="flex items-center justify-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B1E3F]"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C72B32]"></div>
     </div>
   }
 
@@ -26,7 +26,7 @@
     <div class="max-w-4xl mx-auto">
       <!-- Policy Header Card -->
       <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 mb-8">
-        <div class="bg-gradient-to-r from-[#8B1E3F] to-[#D81B60] px-8 py-10 text-white">
+        <div class="bg-gradient-to-r from-[#C72B32] to-[#D81B60] px-8 py-10 text-white">
           <div class="flex items-start justify-between">
             <div>
               <p class="text-sm font-medium text-white/70 uppercase tracking-wider">Fire Insurance Policy</p>
@@ -44,17 +44,17 @@
         <!-- Policy Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
           <div class="px-8 py-6 text-center">
-            <span class="material-icons text-3xl text-[#8B1E3F]">shield</span>
+            <span class="material-icons text-3xl text-[#C72B32]">shield</span>
             <p class="text-2xl font-bold text-gray-900 mt-2">₹{{ p.maxCoverageAmount | number:'1.0-0' }}</p>
             <p class="text-sm text-gray-500 mt-1">Maximum Coverage</p>
           </div>
           <div class="px-8 py-6 text-center">
-            <span class="material-icons text-3xl text-[#8B1E3F]">schedule</span>
+            <span class="material-icons text-3xl text-[#C72B32]">schedule</span>
             <p class="text-2xl font-bold text-gray-900 mt-2">{{ getDurationYears() }}</p>
             <p class="text-sm text-gray-500 mt-1">Coverage Duration</p>
           </div>
           <div class="px-8 py-6 text-center">
-            <span class="material-icons text-3xl text-[#8B1E3F]">payments</span>
+            <span class="material-icons text-3xl text-[#C72B32]">payments</span>
             <p class="text-2xl font-bold text-gray-900 mt-2">₹{{ p.basePremium | number:'1.0-0' }}</p>
             <p class="text-sm text-gray-500 mt-1">Base Premium</p>
           </div>
@@ -64,7 +64,7 @@
       <!-- Coverage Details -->
       <div class="bg-white rounded-xl shadow-md border border-gray-200 p-8 mb-8">
         <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <span class="material-icons text-[#8B1E3F]">description</span> Coverage Details
+          <span class="material-icons text-[#C72B32]">description</span> Coverage Details
         </h2>
         <p class="text-gray-700 leading-relaxed">{{ p.coverageDetails }}</p>
 
@@ -108,10 +108,10 @@
       </div>
 
       <!-- Subscribe CTA -->
-      <div class="bg-gradient-to-r from-[#8B1E3F]/5 to-[#D81B60]/5 rounded-xl border border-[#8B1E3F]/20 p-8 text-center">
+      <div class="bg-gradient-to-r from-[#C72B32]/5 to-[#D81B60]/5 rounded-xl border border-[#C72B32]/20 p-8 text-center">
         <h2 class="text-2xl font-bold text-gray-900">Ready to Protect Your Property?</h2>
         <p class="text-gray-600 mt-2">Apply now and an admin will review your subscription request.</p>
-        <button (click)="openSubscribeModal()" class="mt-6 px-8 py-3 bg-[#8B1E3F] text-white rounded-lg font-semibold hover:bg-[#6f1732] transition-all shadow-lg hover:shadow-xl text-lg">
+        <button (click)="openSubscribeModal()" class="mt-6 px-8 py-3 bg-[#C72B32] text-white rounded-lg font-semibold hover:bg-[#A01E28] transition-all shadow-lg hover:shadow-xl text-lg">
           <span class="material-icons text-lg align-middle mr-2">shield</span>Apply for This Policy
         </button>
       </div>
@@ -122,7 +122,7 @@
     <div class="text-center py-20">
       <span class="material-icons text-6xl text-gray-300">search_off</span>
       <p class="mt-4 text-xl text-gray-500">Policy not found</p>
-      <button (click)="goBack()" class="mt-4 px-6 py-2 bg-[#8B1E3F] text-white rounded-lg">Go Back</button>
+      <button (click)="goBack()" class="mt-4 px-6 py-2 bg-[#C72B32] text-white rounded-lg">Go Back</button>
     </div>
   }
 
@@ -131,7 +131,7 @@
     <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
         <div class="px-6 py-4 border-b bg-gray-50 flex items-center justify-between">
-          <h3 class="text-lg font-bold text-[#8B1E3F]">Apply for {{ policy()?.policyName }}</h3>
+          <h3 class="text-lg font-bold text-[#C72B32]">Apply for {{ policy()?.policyName }}</h3>
           <button (click)="closeSubscribeModal()" class="text-gray-400 hover:text-gray-600">
             <span class="material-icons">close</span>
           </button>
@@ -140,7 +140,7 @@
           <div class="p-6 space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Select Property to Insure</label>
-              <select formControlName="propertyId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1E3F] outline-none">
+              <select formControlName="propertyId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C72B32] outline-none">
                 <option value="0">-- Choose a property --</option>
                 @for (prop of properties(); track prop.propertyId) {
                   <option [value]="prop.propertyId">{{ prop.address }} ({{ prop.propertyType }})</option>
@@ -156,7 +156,7 @@
           </div>
           <div class="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
             <button type="button" (click)="closeSubscribeModal()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg">Cancel</button>
-            <button type="submit" [disabled]="subscribeForm.invalid || isLoading()" class="px-4 py-2 bg-[#8B1E3F] text-white rounded-lg disabled:opacity-50">Apply Now</button>
+            <button type="submit" [disabled]="subscribeForm.invalid || isLoading()" class="px-4 py-2 bg-[#C72B32] text-white rounded-lg disabled:opacity-50">Apply Now</button>
           </div>
         </form>
       </div>

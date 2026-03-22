@@ -20,6 +20,10 @@ export interface PropertyInspection {
   customerPhone?: string | null;
   propertyAddress?: string | null;
   propertyType?: string | null;
+  policyName?: string | null; // Name of the policy customer is subscribing to
+  maxCoverage?: number | null; // Maximum coverage limit of the policy
+  premiumAmount?: number | null; // Premium amount for the policy
+  requestedSumInsured?: number | null; // Customer's requested coverage amount
   customerDocuments?: InspectionDocumentSummary[];
   fireSafetyAvailable?: boolean;
   sprinklerSystem?: boolean;
@@ -29,6 +33,19 @@ export interface PropertyInspection {
   hazardRisk?: number | null;
   recommendedCoverage?: number | null;
   recommendedPremium?: number | null;
+  // Duplicate property detection fields
+  isDuplicateProperty?: boolean; // True if this property has already been inspected
+  existingRiskScore?: number | null; // Risk score from the completed inspection
+  existingRiskData?: {
+    assessedRiskScore: number;
+    fireSafetyAvailable?: boolean;
+    sprinklerSystem?: boolean;
+    fireExtinguishers?: boolean;
+    distanceFromFireStation?: number | null;
+    constructionRisk?: number | null;
+    hazardRisk?: number | null;
+  };
+  referenceInspectionId?: number; // ID of the completed inspection this data comes from
 }
 
 export interface SubmitInspectionReportRequest {
@@ -55,7 +72,10 @@ export interface ClaimInspectionItem {
   customerName?: string | null;
   customerEmail?: string | null;
   customerPhone?: string | null;
-  requestedClaimAmount?: number | null;
+  policyName?: string | null; // Policy that covers this claim
+  maxCoverage?: number | null; // Maximum coverage limit of the policy
+  premiumAmount?: number | null; // Premium amount of the policy
+  requestedClaimAmount?: number | null; // Amount customer requested in claim
   claimDescription?: string | null;
   customerDocuments?: InspectionDocumentSummary[];
 }

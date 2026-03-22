@@ -8,7 +8,7 @@
   <!-- Loading State -->
   @if (isLoading()) {
     <div class="flex items-center justify-center py-16">
-      <div class="w-12 h-12 border-4 border-gray-200 border-t-[#8B1E3F] rounded-full animate-spin"></div>
+      <div class="w-12 h-12 border-4 border-gray-200 border-t-[#C72B32] rounded-full animate-spin"></div>
       <p class="ml-4 text-gray-600">Loading dashboard data...</p>
     </div>
   }
@@ -42,7 +42,7 @@
         </div>
         <div>
           <p class="text-lg font-bold">Property Inspections</p>
-          <p class="text-blue-100 text-sm">View and submit property inspection reports</p>
+          <p class="text-fire-cream text-sm">View and submit property inspection reports</p>
         </div>
         <span class="material-icons ml-auto opacity-70">chevron_right</span>
       </a>
@@ -63,7 +63,7 @@
     <div class="bg-white rounded-xl shadow-md border border-gray-200 mb-6">
       <div class="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
         <h2 class="section-title">Recent Property Inspections</h2>
-        <a routerLink="/surveyor/property-inspections" class="text-sm text-[#8B1E3F] hover:underline font-medium">View all →</a>
+        <a routerLink="/surveyor/property-inspections" class="text-sm text-[#C72B32] hover:underline font-medium">View all →</a>
       </div>
       @if (recentPropertyInspections().length === 0) {
         <div class="text-center py-10 text-gray-500">
@@ -104,7 +104,7 @@
     <div class="bg-white rounded-xl shadow-md border border-gray-200">
       <div class="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
         <h2 class="section-title">Recent Claim Inspections</h2>
-        <a routerLink="/surveyor/claim-inspections" class="text-sm text-[#8B1E3F] hover:underline font-medium">View all →</a>
+        <a routerLink="/surveyor/claim-inspections" class="text-sm text-[#C72B32] hover:underline font-medium">View all →</a>
       </div>
       @if (recentClaimInspections().length === 0) {
         <div class="text-center py-10 text-gray-500">

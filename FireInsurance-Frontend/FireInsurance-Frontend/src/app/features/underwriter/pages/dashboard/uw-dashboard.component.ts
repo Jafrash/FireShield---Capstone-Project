@@ -87,7 +87,7 @@ export class UwDashboardComponent implements OnInit {
         title: 'Assigned Subscriptions',
         value: this.assignedSubscriptions(),
         icon: 'card_membership',
-        color: '#8B1E3F',
+        color: '#C72B32',
         route: '/underwriter/subscriptions'
       },
       {

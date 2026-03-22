@@ -3,7 +3,7 @@
     <div class="flex justify-center mb-6">
       <div class="w-24 h-24 hover:scale-110 transition-transform duration-300">
         <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-xl">
-          <path d="M24 4L8 10V22C8 32.38 14.64 42.1 24 44C33.36 42.1 40 32.38 40 22V10L24 4Z" fill="#8B1538"/>
+          <path d="M24 4L8 10V22C8 32.38 14.64 42.1 24 44C33.36 42.1 40 32.38 40 22V10L24 4Z" fill="#C72B32"/>
           <path d="M24 14L16 20V32H32V20L24 14Z" fill="white" fill-opacity="0.8"/>
           <path d="M24 22C24 22 20 26 20 28.5C20 30.7091 21.7909 32.5 24 32.5C26.2091 32.5 28 30.7091 28 28.5C28 26 24 22 24 22Z" fill="#FB923C"/>
           <path d="M24 25C24 25 22 28 22 29.5C22 30.6046 22.8954 31.5 24 31.5C25.1046 31.5 26 30.6046 26 29.5C26 28 24 25 24 25Z" fill="#FDE047"/>
@@ -15,16 +15,16 @@
     </h2>
     <p class="mt-2 text-center text-sm text-gray-600">
       Or
-      <a routerLink="/auth/login" class="font-semibold text-claret hover:text-claret/80 transition-colors">
+      <a routerLink="/auth/login" class="font-semibold text-fire-red hover:text-fire-red/80 transition-colors">
         sign in to your existing account
       </a>
     </p>
   </div>
 
   <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
-    <div class="bg-white py-8 px-4 shadow-xl shadow-claret/5 sm:rounded-2xl sm:px-10 border border-gray-100 relative overflow-hidden">
+    <div class="bg-white py-8 px-4 shadow-xl shadow-fire-red/5 sm:rounded-2xl sm:px-10 border border-gray-100 relative overflow-hidden">
       <!-- Decorative top border -->
-      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-claret to-fuchsia"></div>
+      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-fire-red to-fire-orange"></div>
 
       <!-- Role Selection Toggle -->
       <div class="flex justify-center mb-8">
@@ -60,7 +60,7 @@
                 <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">person</span>
               </div>
               <input id="firstName" type="text" formControlName="firstName"
-                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
                 [class.border-red-300]="hasError('firstName', 'required')"
                 placeholder="John">
             </div>
@@ -76,7 +76,7 @@
                 <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">person</span>
               </div>
               <input id="lastName" type="text" formControlName="lastName"
-                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
                 [class.border-red-300]="hasError('lastName', 'required')"
                 placeholder="Doe">
             </div>
@@ -94,7 +94,7 @@
                 <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">badge</span>
               </div>
               <input id="username" type="text" formControlName="username"
-                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
                 [class.border-red-300]="hasError('username', 'required')"
                 placeholder="johndoe123">
             </div>
@@ -110,7 +110,7 @@
                 <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">phone</span>
               </div>
               <input id="phoneNumber" type="text" formControlName="phoneNumber"
-                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
                 [class.border-red-300]="hasError('phoneNumber', 'required')"
                 placeholder="(555) 123-4567">
             </div>
@@ -127,7 +127,7 @@
               <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">email</span>
             </div>
             <input id="email" type="email" formControlName="email"
-              class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+              class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
               [class.border-red-300]="hasError('email', 'required') || hasError('email', 'email')"
               placeholder="john@example.com">
           </div>
@@ -144,7 +144,7 @@
                 <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">home</span>
               </div>
               <input id="address" type="text" formControlName="address"
-                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
                 [class.border-red-300]="hasError('address', 'required')"
                 placeholder="123 Main St">
             </div>
@@ -157,7 +157,7 @@
             <div class="space-y-1">
               <label for="city" class="block text-sm font-semibold text-gray-700">City</label>
               <input id="city" type="text" formControlName="city"
-                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
                 [class.border-red-300]="hasError('city', 'required')"
                 placeholder="e.g. New York">
               @if (hasError('city', 'required')) {
@@ -167,7 +167,7 @@
             <div class="space-y-1">
               <label for="state" class="block text-sm font-semibold text-gray-700">State</label>
               <input id="state" type="text" formControlName="state"
-                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
                 [class.border-red-300]="hasError('state', 'required')"
                 placeholder="CT">
               @if (hasError('state', 'required')) {
@@ -182,7 +182,7 @@
             <div class="space-y-1">
               <label for="licenseNumber" class="block text-sm font-semibold text-gray-700">License Number</label>
               <input id="licenseNumber" type="text" formControlName="licenseNumber"
-                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
                 [class.border-red-300]="hasError('licenseNumber', 'required')"
                 placeholder="LIC-55412">
               @if (hasError('licenseNumber', 'required')) {
@@ -192,7 +192,7 @@
             <div class="space-y-1">
               <label for="experienceYears" class="block text-sm font-semibold text-gray-700">Years Experience</label>
               <input id="experienceYears" type="number" formControlName="experienceYears"
-                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
                 [class.border-red-300]="hasError('experienceYears', 'required')"
                 placeholder="5">
               @if (hasError('experienceYears', 'required')) {
@@ -203,7 +203,7 @@
           <div class="space-y-1 animate-[fadeIn_0.3s_ease-out]">
             <label for="assignedRegion" class="block text-sm font-semibold text-gray-700">Assigned Region</label>
             <input id="assignedRegion" type="text" formControlName="assignedRegion"
-              class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+              class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
               [class.border-red-300]="hasError('assignedRegion', 'required')"
               placeholder="Northeast">
             @if (hasError('assignedRegion', 'required')) {
@@ -219,7 +219,7 @@
               <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">lock</span>
             </div>
             <input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
-              class="block w-full pl-11 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-claret/20 focus:border-claret sm:text-sm transition-colors"
+              class="block w-full pl-11 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
               [class.border-red-300]="hasError('password', 'required')"
               placeholder="••••••••">
             <button type="button" (click)="togglePasswordVisibility()" tabindex="-1"
@@ -263,7 +263,7 @@
 
         <div>
           <button type="submit" [disabled]="isSubmitting()"
-            class="w-full flex justify-center py-2.5 mt-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gradient-to-r from-claret to-fuchsia hover:from-claret hover:to-claret focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-claret disabled:opacity-70 disabled:cursor-not-allowed transition-all hover:shadow-lg">
+            class="w-full flex justify-center py-2.5 mt-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gradient-to-r from-fire-red to-fire-orange hover:from-fire-red hover:to-fire-red focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fire-red disabled:opacity-70 disabled:cursor-not-allowed transition-all hover:shadow-lg">
             @if (isSubmitting()) {
               <span class="material-icons animate-spin mr-2 text-[18px]">refresh</span> Signing up...
             } @else {

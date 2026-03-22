@@ -27,7 +27,7 @@ interface InspectionDetail {
       @if (loading()) {
         <div class="content-card">
           <div class="flex items-center justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-claret"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-fire-red"></div>
           </div>
         </div>
       } @else if (error()) {
@@ -92,7 +92,7 @@ interface InspectionDetail {
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button 
                         (click)="viewDetails(inspection)" 
-                        class="text-claret hover:text-claret-dark transition-colors">
+                        class="text-fire-red hover:text-fire-orange transition-colors">
                         View Details
                       </button>
                     </td>
@@ -201,7 +201,7 @@ interface InspectionDetail {
     }
 
     .btn-primary {
-      background-color: #8B1E3F;
+      background-color: #C72B32;
       color: white;
       padding: 0.5rem 1rem;
       border-radius: 0.5rem;
@@ -261,9 +261,6 @@ interface InspectionDetail {
       border-top: 1px solid #e5e7eb;
     }
 
-    .text-claret { color: #8B1E3F; }
-    .text-claret-dark { color: #6d1731; }
-
     table { width: 100%; }
     th { background-color: #f9fafb; }
   `]
@@ -309,7 +306,7 @@ export class PropertyInspectionsComponent implements OnInit {
     const classes = 'px-3 py-1 text-xs font-semibold rounded-full ';
     switch (status) {
       case 'ASSIGNED':
-        return classes + 'bg-blue-100 text-blue-800';
+        return classes + 'bg-fire-red/10 text-fire-red-700';
       case 'IN_PROGRESS':
         return classes + 'bg-yellow-100 text-yellow-800';
       case 'COMPLETED':

@@ -27,7 +27,7 @@ interface ClaimInspectionDetail {
       @if (loading()) {
         <div class="content-card">
           <div class="flex items-center justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-claret"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-fire-red"></div>
           </div>
         </div>
       } @else if (error()) {
@@ -98,7 +98,7 @@ interface ClaimInspectionDetail {
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button 
                         (click)="viewDetails(inspection)" 
-                        class="text-claret hover:text-claret-dark transition-colors">
+                        class="text-fire-red hover:text-fire-orange transition-colors">
                         View Details
                       </button>
                     </td>
@@ -215,7 +215,7 @@ interface ClaimInspectionDetail {
     }
 
     .btn-primary {
-      background-color: #8B1E3F;
+      background: linear-gradient(to right, var(--color-fire-red), var(--color-fire-orange));
       color: white;
       padding: 0.5rem 1rem;
       border-radius: 0.5rem;
@@ -274,9 +274,6 @@ interface ClaimInspectionDetail {
       padding: 1.5rem;
       border-top: 1px solid #e5e7eb;
     }
-
-    .text-claret { color: #8B1E3F; }
-    .text-claret-dark { color: #6d1731; }
 
     table { width: 100%; }
     th { background-color: #f9fafb; }

@@ -8,7 +8,7 @@
       </div>
       <button (click)="toggleForm()"
               class="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all"
-              [ngClass]="showRegisterForm() ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-claret text-white hover:opacity-90'">
+              [ngClass]="showRegisterForm() ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-fire-red text-white hover:opacity-90'">
         <span class="material-icons text-sm">{{ showRegisterForm() ? 'close' : 'person_add' }}</span>
         {{ showRegisterForm() ? 'Cancel' : 'Register Underwriter' }}
       </button>
@@ -30,7 +30,7 @@
     @if (showRegisterForm()) {
       <div class="glass-card p-8 mb-8">
         <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <span class="material-icons text-claret">person_add</span>
+          <span class="material-icons text-fire-red">person_add</span>
           Register New Underwriter
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -38,49 +38,49 @@
           <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Username *</label>
             <input [(ngModel)]="form.username" type="text" placeholder="e.g. jsmith"
-                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-claret focus:border-claret outline-none bg-white transition-shadow">
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
           </div>
           <!-- Email -->
           <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Email *</label>
             <input [(ngModel)]="form.email" type="email" placeholder="e.g. jsmith@example.com"
-                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-claret focus:border-claret outline-none bg-white transition-shadow">
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
           </div>
           <!-- Password -->
           <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Password *</label>
             <input [(ngModel)]="form.password" type="password" placeholder="Min 8 characters"
-                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-claret focus:border-claret outline-none bg-white transition-shadow">
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
           </div>
           <!-- Phone -->
           <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Phone</label>
             <input [(ngModel)]="form.phone" type="tel" placeholder="+91 9876543210"
-                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-claret focus:border-claret outline-none bg-white transition-shadow">
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
           </div>
           <!-- Department -->
           <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Department</label>
             <input [(ngModel)]="form.department" type="text" placeholder="e.g. Fire & Property"
-                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-claret focus:border-claret outline-none bg-white transition-shadow">
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
           </div>
           <!-- Region -->
           <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Region</label>
             <input [(ngModel)]="form.region" type="text" placeholder="e.g. South Zone"
-                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-claret focus:border-claret outline-none bg-white transition-shadow">
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
           </div>
           <!-- Experience -->
           <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Experience (Years)</label>
             <input [(ngModel)]="form.experienceYears" type="number" min="0" placeholder="0"
-                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-claret focus:border-claret outline-none bg-white transition-shadow">
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
           </div>
         </div>
         <div class="mt-6 flex justify-end">
           <button (click)="registerUnderwriter()"
                   [disabled]="isSubmitting()"
-                  class="flex items-center gap-2 px-6 py-3 rounded-xl bg-claret text-white font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                  class="flex items-center gap-2 px-6 py-3 rounded-xl bg-fire-red text-white font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
             @if (isSubmitting()) {
               <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             } @else {
@@ -95,7 +95,7 @@
     <!-- Loading -->
     @if (isLoading()) {
       <div class="flex justify-center items-center py-20">
-        <div class="w-12 h-12 border-4 border-claret border-t-transparent rounded-full animate-spin"></div>
+        <div class="w-12 h-12 border-4 border-fire-red border-t-transparent rounded-full animate-spin"></div>
       </div>
     }
 
@@ -116,7 +116,7 @@
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead>
-                <tr class="bg-gradient-to-r from-claret to-fuchsia text-white">
+                <tr class="bg-gradient-to-r from-fire-red to-fire-orange text-white">
                   <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">ID</th>
                   <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Username</th>
                   <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Email</th>

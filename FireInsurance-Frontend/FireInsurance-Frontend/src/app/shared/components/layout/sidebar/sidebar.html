@@ -1,59 +1,90 @@
-<aside [ngClass]="{ 'w-20': isCollapsed, 'w-[260px]': !isCollapsed }" 
-       class="h-screen flex flex-col transition-all duration-300 shadow-2xl relative overflow-hidden"
-       style="background: linear-gradient(180deg, #8B1538 0%, #E91E63 100%);">
-  
-  <!-- Decorative overlay -->
-  <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
-  
+<aside [ngClass]="{ 'w-20': isCollapsed, 'w-[280px]': !isCollapsed }"
+       class="h-screen flex flex-col transition-all duration-500 shadow-2xl relative overflow-hidden animate-slide-in-right"
+       style="background: linear-gradient(180deg, #C72B32 0%, #FF6B35 100%);">
+
+  <!-- Background Pattern -->
+  <div class="absolute inset-0 opacity-5">
+    <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+  </div>
+
+  <!-- Decorative Gradient Overlay -->
+  <div class="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 pointer-events-none"></div>
+
+  <!-- Ambient Glow -->
+  <div class="absolute top-1/4 left-1/2 transform -translate-x-1/2 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-pulse pointer-events-none"></div>
+
   <!-- Logo Header -->
-  <div class="relative flex items-center justify-between px-6 py-8 border-b border-white/10">
+  <div class="relative flex items-center justify-between px-5 py-6 border-b border-white/10">
     <div class="flex items-center gap-3">
-      <div class="p-2.5 bg-white/95 rounded-xl shadow-lg backdrop-blur-sm">
-        <span class="material-icons text-claret text-[28px]">local_fire_department</span>
+      <div class="p-3 bg-white/95 rounded-xl shadow-xl backdrop-blur-md hover:scale-110 transition-transform duration-300">
+        <span class="material-icons text-fire-red text-3xl">local_fire_department</span>
       </div>
       @if (!isCollapsed) {
-        <div>
-          <span class="font-bold text-xl text-white tracking-tight block">FireShield</span>
-          <span class="text-xs text-white/70 font-medium">Fire Insurance</span>
+        <div class="animate-fade-in-right">
+          <span class="font-extrabold text-xl text-white tracking-tight block">FireShield</span>
+          <span class="text-xs text-white/80 font-semibold tracking-wider">Insurance Portal</span>
         </div>
       }
     </div>
-    <button (click)="toggleSidebar()" 
-            aria-label="Toggle sidebar" 
-            class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm">
-      <span class="material-icons text-white text-[20px]">{{ isCollapsed ? 'menu' : 'close' }}</span>
+    <button
+      (click)="toggleSidebar()"
+      aria-label="Toggle sidebar"
+      class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-300 backdrop-blur-md hover:scale-110 hover:shadow-lg group"
+    >
+      <span class="material-icons text-white text-xl group-hover:rotate-180 transition-transform duration-300">
+        {{ isCollapsed ? 'menu_open' : 'menu' }}
+      </span>
     </button>
   </div>
 
   <!-- Navigation Links -->
-  <nav class="relative flex-1 overflow-auto py-6 px-3 scrollbar-thin scrollbar-thumb-white/20">
+  <nav class="relative flex-1 overflow-auto py-6 px-4 scrollbar-custom">
     <ul class="space-y-2">
-      @for (link of navLinks; track link.path) {
-        <li>
+      @for (link of navLinks; track link.path; let idx = $index) {
+        <li class="animate-fade-in-right" [style.animation-delay]="(idx * 50) + 'ms'">
           <a
             [routerLink]="link.path"
-            class="group relative flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 overflow-hidden"
-            [ngClass]="{ 
-              'bg-white text-claret shadow-lg font-semibold': isActive(link.path),
-              'text-white hover:bg-white/10': !isActive(link.path)
+            class="group relative flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-300 overflow-hidden"
+            [ngClass]="{
+              'bg-white text-fire-red shadow-xl font-bold scale-105': isActive(link.path),
+              'text-white hover:bg-white/15 hover:scale-105': !isActive(link.path)
             }"
-            [style.box-shadow]="isActive(link.path) ? '0 4px 12px rgba(0,0,0,0.08)' : ''"
             [title]="link.label"
           >
-            <!-- Active indicator -->
+            <!-- Active Indicator Bar -->
             @if (isActive(link.path)) {
-              <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-claret rounded-r-full"></div>
+              <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-gradient-to-b from-fire-red to-fire-orange rounded-r-full shadow-lg"></div>
             }
-            
-            <span class="material-icons text-[22px] transition-transform duration-200 group-hover:scale-110" 
-                  [ngClass]="{ 'ml-1': isActive(link.path) }">{{ link.icon }}</span>
+
+            <!-- Icon with Animation -->
+            <div class="relative z-10">
+              <span
+                class="material-icons text-2xl transition-all duration-300"
+                [ngClass]="{
+                  'text-fire-red': isActive(link.path),
+                  'text-white group-hover:scale-125 group-hover:rotate-12': !isActive(link.path),
+                  'ml-1': isActive(link.path)
+                }"
+              >
+                {{ link.icon }}
+              </span>
+            </div>
+
+            <!-- Label -->
             @if (!isCollapsed) {
-              <span class="font-semibold text-[15px] truncate">{{ link.label }}</span>
+              <span class="font-semibold text-base truncate relative z-10">
+                {{ link.label }}
+              </span>
             }
-            
-            <!-- Hover glow effect -->
+
+            <!-- Hover Glow Effect -->
             @if (!isActive(link.path)) {
-              <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
+              <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+            }
+
+            <!-- Active Shimmer Effect -->
+            @if (isActive(link.path)) {
+              <div class="absolute inset-0 shimmer-effect rounded-xl opacity-30"></div>
             }
           </a>
         </li>
@@ -63,31 +94,29 @@
 
   <!-- User Role Badge -->
   @if (!isCollapsed) {
-    <div class="relative px-6 py-5 border-t border-white/10 bg-black/10 backdrop-blur-sm">
-      <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/95 shadow-lg">
-        <span class="material-icons text-claret text-[20px]">verified_user</span>
-        <div>
-          <div class="text-xs text-gray-500 font-medium">Role</div>
-          <div class="text-sm font-bold text-gray-900">{{ userRole }}</div>
+    <div class="relative px-5 py-6 border-t border-white/20 bg-gradient-to-br from-black/20 via-black/10 to-transparent backdrop-blur-md animate-fade-in-up">
+      <div class="flex items-center gap-3 px-4 py-4 rounded-xl bg-white/95 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-fire-red to-fire-orange flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <span class="material-icons text-white text-xl">verified_user</span>
+        </div>
+        <div class="flex-1">
+          <div class="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">Your Role</div>
+          <div class="text-sm font-extrabold bg-gradient-to-r from-fire-red to-fire-orange bg-clip-text text-transparent">
+            {{ userRole }}
+          </div>
+        </div>
+        <span class="material-icons text-fire-red text-sm group-hover:translate-x-1 transition-transform">
+          arrow_forward
+        </span>
+      </div>
+    </div>
+  } @else {
+    <div class="relative px-4 py-6 border-t border-white/20 bg-gradient-to-br from-black/20 via-black/10 to-transparent backdrop-blur-md">
+      <div class="flex items-center justify-center p-3 rounded-xl bg-white/95 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-fire-red to-fire-orange flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300">
+          <span class="material-icons text-white text-xl">verified_user</span>
         </div>
       </div>
     </div>
   }
-  
-  <!-- Custom scrollbar styles -->
-  <style>
-    .scrollbar-thin::-webkit-scrollbar {
-      width: 6px;
-    }
-    .scrollbar-thin::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .scrollbar-thin::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 3px;
-    }
-    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-  </style>
 </aside>

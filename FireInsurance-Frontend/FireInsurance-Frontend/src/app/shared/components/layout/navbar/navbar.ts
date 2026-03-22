@@ -132,12 +132,16 @@ export class NavbarComponent implements OnInit {
 
     this.notificationSubscription = this.notificationService.pollNotifications(20, 30000).subscribe({
       next: (items) => {
-        this.notifications = this.notificationService.decorateWithReadStatus(this.username!, items);
-        this.unreadCount = this.notificationService.getUnreadCount(this.notifications);
+        setTimeout(() => {
+          this.notifications = this.notificationService.decorateWithReadStatus(this.username!, items);
+          this.unreadCount = this.notificationService.getUnreadCount(this.notifications);
+        }, 0);
       },
       error: () => {
-        this.notifications = [];
-        this.unreadCount = 0;
+        setTimeout(() => {
+          this.notifications = [];
+          this.unreadCount = 0;
+        }, 0);
       }
     });
   }

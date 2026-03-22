@@ -315,7 +315,7 @@ export class AdminSubscriptionsComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
-      'REQUESTED': 'bg-blue-100 text-blue-800',
+      'REQUESTED': 'bg-fire-red/10 text-fire-red-700',
       'PENDING': 'bg-yellow-100 text-yellow-800',
       'UNDER_INSPECTION': 'bg-purple-100 text-purple-800',
       'INSPECTING': 'bg-purple-100 text-purple-800',
@@ -346,7 +346,7 @@ export class AdminSubscriptionsComponent implements OnInit {
 
   getRiskClass(riskScore: number): string {
     if (riskScore <= 2) return 'bg-green-100 text-green-800';
-    if (riskScore <= 4) return 'bg-blue-100 text-blue-800';
+    if (riskScore <= 4) return 'bg-fire-red/10 text-fire-red-700';
     if (riskScore <= 6) return 'bg-yellow-100 text-yellow-800';
     if (riskScore <= 8) return 'bg-orange-100 text-orange-800';
     return 'bg-red-100 text-red-800';

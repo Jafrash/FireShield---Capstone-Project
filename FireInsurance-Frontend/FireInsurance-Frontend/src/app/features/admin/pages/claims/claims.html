@@ -13,7 +13,7 @@
       <div class="flex-1 relative">
         <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
         <input type="text" placeholder="Search by claim ID, status, or description..."
-          class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1E3F] focus:border-[#8B1E3F] outline-none transition-all"
+          class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C72B32] focus:border-[#C72B32] outline-none transition-all"
           (input)="searchClaims($any($event.target).value)" />
       </div>
     </div>
@@ -54,7 +54,7 @@
           <tr>
             <td colspan="7" class="px-6 py-12 text-center">
               <div class="flex flex-col items-center gap-3">
-                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#8B1E3F]"></div>
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#C72B32]"></div>
                 <p class="text-gray-600">Loading claims...</p>
               </div>
             </td>
@@ -108,7 +108,7 @@
             </td>
             <td class="px-6 py-4">
               <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" [ngClass]="{
-                        'bg-blue-100 text-blue-800': claim.status === 'SUBMITTED',
+                        'bg-fire-red/10 text-fire-red-700': claim.status === 'SUBMITTED',
                         'bg-yellow-100 text-yellow-800': claim.status === 'INSPECTING',
                         'bg-purple-100 text-purple-800': claim.status === 'INSPECTED',
                         'bg-green-100 text-green-800': claim.status === 'APPROVED',
@@ -177,7 +177,7 @@
 <div class="fixed inset-0 bg-black/60 shadow-lg backdrop-blur-sm z-50 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
     <div
-      class="bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] p-5 text-white rounded-t-2xl flex justify-between items-center z-10 shadow-sm">
+      class="bg-gradient-to-r from-[#C72B32] to-[#A0214F] p-5 text-white rounded-t-2xl flex justify-between items-center z-10 shadow-sm">
       <div>
         <h2 class="text-xl font-bold flex items-center gap-2"><span class="material-icons">folder</span> Claim Documents
         </h2>
@@ -191,7 +191,7 @@
     <div class="p-6 max-h-[60vh] overflow-y-auto bg-gray-50/50">
       @if (isDocsLoading()) {
       <div class="flex flex-col items-center justify-center p-8">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#8B1E3F] mb-3"></div>
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#C72B32] mb-3"></div>
         <p class="text-gray-500 font-medium text-sm">Fetching claim documents...</p>
       </div>
       } @else if (claimDocuments().length === 0) {
@@ -206,8 +206,8 @@
         <li
           class="flex items-center justify-between p-4 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md transition-shadow">
           <div class="flex items-center gap-4 overflow-hidden">
-            <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-lg shadow-sm">
-              <span class="material-icons text-blue-600 text-xl">description</span>
+            <div class="bg-fire-cream border border-fire-red/20 p-2.5 rounded-lg shadow-sm">
+              <span class="material-icons text-fire-red text-xl">description</span>
             </div>
             <div class="flex flex-col overflow-hidden">
               <span class="text-sm font-bold text-gray-800 truncate" [title]="doc.fileName">{{ doc.fileName ||
@@ -216,7 +216,7 @@
             </div>
           </div>
           <button (click)="downloadDocument(doc)"
-            class="px-4 py-2 text-sm bg-blue-50 text-blue-700 font-bold border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1 shadow-sm hover:-translate-y-0.5">
+            class="px-4 py-2 text-sm bg-fire-cream text-fire-red-600 font-bold border border-fire-orange/20 rounded-lg hover:bg-fire-red/10 transition-colors flex items-center gap-1 shadow-sm hover:-translate-y-0.5">
             <span class="material-icons text-[16px]">file_download</span>
             View
           </button>

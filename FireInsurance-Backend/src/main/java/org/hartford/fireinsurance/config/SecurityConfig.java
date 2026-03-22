@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/h2-console/**",
                                 "/api/auth/**",
+                                "/api/test/**",
                                 "/error")
                         .permitAll()
 

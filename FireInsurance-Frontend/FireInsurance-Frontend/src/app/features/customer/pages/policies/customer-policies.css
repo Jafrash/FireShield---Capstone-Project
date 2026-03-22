@@ -60,7 +60,7 @@
   width: 60px;
   height: 60px;
   border: 6px solid #e5e7eb;
-  border-top-color: #8B1E3F;
+  border-top-color: #C72B32;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -144,7 +144,7 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #8B1E3F;
+  border-color: #C72B32;
   box-shadow: 0 0 0 3px rgba(139, 30, 63, 0.1);
 }
 
@@ -231,7 +231,7 @@ select.form-input {
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #8B1E3F;
+  background: #C72B32;
   border-radius: 10px;
 }
 
@@ -357,7 +357,7 @@ button:active:not(:disabled) {
 button:focus-visible,
 select:focus-visible,
 input:focus-visible {
-  outline: 3px solid #8B1E3F;
+  outline: 3px solid #C72B32;
   outline-offset: 2px;
 }
 

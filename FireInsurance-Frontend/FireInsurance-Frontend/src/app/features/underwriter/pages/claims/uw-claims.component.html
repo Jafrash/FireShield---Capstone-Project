@@ -27,7 +27,7 @@
     <!-- Loading -->
     @if (isLoading()) {
       <div class="flex justify-center items-center py-20">
-        <div class="w-12 h-12 border-4 border-claret border-t-transparent rounded-full animate-spin"></div>
+        <div class="w-12 h-12 border-4 border-fire-red border-t-transparent rounded-full animate-spin"></div>
       </div>
     }
 
@@ -43,7 +43,7 @@
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead>
-                <tr class="bg-gradient-to-r from-claret to-fuchsia text-white">
+                <tr class="bg-gradient-to-r from-fire-red to-fire-orange text-white">
                   <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Claim ID</th>
                   <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Subscription</th>
                   <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Claim Amount</th>
@@ -84,7 +84,7 @@
                     <!-- Documents -->
                     <td class="px-5 py-4">
                       <button (click)="viewDocuments(claim)"
-                              class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold border border-claret text-claret hover:bg-claret hover:text-white transition-colors">
+                              class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold border border-fire-red text-fire-red hover:bg-fire-red hover:text-white transition-colors">
                         <span class="material-icons text-sm">folder_open</span>
                         View
                       </button>
@@ -95,7 +95,7 @@
                       @if (claim.status === 'SUBMITTED' || claim.status === 'UNDER_REVIEW') {
                         <div class="flex items-center gap-2">
                           <select (change)="onSurveyorSelect(claim.claimId, $event)"
-                                  class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:ring-1 focus:ring-claret focus:border-claret outline-none">
+                                  class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:ring-1 focus:ring-fire-red focus:border-fire-red outline-none">
                             <option value="">Select…</option>
                             @for (sv of surveyors(); track sv.surveyorId) {
                               <option [value]="sv.surveyorId">
@@ -104,7 +104,7 @@
                             }
                           </select>
                           <button (click)="assignSurveyor(claim)"
-                                  class="px-3 py-1.5 rounded-lg text-xs font-bold bg-fuchsia text-white hover:opacity-90 transition-opacity flex items-center gap-1">
+                                  class="px-3 py-1.5 rounded-lg text-xs font-bold bg-fire-orange text-white hover:opacity-90 transition-opacity flex items-center gap-1">
                             <span class="material-icons text-sm">person_add</span>
                             Assign
                           </button>
@@ -115,7 +115,7 @@
                           Completed
                         </div>
                       } @else if (claim.status === 'SURVEY_ASSIGNED' || claim.status === 'INSPECTING') {
-                        <div class="flex items-center gap-1 text-claret font-medium italic">
+                        <div class="flex items-center gap-1 text-fire-red font-medium italic">
                           <span class="material-icons text-sm">check_circle</span>
                           Assigned
                         </div>
@@ -161,7 +161,7 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
       <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
         <div class="flex items-center gap-3">
-          <span class="material-icons text-claret">description</span>
+          <span class="material-icons text-fire-red">description</span>
           <h3 class="font-bold text-gray-900 text-lg">Documents — Claim #{{ selectedClaimId() }}</h3>
         </div>
         <button (click)="closeDocsModal()"
@@ -173,7 +173,7 @@
       <div class="flex-1 overflow-y-auto px-6 py-4">
         @if (docsLoading()) {
           <div class="flex justify-center items-center py-12">
-            <div class="w-10 h-10 border-4 border-claret border-t-transparent rounded-full animate-spin"></div>
+            <div class="w-10 h-10 border-4 border-fire-red border-t-transparent rounded-full animate-spin"></div>
           </div>
         } @else if (currentDocs().length === 0) {
           <div class="text-center py-12 text-gray-500">
@@ -184,7 +184,7 @@
           <div class="space-y-3">
             @for (doc of currentDocs(); track doc.documentId) {
               <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                <span class="material-icons text-claret text-2xl">insert_drive_file</span>
+                <span class="material-icons text-fire-red text-2xl">insert_drive_file</span>
                 <div class="flex-1 min-w-0">
                   <p class="font-semibold text-gray-800 truncate">{{ doc.fileName || 'Document #' + doc.documentId }}</p>
                   <p class="text-xs text-gray-400 mt-0.5">
@@ -195,10 +195,10 @@
                 @if (doc.fileSize) {
                   <span class="text-xs text-gray-400 whitespace-nowrap">{{ (doc.fileSize / 1024).toFixed(1) }} KB</span>
                 }
-                <button (click)="viewDoc(doc)" class="flex items-center gap-1 px-3 py-1.5 ml-2 text-claret bg-claret/5 hover:bg-claret/10 rounded-lg transition-colors font-medium text-xs border border-claret/20">
+                <button (click)="viewDoc(doc)" class="flex items-center gap-1 px-3 py-1.5 ml-2 text-fire-red bg-fire-red/5 hover:bg-fire-red/10 rounded-lg transition-colors font-medium text-xs border border-fire-red/20">
                   <span class="material-icons text-sm">visibility</span> Open
                 </button>
-                <button (click)="downloadDoc(doc)" class="flex items-center gap-1 px-3 py-1.5 ml-2 text-claret bg-claret/10 hover:bg-claret hover:text-white rounded-lg transition-colors font-medium text-xs">
+                <button (click)="downloadDoc(doc)" class="flex items-center gap-1 px-3 py-1.5 ml-2 text-fire-red bg-fire-red/10 hover:bg-fire-red hover:text-white rounded-lg transition-colors font-medium text-xs">
                   <span class="material-icons text-sm">download</span> Download
                 </button>
               </div>
@@ -209,7 +209,7 @@
 
       <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
         <button (click)="closeDocsModal()"
-                class="px-5 py-2.5 rounded-xl bg-claret text-white font-bold text-sm hover:opacity-90 transition-opacity">
+                class="px-5 py-2.5 rounded-xl bg-fire-red text-white font-bold text-sm hover:opacity-90 transition-opacity">
           Close
         </button>
       </div>

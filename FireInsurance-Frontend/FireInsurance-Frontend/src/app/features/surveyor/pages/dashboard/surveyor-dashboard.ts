@@ -43,14 +43,14 @@ export class SurveyorDashboardComponent implements OnInit {
             title: 'Assigned Property Inspections',
             value: stats.assignedPropertyInspections || 0,
             icon: 'home_work',
-            color: '#3b82f6',
+            color: '#C72B32',
             route: '/surveyor/property-inspections'
           },
           {
             title: 'Assigned Claim Inspections',
             value: stats.assignedClaimInspections || 0,
             icon: 'assignment',
-            color: '#f59e0b',
+            color: '#FF6B35',
             route: '/surveyor/claim-inspections'
           },
           {
@@ -63,7 +63,7 @@ export class SurveyorDashboardComponent implements OnInit {
             title: 'Pending Inspections',
             value: stats.pendingInspections || 0,
             icon: 'pending_actions',
-            color: '#ef4444'
+            color: '#C72B32'
           }
         ]);
         this.isLoading.set(false);
