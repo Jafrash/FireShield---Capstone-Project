@@ -67,6 +67,19 @@ public class Claim {
     @JoinColumn(name = "underwriter_id")
     private Underwriter underwriter;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "siu_investigator_id")
+    private SiuInvestigator siuInvestigator;
+
+    @Column(name = "siu_status")
+    private String siuStatus; // 'UNDER_INVESTIGATION' | 'CLEARED' | 'FRAUD_CONFIRMED'
+
+    @Column(name = "deductible")
+    private Double deductible;
+
+    @Column(name = "depreciation")
+    private Double depreciation;
+
     // Constructors
     public Claim() {
     }
@@ -198,5 +211,37 @@ public class Claim {
 
     public void setUnderwriter(Underwriter underwriter) {
         this.underwriter = underwriter;
+    }
+
+    public SiuInvestigator getSiuInvestigator() {
+        return siuInvestigator;
+    }
+
+    public void setSiuInvestigator(SiuInvestigator siuInvestigator) {
+        this.siuInvestigator = siuInvestigator;
+    }
+
+    public String getSiuStatus() {
+        return siuStatus;
+    }
+
+    public void setSiuStatus(String siuStatus) {
+        this.siuStatus = siuStatus;
+    }
+
+    public Double getDeductible() {
+        return deductible;
+    }
+
+    public void setDeductible(Double deductible) {
+        this.deductible = deductible;
+    }
+
+    public Double getDepreciation() {
+        return depreciation;
+    }
+
+    public void setDepreciation(Double depreciation) {
+        this.depreciation = depreciation;
     }
 }

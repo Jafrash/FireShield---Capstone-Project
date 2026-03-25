@@ -10,7 +10,6 @@ import { Document } from '../../../core/models/document.model';
 export interface DashboardStats {
   totalCustomers: number;
   totalClaims: number;
-  pendingInspections: number;
   activePolicies: number;
   totalSurveyors?: number;
 }
@@ -42,6 +41,98 @@ export interface Underwriter {
   createdAt?: string;
 }
 
+export interface SiuInvestigator {
+  investigatorId: number;
+  username: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  badgeNumber?: string;
+  department?: string;
+  experienceYears?: number;
+  specialization?: string;
+  active?: boolean;
+  createdAt?: string;
+}
+
+export interface BlacklistEntry {
+  blacklistId: number;
+  username: string;
+  email: string;
+  phoneNumber?: string;
+  reason: string;
+  active: boolean;
+  createdAt: string;
+  createdBy: string;
+}
+
+export interface BlacklistRequest {
+  username: string;
+  email: string;
+  phoneNumber?: string;
+  reason: string;
+}
+
+export interface FraudRule {
+  ruleName: string;
+  description: string;
+  weight: number;
+  triggered: boolean;
+  impact: 'LOW' | 'MEDIUM' | 'HIGH';
+  details: string;
+}
+
+export interface FraudAnalysisResponse {
+  claimId: number;
+  fraudScore: number;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  ruleBreakdown: FraudRule[];
+  overallAssessment: string;
+  suspiciousIndicators: string[];
+  confidenceScore: number;
+}
+
+export interface FraudStatistics {
+  totalFraudCases: number;
+  highRiskClaims: number;
+  mediumRiskClaims: number;
+  lowRiskClaims: number;
+  totalSiuInvestigations: number;
+  activeSiuInvestigations: number;
+  completedSiuInvestigations: number;
+  fraudConfirmedCases: number;
+  clearedCases: number;
+  averageFraudScore: number;
+  totalClaimsValue: number;
+  fraudulentClaimsValue: number;
+  fraudPercentage: number;
+}
+
+export interface FraudDistribution {
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  count: number;
+  percentage: number;
+  totalValue: number;
+}
+
+export interface SiuWorkload {
+  investigatorId: number;
+  investigatorName: string;
+  activeCases: number;
+  completedCases: number;
+  fraudConfirmed: number;
+  cleared: number;
+  averageCompletionDays: number;
+}
+
+export interface FraudTrend {
+  month: string;
+  fraudCases: number;
+  totalClaims: number;
+  fraudPercentage: number;
+}
+
 export interface UnderwriterRegistrationRequest {
   username: string;
   email: string;
@@ -52,17 +143,17 @@ export interface UnderwriterRegistrationRequest {
   experienceYears?: number;
 }
 
-export interface Inspection {
-  id: number;
-  propertyId: number;
-  surveyorId?: number;
-  inspectionType: string;
-  status: string;
-  scheduledDate?: string;
-  completedDate?: string;
-  notes?: string;
-  property?: Property;
-  surveyor?: Surveyor;
+export interface SiuInvestigatorRegistrationRequest {
+  username: string;
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  badgeNumber?: string;
+  department?: string;
+  experienceYears?: number;
+  specialization?: string;
 }
 
 @Injectable({
@@ -127,6 +218,86 @@ export class AdminService {
     });
   }
 
+  // SIU Investigator Management
+  getAllSiuInvestigators(): Observable<SiuInvestigator[]> {
+    return this.http.get<SiuInvestigator[]>(`${this.apiUrl}/admin/siu-users`);
+  }
+
+  // Alias method for getting SIU users (as per requirement)
+  getSiuUsers(): Observable<SiuInvestigator[]> {
+    return this.getAllSiuInvestigators();
+  }
+
+  getSiuInvestigatorById(id: number): Observable<SiuInvestigator> {
+    return this.http.get<SiuInvestigator>(`${this.apiUrl}/admin/siu-investigators/${id}`);
+  }
+
+  registerSiuInvestigator(data: SiuInvestigatorRegistrationRequest): Observable<SiuInvestigator> {
+    return this.http.post<SiuInvestigator>(`${this.apiUrl}/admin/siu-investigators`, data);
+  }
+
+  deleteSiuInvestigator(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/admin/siu-investigators/${id}`);
+  }
+
+  assignSiuInvestigatorToClaim(claimId: number, investigatorId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/admin/assign-siu-investigator/claim`, { targetId: claimId, investigatorId }, {
+      responseType: 'text'
+    });
+  }
+
+  // Assign SIU Investigator to Claim (specific endpoint)
+  assignSiuToClaim(claimId: number, investigatorId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/admin/assign-siu`, { claimId, investigatorId }, {
+      responseType: 'text'
+    });
+  }
+
+  // Blacklist Management
+  getBlacklistedUsers(): Observable<BlacklistEntry[]> {
+    return this.http.get<BlacklistEntry[]>(`${this.apiUrl}/admin/blacklist`);
+  }
+
+  getBlacklistedUserById(id: number): Observable<BlacklistEntry> {
+    return this.http.get<BlacklistEntry>(`${this.apiUrl}/admin/blacklist/${id}`);
+  }
+
+  addToBlacklist(data: BlacklistRequest): Observable<BlacklistEntry> {
+    return this.http.post<BlacklistEntry>(`${this.apiUrl}/admin/blacklist`, data);
+  }
+
+  removeFromBlacklist(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/admin/blacklist/${id}`, {
+      responseType: 'text'
+    });
+  }
+
+  checkBlacklist(identifier: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/admin/blacklist/check/${encodeURIComponent(identifier)}`);
+  }
+
+  // Fraud Analysis
+  getFraudAnalysis(claimId: number): Observable<FraudAnalysisResponse> {
+    return this.http.get<FraudAnalysisResponse>(`${this.apiUrl}/fraud/analysis/${claimId}`);
+  }
+
+  // Fraud Monitoring Dashboard
+  getFraudStatistics(): Observable<FraudStatistics> {
+    return this.http.get<FraudStatistics>(`${this.apiUrl}/admin/fraud/statistics`);
+  }
+
+  getFraudDistribution(): Observable<FraudDistribution[]> {
+    return this.http.get<FraudDistribution[]>(`${this.apiUrl}/admin/fraud/distribution`);
+  }
+
+  getSiuWorkload(): Observable<SiuWorkload[]> {
+    return this.http.get<SiuWorkload[]>(`${this.apiUrl}/admin/fraud/siu-workload`);
+  }
+
+  getFraudTrends(): Observable<FraudTrend[]> {
+    return this.http.get<FraudTrend[]>(`${this.apiUrl}/admin/fraud/trends`);
+  }
+
   // Policy Management
   getAllPolicies(): Observable<Policy[]> {
     return this.http.get<Policy[]>(`${this.apiUrl}/policies`);
@@ -167,31 +338,6 @@ export class AdminService {
 
   rejectClaim(id: number): Observable<Claim> {
     return this.http.put<Claim>(`${this.apiUrl}/claims/${id}/reject`, {});
-  }
-
-  assignClaimToSurveyor(claimId: number, surveyorId: number): Observable<Claim> {
-    return this.http.post<Claim>(`${this.apiUrl}/claim-inspections/assign/${claimId}?surveyorId=${surveyorId}`, {});
-  }
-
-  getAllClaimInspections(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/claim-inspections`);
-  }
-
-  // Inspection Management
-  getAllInspections(): Observable<Inspection[]> {
-    return this.http.get<Inspection[]>(`${this.apiUrl}/inspections`);
-  }
-
-  getInspectionById(id: number): Observable<Inspection> {
-    return this.http.get<Inspection>(`${this.apiUrl}/inspections/${id}`);
-  }
-
-  assignInspectionToSurveyor(propertyId: number, surveyorId: number): Observable<Inspection> {
-    return this.http.post<Inspection>(`${this.apiUrl}/inspections/assign/${propertyId}?surveyorId=${surveyorId}`, {});
-  }
-
-  updateInspectionStatus(id: number, status: string): Observable<Inspection> {
-    return this.http.patch<Inspection>(`${this.apiUrl}/inspections/${id}/status`, { status });
   }
 
   // Property Management

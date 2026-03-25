@@ -1,0 +1,264 @@
+<div class="content-container py-8">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="page-title">Fraud Monitoring Dashboard</h1>
+      <p class="text-gray-600 mt-2">Monitor fraud detection, analysis, and SIU investigations across all claims</p>
+    </div>
+    <button (click)="refreshData()"
+      class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
+      <span class="material-icons text-sm">refresh</span>
+      Refresh Data
+    </button>
+  </div>
+
+  <!-- Overall Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Fraud Cases -->
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+      @if (isStatsLoading()) {
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-200 rounded mb-4"></div>
+          <div class="h-8 bg-gray-200 rounded mb-2"></div>
+        </div>
+      } @else if (statsError()) {
+        <div class="text-red-600 text-sm">{{ statsError() }}</div>
+      } @else if (fraudStats()) {
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">Total Fraud Cases</h3>
+          <span class="material-icons text-red-600">security</span>
+        </div>
+        <div class="text-3xl font-bold text-red-600 mb-2">{{ fraudStats()!.totalFraudCases }}</div>
+        <div class="text-sm text-gray-600">
+          {{ formatPercentage(fraudStats()!.fraudPercentage) }} of all claims
+        </div>
+      }
+    </div>
+
+    <!-- High Risk Claims -->
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+      @if (isStatsLoading()) {
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-200 rounded mb-4"></div>
+          <div class="h-8 bg-gray-200 rounded mb-2"></div>
+        </div>
+      } @else if (statsError()) {
+        <div class="text-red-600 text-sm">{{ statsError() }}</div>
+      } @else if (fraudStats()) {
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">High Risk Claims</h3>
+          <span class="material-icons text-orange-600">warning</span>
+        </div>
+        <div class="text-3xl font-bold text-orange-600 mb-2">{{ fraudStats()!.highRiskClaims }}</div>
+        <div class="text-sm text-gray-600 cursor-pointer hover:text-orange-600"
+          (click)="navigateToClaimsWithFilter('high-risk')">
+          Click to view details →
+        </div>
+      }
+    </div>
+
+    <!-- Active SIU Investigations -->
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+      @if (isStatsLoading()) {
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-200 rounded mb-4"></div>
+          <div class="h-8 bg-gray-200 rounded mb-2"></div>
+        </div>
+      } @else if (statsError()) {
+        <div class="text-red-600 text-sm">{{ statsError() }}</div>
+      } @else if (fraudStats()) {
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">Active SIU Cases</h3>
+          <span class="material-icons text-purple-600">investigation</span>
+        </div>
+        <div class="text-3xl font-bold text-purple-600 mb-2">{{ fraudStats()!.activeSiuInvestigations }}</div>
+        <div class="text-sm text-gray-600 cursor-pointer hover:text-purple-600"
+          (click)="navigateToSiuDashboard()">
+          View SIU Dashboard →
+        </div>
+      }
+    </div>
+
+    <!-- Average Fraud Score -->
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+      @if (isStatsLoading()) {
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-200 rounded mb-4"></div>
+          <div class="h-8 bg-gray-200 rounded mb-2"></div>
+        </div>
+      } @else if (statsError()) {
+        <div class="text-red-600 text-sm">{{ statsError() }}</div>
+      } @else if (fraudStats()) {
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">Avg Fraud Score</h3>
+          <span class="material-icons text-blue-600">analytics</span>
+        </div>
+        <div class="text-3xl font-bold text-blue-600 mb-2">{{ fraudStats()!.averageFraudScore.toFixed(1) }}%</div>
+        <div class="text-sm text-gray-600">
+          Across all analyzed claims
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Charts and Data Visualization -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Fraud Distribution Chart -->
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <span class="material-icons text-red-600">pie_chart</span>
+          Fraud Risk Distribution
+        </h3>
+      </div>
+
+      @if (isDistributionLoading()) {
+        <div class="flex justify-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+        </div>
+      } @else if (distributionError()) {
+        <div class="text-center py-12 text-red-600">{{ distributionError() }}</div>
+      } @else if (fraudDistribution().length > 0) {
+        <div class="space-y-4">
+          @for (item of fraudDistribution(); track item.riskLevel) {
+            <div class="flex items-center justify-between p-4 rounded-lg border"
+              [class]="getRiskLevelColor(item.riskLevel)">
+              <div class="flex items-center gap-3">
+                <span class="material-icons" [class]="'text-' + (item.riskLevel === 'HIGH' ? 'red' : item.riskLevel === 'MEDIUM' ? 'yellow' : 'green') + '-600'">
+                  {{ getRiskLevelIcon(item.riskLevel) }}
+                </span>
+                <div>
+                  <div class="font-semibold">{{ item.riskLevel }} Risk</div>
+                  <div class="text-sm opacity-75">{{ formatCurrency(item.totalValue) }} total value</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold">{{ item.count }}</div>
+                <div class="text-sm opacity-75">{{ formatPercentage(item.percentage) }}</div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-12 text-gray-500">No fraud distribution data available</div>
+      }
+    </div>
+
+    <!-- Fraud Trends Chart -->
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <span class="material-icons text-blue-600">trending_up</span>
+          Fraud Trends (6 Months)
+        </h3>
+      </div>
+
+      @if (isTrendsLoading()) {
+        <div class="flex justify-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      } @else if (trendsError()) {
+        <div class="text-center py-12 text-red-600">{{ trendsError() }}</div>
+      } @else if (fraudTrends().length > 0) {
+        <div class="space-y-3">
+          @for (trend of fraudTrends(); track trend.month) {
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div class="font-medium text-gray-700">{{ trend.month }}</div>
+              <div class="flex items-center gap-4">
+                <div class="text-sm text-gray-600">
+                  {{ trend.fraudCases }}/{{ trend.totalClaims }} claims
+                </div>
+                <div class="px-3 py-1 rounded-full text-xs font-bold"
+                  [class]="trend.fraudPercentage > 15 ? 'bg-red-100 text-red-800' :
+                           trend.fraudPercentage > 10 ? 'bg-yellow-100 text-yellow-800' :
+                           'bg-green-100 text-green-800'">
+                  {{ formatPercentage(trend.fraudPercentage) }}
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-12 text-gray-500">No fraud trend data available</div>
+      }
+    </div>
+  </div>
+
+  <!-- SIU Workload Table -->
+  <div class="bg-white rounded-xl shadow-md border border-gray-200">
+    <div class="px-6 py-5 border-b border-gray-200">
+      <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+        <span class="material-icons text-purple-600">work</span>
+        SIU Investigator Workload
+      </h2>
+      <p class="text-sm text-gray-600 mt-1">Current caseload and performance metrics for SIU investigators</p>
+    </div>
+
+    @if (isWorkloadLoading()) {
+      <div class="p-6">
+        <div class="flex justify-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        </div>
+      </div>
+    } @else if (workloadError()) {
+      <div class="p-6 text-center text-red-600">{{ workloadError() }}</div>
+    } @else if (siuWorkload().length > 0) {
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Investigator</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Active Cases</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Completed</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fraud Confirmed</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Cleared</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Avg. Days</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            @for (investigator of siuWorkload(); track investigator.investigatorId) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ investigator.investigatorName }}</td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                    [class]="investigator.activeCases > 10 ? 'bg-red-100 text-red-800' :
+                             investigator.activeCases > 5 ? 'bg-yellow-100 text-yellow-800' :
+                             'bg-green-100 text-green-800'">
+                    {{ investigator.activeCases }} cases
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700">{{ investigator.completedCases }}</td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-red-600">{{ investigator.fraudConfirmed }}</span>
+                    <span class="material-icons text-red-600 text-sm">warning</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-green-600">{{ investigator.cleared }}</span>
+                    <span class="material-icons text-green-600 text-sm">check_circle</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700">{{ investigator.averageCompletionDays }} days</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="p-6 text-center text-gray-500">No SIU workload data available</div>
+    }
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+      <div class="flex items-center justify-between text-sm text-gray-600">
+        <span>Last updated: {{ getCurrentTime() }}</span>
+        <button (click)="navigateToSiuDashboard()"
+          class="text-purple-600 hover:text-purple-700 font-medium">
+          View Full SIU Dashboard →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

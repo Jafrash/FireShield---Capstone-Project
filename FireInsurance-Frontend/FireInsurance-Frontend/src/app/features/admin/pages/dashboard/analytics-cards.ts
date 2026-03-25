@@ -34,12 +34,5 @@ export const ADVANCED_ANALYTICS: AnalyticsCard[] = [
     icon: 'pie_chart',
     color: '#FF6B35',
     description: 'Ratio of active policies to total policies.'
-  },
-  {
-    title: 'Pending Inspections',
-    value: '--',
-    icon: 'assignment_late',
-    color: '#C72B32',
-    description: 'Number of inspections pending completion.'
   }
 ];

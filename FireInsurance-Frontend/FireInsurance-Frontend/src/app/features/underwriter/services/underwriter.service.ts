@@ -33,6 +33,9 @@ export interface UwClaim {
   calculatedDeductible?: number;
   calculatedDepreciation?: number;
   settlementAmount?: number;
+  fraudScore?: number; // 0-100 fraud risk score
+  siuStatus?: string; // 'UNDER_INVESTIGATION' | 'CLEARED' | 'FRAUD_CONFIRMED' | null
+  riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 }
 
 export interface UwDocument {

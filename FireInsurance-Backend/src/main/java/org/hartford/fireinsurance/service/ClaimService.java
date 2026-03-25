@@ -8,10 +8,12 @@ import org.hartford.fireinsurance.model.Customer;
 import org.hartford.fireinsurance.model.Policy;
 import org.hartford.fireinsurance.model.PolicySubscription;
 import org.hartford.fireinsurance.model.Property;
+import org.hartford.fireinsurance.model.SiuInvestigator;
 import org.hartford.fireinsurance.model.Underwriter;
 import org.hartford.fireinsurance.repository.ClaimRepository;
 import org.hartford.fireinsurance.repository.NotificationPreferenceRepository;
 import org.hartford.fireinsurance.repository.PolicySubscriptionRepository;
+import org.hartford.fireinsurance.repository.SiuInvestigatorRepository;
 import org.hartford.fireinsurance.repository.UnderwriterRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,7 @@ public class ClaimService {
     private final CustomerService customerService;
     private final org.hartford.fireinsurance.repository.ClaimInspectionRepository claimInspectionRepository;
     private final UnderwriterRepository underwriterRepository;
+    private final SiuInvestigatorRepository siuInvestigatorRepository;
     private final EmailNotificationService emailNotificationService;
     private final NotificationPreferenceRepository notificationPreferenceRepository;
 
@@ -49,6 +52,7 @@ public class ClaimService {
             CustomerService customerService,
             org.hartford.fireinsurance.repository.ClaimInspectionRepository claimInspectionRepository,
             UnderwriterRepository underwriterRepository,
+            SiuInvestigatorRepository siuInvestigatorRepository,
             EmailNotificationService emailNotificationService,
             NotificationPreferenceRepository notificationPreferenceRepository) {
         this.claimRepository = claimRepository;
@@ -56,6 +60,7 @@ public class ClaimService {
         this.customerService = customerService;
         this.claimInspectionRepository = claimInspectionRepository;
         this.underwriterRepository = underwriterRepository;
+        this.siuInvestigatorRepository = siuInvestigatorRepository;
         this.emailNotificationService = emailNotificationService;
         this.notificationPreferenceRepository = notificationPreferenceRepository;
     }
@@ -400,6 +405,18 @@ public class ClaimService {
         if (claim.getStatus() == ClaimStatus.SUBMITTED) {
             claim.setStatus(ClaimStatus.UNDER_REVIEW);
         }
+        return claimRepository.save(claim);
+    }
+
+    public Claim assignSiuInvestigator(Long claimId, Long investigatorId) {
+        Claim claim = claimRepository.findById(claimId)
+                .orElseThrow(() -> new RuntimeException("Claim not found with ID: " + claimId));
+
+        SiuInvestigator investigator = siuInvestigatorRepository.findById(investigatorId)
+                .orElseThrow(() -> new RuntimeException("SIU investigator not found with ID: " + investigatorId));
+
+        claim.setSiuInvestigator(investigator);
+        claim.setSiuStatus("UNDER_INVESTIGATION");
         return claimRepository.save(claim);
     }
 

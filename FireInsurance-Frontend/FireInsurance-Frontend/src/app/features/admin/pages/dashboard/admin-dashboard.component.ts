@@ -23,18 +23,18 @@ export class AdminDashboardComponent implements OnInit {
   errorMessage = signal('');
 
   // Advanced analytics state
-  analyticsCards = signal<AnalyticsCard[]>([...ADVANCED_ANALYTICS]);
+  analyticsCards = signal<AnalyticsCard[]>([]);
 
   // Raw data for analytics
   allClaims: Claim[] = [];
   allPolicies: any[] = [];
-  allInspections: any[] = [];
   allSubscriptions: PolicySubscription[] = [];
 
   ngOnInit(): void {
     this.loadDashboardData();
     this.loadAnalyticsData();
   }
+
   // Load all data needed for analytics
   private loadAnalyticsData(): void {
     // Claims
@@ -46,6 +46,7 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: () => {}
     });
+
     // Policies
     this.adminService.getAllPolicies().subscribe({
       next: (policies) => {
@@ -54,14 +55,7 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: () => {}
     });
-    // Inspections
-    this.adminService.getAllInspections().subscribe({
-      next: (inspections) => {
-        this.allInspections = inspections || [];
-        this.updateAnalyticsCards();
-      },
-      error: () => {}
-    });
+
     // Subscriptions
     this.adminService.getAllSubscriptions().subscribe({
       next: (subs) => {
@@ -76,7 +70,6 @@ export class AdminDashboardComponent implements OnInit {
   private updateAnalyticsCards(): void {
     const claims = this.allClaims;
     const policies = this.allPolicies;
-    const inspections = this.allInspections;
     const subs = this.allSubscriptions;
 
     // Claims Approval Rate
@@ -104,10 +97,7 @@ export class AdminDashboardComponent implements OnInit {
     const totalPolicies = subs.length;
     const activePolicyRatio = totalPolicies > 0 ? ((activePolicies / totalPolicies) * 100).toFixed(1) + '%' : '--';
 
-    // Pending Inspections
-    const pendingInspections = inspections.filter(i => i.status === 'PENDING' || i.status === 'ASSIGNED').length;
-
-    // Update analytics cards
+    // Update analytics cards - removed inspections analytics
     this.analyticsCards.set([
       {
         title: 'Claims Approval Rate',
@@ -136,13 +126,6 @@ export class AdminDashboardComponent implements OnInit {
         icon: 'pie_chart',
         color: '#FF6B35',
         description: 'Ratio of active policies to total policies.'
-      },
-      {
-        title: 'Pending Inspections',
-        value: pendingInspections,
-        icon: 'assignment_late',
-        color: '#C72B32',
-        description: 'Number of inspections pending completion.'
       }
     ]);
   }
@@ -153,7 +136,6 @@ export class AdminDashboardComponent implements OnInit {
     // Load all data in parallel
     let customersCount = 0;
     let totalClaims = 0;
-    let pendingInspections = 0;
     let activePolicies = 0;
     let pendingSubs = 0;
     let totalPolicies = 0;
@@ -162,7 +144,7 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAllUnderwriters().subscribe({
       next: (uws) => {
         totalUnderwriters = uws?.length || 0;
-        this.updateCards(customersCount, totalClaims, pendingInspections, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
+        this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
       },
       error: () => {}
     });
@@ -170,7 +152,7 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAllCustomers().subscribe({
       next: (customers) => {
         customersCount = customers?.length || 0;
-        this.updateCards(customersCount, totalClaims, pendingInspections, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
+        this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
       },
       error: () => {}
     });
@@ -181,7 +163,7 @@ export class AdminDashboardComponent implements OnInit {
         const processedClaims = (claims || []).map(claim => this.calculateSettlementAmount(claim));
         totalClaims = processedClaims.length;
         this.recentClaims.set(processedClaims.slice(0, 5));
-        this.updateCards(customersCount, totalClaims, pendingInspections, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
+        this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
       },
       error: () => {}
     });
@@ -191,7 +173,7 @@ export class AdminDashboardComponent implements OnInit {
         activePolicies = subs?.filter((s: PolicySubscription) => s.status === 'ACTIVE').length || 0;
         pendingSubs = subs?.filter((s: PolicySubscription) => s.status === 'PENDING').length || 0;
         this.pendingSubscriptions.set(subs?.filter((s: PolicySubscription) => s.status === 'PENDING').slice(0, 5) || []);
-        this.updateCards(customersCount, totalClaims, pendingInspections, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
+        this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
       },
       error: (err: Error) => {
         console.error('Error loading subscriptions:', err);
@@ -202,14 +184,14 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAllPolicies().subscribe({
       next: (policies) => {
         totalPolicies = policies?.length || 0;
-        this.updateCards(customersCount, totalClaims, pendingInspections, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
+        this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
         this.isLoading.set(false);
       },
       error: () => { this.isLoading.set(false); }
     });
   }
 
-  private updateCards(customers: number, claims: number, inspections: number, active: number, pending: number, policies: number, underwriters: number): void {
+  private updateCards(customers: number, claims: number, active: number, pending: number, policies: number, underwriters: number): void {
     this.dashboardCards.set([
       { title: 'Total Customers', value: customers, icon: 'people', color: '#C72B32', route: '/admin/customers' },
       { title: 'Underwriters', value: underwriters, icon: 'manage_accounts', color: '#8b5cf6', route: '/admin/underwriters' },

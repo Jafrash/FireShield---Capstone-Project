@@ -141,7 +141,7 @@ export class AuthService {
    */
   redirectToDashboard(): void {
     const role = this.tokenService.getRole();
-    
+
     if (!role) {
       this.router.navigate(['/auth/login']);
       return;
@@ -149,7 +149,7 @@ export class AuthService {
 
     switch (role) {
       case 'ADMIN':
-        this.router.navigate(['/admin']);
+        this.router.navigate(['/admin-dashboard']);
         break;
       case 'CUSTOMER':
         this.router.navigate(['/customer']);
@@ -158,7 +158,10 @@ export class AuthService {
         this.router.navigate(['/surveyor']);
         break;
       case 'UNDERWRITER':
-        this.router.navigate(['/underwriter']);
+        this.router.navigate(['/underwriter-dashboard']);
+        break;
+      case 'SIU_INVESTIGATOR':
+        this.router.navigate(['/siu-dashboard']);
         break;
       default:
         this.router.navigate(['/auth/login']);

@@ -39,15 +39,22 @@ export class SidebarComponent implements OnInit {
     switch (this.userRole) {
       case 'ADMIN':
         this.navLinks = [
-          { label: 'Dashboard', path: '/admin/dashboard', icon: 'dashboard' },
-          { label: 'Customers', path: '/admin/customers', icon: 'people' },
-          { label: 'Surveyors', path: '/admin/surveyors', icon: 'badge' },
-          { label: 'Underwriters', path: '/admin/underwriters', icon: 'manage_accounts' },
-          { label: 'Policies', path: '/admin/policies', icon: 'description' },
-          { label: 'Subscriptions', path: '/admin/subscriptions', icon: 'card_membership' },
-          { label: 'Claims', path: '/admin/claims', icon: 'assignment' },
-          { label: 'Property Inspections', path: '/admin/property-inspections', icon: 'home' },
-          { label: 'Claim Inspections', path: '/admin/claim-inspections', icon: 'search' }
+          { label: 'Dashboard', path: '/admin-dashboard/dashboard', icon: 'dashboard' },
+          { label: 'Fraud Monitoring', path: '/admin-dashboard/fraud-monitoring', icon: 'security' },
+          { label: 'Customers', path: '/admin-dashboard/customers', icon: 'people' },
+          { label: 'Surveyors', path: '/admin-dashboard/surveyors', icon: 'badge' },
+          { label: 'Underwriters', path: '/admin-dashboard/underwriters', icon: 'manage_accounts' },
+          { label: 'SIU Investigators', path: '/admin-dashboard/siu-investigators', icon: 'investigation' },
+          { label: 'Blacklist Management', path: '/admin-dashboard/blacklist', icon: 'block' },
+          { label: 'Policies', path: '/admin-dashboard/policies', icon: 'description' },
+          { label: 'Subscriptions', path: '/admin-dashboard/subscriptions', icon: 'card_membership' },
+          { label: 'Claims', path: '/admin-dashboard/claims', icon: 'assignment' }
+        ];
+        break;
+
+      case 'SIU_INVESTIGATOR':
+        this.navLinks = [
+          { label: 'Dashboard', path: '/siu-dashboard/dashboard', icon: 'dashboard' }
         ];
         break;
 
@@ -73,9 +80,11 @@ export class SidebarComponent implements OnInit {
 
       case 'UNDERWRITER':
         this.navLinks = [
-          { label: 'Dashboard', path: '/underwriter/dashboard', icon: 'dashboard' },
-          { label: 'Policy Subscriptions', path: '/underwriter/subscriptions', icon: 'card_membership' },
-          { label: 'Claims', path: '/underwriter/claims', icon: 'assignment' }
+          { label: 'Dashboard', path: '/underwriter-dashboard/dashboard', icon: 'dashboard' },
+          { label: 'Policy Subscriptions', path: '/underwriter-dashboard/subscriptions', icon: 'card_membership' },
+          { label: 'Claims', path: '/underwriter-dashboard/claims', icon: 'assignment' },
+          { label: 'Property Inspections', path: '/underwriter-dashboard/property-inspections', icon: 'home' },
+          { label: 'Claim Inspections', path: '/underwriter-dashboard/claim-inspections', icon: 'search' }
         ];
         break;
     }

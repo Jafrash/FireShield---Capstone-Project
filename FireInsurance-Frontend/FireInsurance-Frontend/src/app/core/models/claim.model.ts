@@ -15,6 +15,8 @@ export interface Claim {
   deductible?: number;
   depreciation?: number;
   updatedAt: string;
+  siuStatus?: string; // 'UNDER_INVESTIGATION' | 'CLEARED' | 'FRAUD_CONFIRMED' | null
+  fraudScore?: number; // 0-100 fraud risk score
 }
 
 export interface ClaimInspection {

@@ -57,7 +57,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/notification-preferences/valid-events").permitAll()
 
                         // Admin and underwriter domains
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SIU_INVESTIGATOR")
                         .requestMatchers("/api/underwriter/**").hasRole("UNDERWRITER")
 
                         // Claims - include underwriter workflow

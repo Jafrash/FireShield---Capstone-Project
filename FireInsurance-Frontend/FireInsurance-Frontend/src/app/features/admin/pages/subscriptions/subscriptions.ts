@@ -1,9 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminService, Surveyor, Underwriter } from '../../services/admin.service';
+import { AdminService, Underwriter } from '../../services/admin.service';
 import { PolicySubscription } from '../../../../core/models/policy.model';
-import { InspectionService, InspectionDetails } from '../../../../core/services/inspection.service';
 import { DocumentService } from '../../../../core/services/document.service';
 import { Document } from '../../../../core/models/document.model';
 
@@ -15,14 +14,10 @@ import { Document } from '../../../../core/models/document.model';
 })
 export class AdminSubscriptionsComponent implements OnInit {
   private adminService = inject(AdminService);
-  private inspectionService = inject(InspectionService);
 
   subscriptions = signal<PolicySubscription[]>([]);
   filteredSubscriptions = signal<PolicySubscription[]>([]);
-  surveyors = signal<Surveyor[]>([]);
-  inspections = signal<Record<number, InspectionDetails>>({});
-  selectedSurveyors = signal<Record<number, number>>({});
-  
+
   underwriters = signal<Underwriter[]>([]);
   selectedUnderwriters = signal<Record<number, number>>({});
   
@@ -39,7 +34,6 @@ export class AdminSubscriptionsComponent implements OnInit {
   private documentService = inject(DocumentService);
 
   ngOnInit(): void {
-    this.loadSurveyors();
     this.loadUnderwriters();
     this.loadSubscriptions();
   }
@@ -48,41 +42,6 @@ export class AdminSubscriptionsComponent implements OnInit {
     this.adminService.getAllUnderwriters().subscribe({
       next: (data) => this.underwriters.set(data || []),
       error: (err) => console.error('Error loading underwriters:', err)
-    });
-  }
-
-  loadSurveyors(): void {
-    this.inspectionService.getSurveyors().subscribe({
-      next: (data) => this.surveyors.set(data),
-      error: (err) => console.error('Error loading surveyors:', err)
-    });
-  }
-
-  loadInspectionStatuses(): void {
-    const subs = this.subscriptions();
-    if (subs.length === 0) return;
-
-    this.adminService.getAllInspections().subscribe({
-      next: (insList) => {
-        const current: Record<number, InspectionDetails> = {};
-        subs.forEach(sub => {
-          const subId = sub.subscriptionId || sub.id || 0;
-          // Find an inspection matching this subscription's property
-          const insp = insList.find(i => i.propertyId === sub.propertyId);
-          if (insp) {
-            current[subId] = {
-              inspectionId: insp.id || (insp as any).inspectionId,
-              subscriptionId: subId,
-              propertyId: insp.propertyId,
-              surveyorId: insp.surveyorId || 0,
-              surveyorName: insp.surveyor ? `${insp.surveyor.firstName || insp.surveyor.username} ${insp.surveyor.lastName || ''}` : 'Surveyor',
-              status: insp.status
-            };
-          }
-        });
-        this.inspections.set(current);
-      },
-      error: (err) => console.error('Error loading all inspections', err)
     });
   }
 
@@ -110,7 +69,6 @@ export class AdminSubscriptionsComponent implements OnInit {
         
         this.subscriptions.set(Array.from(uniqueSubs.values()));
         this.applyFilter();
-        this.loadInspectionStatuses();
         this.isLoading.set(false);
       },
       error: (err: Error) => {
@@ -133,59 +91,6 @@ export class AdminSubscriptionsComponent implements OnInit {
     } else {
       this.filteredSubscriptions.set(this.subscriptions().filter(s => s.status === filter));
     }
-  }
-
-  assignInspection(sub: PolicySubscription): void {
-    const subId = sub.subscriptionId || sub.id || 0;
-    const propertyId = sub.propertyId;
-    const surveyorId = this.selectedSurveyors()[subId];
-    
-    if (!surveyorId) {
-      this.errorMessage.set('Please select a surveyor first');
-      setTimeout(() => this.errorMessage.set(''), 3000);
-      return;
-    }
-    
-    // We hit the reliable InspectionController endpoint via AdminService instead of the Subscription controller
-    this.adminService.assignInspectionToSurveyor(propertyId, surveyorId).subscribe({
-      next: (insResponse) => {
-        this.successMessage.set('Inspection assigned successfully');
-        
-        // Find surveyor correctly mapped from surveyors()
-        const surveyor = this.surveyors().find(s => s.surveyorId == surveyorId || (s as any).id == surveyorId);
-        
-        // Assemble frontend inspection state mimicking backend Inspection details format for UI cache
-        const ins = {
-          inspectionId: (insResponse as any).inspectionId || 0,
-          subscriptionId: subId,
-          propertyId: propertyId,
-          surveyorId: surveyorId,
-          surveyorName: surveyor ? `${surveyor.firstName || surveyor.username} ${surveyor.lastName || ''}` : 'Surveyor',
-          status: 'ASSIGNED',
-          assignedDate: new Date().toISOString()
-        };
-        
-        const current = this.inspections();
-        this.inspections.set({ ...current, [subId]: ins as any });
-        
-        // Update subscription visually in the dashboard
-        const updatedSubs = this.subscriptions().map(s => {
-          if ((s.subscriptionId || s.id) === subId) {
-            return { ...s, status: 'PENDING' as any }; 
-          }
-          return s;
-        });
-        this.subscriptions.set(updatedSubs);
-        this.applyFilter();
-        setTimeout(() => this.successMessage.set(''), 3000);
-      },
-      error: (err: any) => {
-        console.error('Error assigning inspection:', err);
-        const msg = err.error?.message || err.message || 'Failed to assign inspection';
-        this.errorMessage.set(msg);
-        setTimeout(() => this.errorMessage.set(''), 4000);
-      }
-    });
   }
 
   viewDocuments(sub: PolicySubscription): void {
@@ -234,12 +139,6 @@ export class AdminSubscriptionsComponent implements OnInit {
         setTimeout(() => this.errorMessage.set(''), 4000);
       }
     });
-  }
-
-  onSurveyorSelect(subId: number, event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    const current = this.selectedSurveyors();
-    this.selectedSurveyors.set({ ...current, [subId]: Number(select.value) });
   }
 
   onUnderwriterSelect(subId: number, event: Event): void {
