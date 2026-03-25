@@ -44,7 +44,7 @@ public class PolicyEndorsementController {
     }
 
     @GetMapping("/subscription/{subscriptionId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'UNDERWRITER')")
     public ResponseEntity<List<EndorsementResponse>> getForSubscription(Authentication authentication,
                                                                         @PathVariable Long subscriptionId) {
         return ResponseEntity.ok(endorsementService.getBySubscription(subscriptionId, authentication.getName())

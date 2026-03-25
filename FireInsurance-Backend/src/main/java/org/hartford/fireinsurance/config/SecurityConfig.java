@@ -60,8 +60,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/underwriter/**").hasRole("UNDERWRITER")
 
-                        // Claims - include underwriter workflow
-                        .requestMatchers("/api/claims/**").hasAnyRole("ADMIN", "SURVEYOR", "CUSTOMER", "UNDERWRITER")
+                        // Fraud detection and SIU endpoints
+                        .requestMatchers("/api/fraud/siu/investigators").hasAnyRole("ADMIN", "SIU_INVESTIGATOR")
+                        .requestMatchers("/api/fraud/siu/**").hasAnyRole("ADMIN", "SIU_INVESTIGATOR")
+                        .requestMatchers("/api/fraud/**").hasAnyRole("ADMIN", "SIU_INVESTIGATOR")
+
+                        // Claims - include SIU investigator workflow
+                        .requestMatchers("/api/claims/**").hasAnyRole("ADMIN", "SURVEYOR", "CUSTOMER", "UNDERWRITER", "SIU_INVESTIGATOR")
 
                         // Claim inspections
                         .requestMatchers("/api/claim-inspections/**").hasAnyRole("SURVEYOR", "ADMIN", "UNDERWRITER")

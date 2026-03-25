@@ -3,8 +3,10 @@ package org.hartford.fireinsurance.service;
 import org.hartford.fireinsurance.dto.CreateEndorsementRequest;
 import org.hartford.fireinsurance.model.PolicyEndorsement;
 import org.hartford.fireinsurance.model.PolicySubscription;
+import org.hartford.fireinsurance.model.User;
 import org.hartford.fireinsurance.repository.PolicyEndorsementRepository;
 import org.hartford.fireinsurance.repository.PolicySubscriptionRepository;
+import org.hartford.fireinsurance.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,18 +19,29 @@ public class PolicyEndorsementService {
 
     private final PolicyEndorsementRepository endorsementRepository;
     private final PolicySubscriptionRepository subscriptionRepository;
+    private final UserRepository userRepository;
 
     public PolicyEndorsementService(PolicyEndorsementRepository endorsementRepository,
-                                    PolicySubscriptionRepository subscriptionRepository) {
+                                    PolicySubscriptionRepository subscriptionRepository,
+                                    UserRepository userRepository) {
         this.endorsementRepository = endorsementRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.userRepository = userRepository;
+    }
+
+    private boolean hasAdminOrUnderwriterRole(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        String role = user.getRole();
+        return "ADMIN".equals(role) || "UNDERWRITER".equals(role);
     }
 
     public PolicyEndorsement create(String username, CreateEndorsementRequest request) {
         PolicySubscription subscription = subscriptionRepository.findById(request.getSubscriptionId())
                 .orElseThrow(() -> new RuntimeException("Subscription not found with ID: " + request.getSubscriptionId()));
 
-        if (!subscription.getCustomer().getUser().getUsername().equals(username)) {
+        if (!hasAdminOrUnderwriterRole(username) &&
+            !subscription.getCustomer().getUser().getUsername().equals(username)) {
             throw new RuntimeException("Unauthorized: subscription does not belong to this customer");
         }
 
@@ -83,7 +96,8 @@ public class PolicyEndorsementService {
         PolicySubscription subscription = subscriptionRepository.findById(subscriptionId)
                 .orElseThrow(() -> new RuntimeException("Subscription not found with ID: " + subscriptionId));
 
-        if (!subscription.getCustomer().getUser().getUsername().equals(username)) {
+        if (!hasAdminOrUnderwriterRole(username) &&
+            !subscription.getCustomer().getUser().getUsername().equals(username)) {
             throw new RuntimeException("Unauthorized: subscription does not belong to this customer");
         }
 

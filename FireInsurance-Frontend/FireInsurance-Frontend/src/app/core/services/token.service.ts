@@ -85,6 +85,14 @@ export class TokenService {
   }
 
   /**
+   * Get user ID from JWT token
+   */
+  getUserId(): string | null {
+    const payload = this.decodePayload();
+    return payload?.sub || null;
+  }
+
+  /**
    * Check if user has specific role
    */
   hasRole(role: UserRole): boolean {

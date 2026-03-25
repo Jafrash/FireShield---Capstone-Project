@@ -42,7 +42,7 @@ public class ClaimController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SURVEYOR', 'CUSTOMER', 'UNDERWRITER', 'SIU_INVESTIGATOR')")
     public ResponseEntity<List<ClaimResponse>> getAllClaims() {
         List<ClaimResponse> response = claimService.getAllClaims().stream()
                 .map(this::mapToResponse)

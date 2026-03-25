@@ -1,0 +1,186 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">SIU Investigators</h1>
+        <p class="text-gray-600 mt-2">Register and manage Special Investigation Unit investigators</p>
+      </div>
+      <button (click)="toggleForm()"
+              class="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all"
+              [ngClass]="showRegisterForm() ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-fire-red text-white hover:opacity-90'">
+        <span class="material-icons text-sm">{{ showRegisterForm() ? 'close' : 'person_add' }}</span>
+        {{ showRegisterForm() ? 'Cancel' : 'Register SIU Investigator' }}
+      </button>
+    </div>
+
+    <!-- Alerts -->
+    @if (successMessage()) {
+      <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-5 flex items-center gap-2">
+        <span class="material-icons text-sm">check_circle</span>{{ successMessage() }}
+      </div>
+    }
+    @if (errorMessage()) {
+      <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-5 flex items-center gap-2">
+        <span class="material-icons text-sm">error</span>{{ errorMessage() }}
+      </div>
+    }
+
+    <!-- Register Form -->
+    @if (showRegisterForm()) {
+      <div class="glass-card p-8 mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+          <span class="material-icons text-fire-red">security</span>
+          Register New SIU Investigator
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Email -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Email *</label>
+            <input [(ngModel)]="form.email" type="email" placeholder="e.g. jsmith@example.com"
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
+          </div>
+          <!-- Password -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Password *</label>
+            <input [(ngModel)]="form.password" type="password" placeholder="Min 8 characters"
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
+          </div>
+          <!-- First Name -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">First Name *</label>
+            <input [(ngModel)]="form.firstName" type="text" placeholder="e.g. John"
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
+          </div>
+          <!-- Last Name -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Last Name *</label>
+            <input [(ngModel)]="form.lastName" type="text" placeholder="e.g. Smith"
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
+          </div>
+          <!-- Phone -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Phone</label>
+            <input [(ngModel)]="form.phoneNumber" type="tel" placeholder="+91 9876543210"
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
+          </div>
+          <!-- Badge Number -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Badge Number *</label>
+            <input [(ngModel)]="form.badgeNumber" type="text" placeholder="e.g. SIU001"
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
+          </div>
+          <!-- Specialization -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Specialization *</label>
+            <select [(ngModel)]="form.specialization"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
+              @for (spec of specializations; track spec.value) {
+                <option [value]="spec.value">{{ spec.label }}</option>
+              }
+            </select>
+          </div>
+          <!-- Experience -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Experience (Years)</label>
+            <input [(ngModel)]="form.experienceYears" type="number" min="0" placeholder="0"
+                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fire-red focus:border-fire-red outline-none bg-white transition-shadow">
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end">
+          <button (click)="registerSiuInvestigator()"
+                  [disabled]="isSubmitting()"
+                  class="flex items-center gap-2 px-6 py-3 rounded-xl bg-fire-red text-white font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (isSubmitting()) {
+              <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            } @else {
+              <span class="material-icons text-sm">save</span>
+            }
+            {{ isSubmitting() ? 'Registering…' : 'Register SIU Investigator' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Loading -->
+    @if (isLoading()) {
+      <div class="flex justify-center items-center py-20">
+        <div class="w-12 h-12 border-4 border-fire-red border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }
+
+    <!-- Table -->
+    @if (!isLoading()) {
+      @if (siuInvestigators().length === 0) {
+        <div class="glass-card p-12 text-center">
+          <span class="material-icons text-6xl text-gray-300">security</span>
+          <p class="text-gray-500 mt-3 text-lg">No SIU investigators registered yet.</p>
+          <p class="text-gray-400 text-sm mt-1">Click "Register SIU Investigator" to add the first one.</p>
+        </div>
+      } @else {
+        <div class="glass-card overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="font-bold text-gray-800">All SIU Investigators</h2>
+            <span class="text-sm text-gray-500">{{ siuInvestigators().length }} total</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-gradient-to-r from-fire-red to-fire-orange text-white">
+                  <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">ID</th>
+                  <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Badge #</th>
+                  <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Name</th>
+                  <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Username</th>
+                  <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Email</th>
+                  <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Specialization</th>
+                  <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Exp.</th>
+                  <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Status</th>
+                  <th class="px-5 py-4 text-left font-bold uppercase tracking-widest text-xs">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                @for (investigator of siuInvestigators(); track investigator.investigatorId) {
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-4 font-mono font-bold text-gray-600">#{{ investigator.investigatorId }}</td>
+                    <td class="px-5 py-4 font-semibold text-fire-red">{{ investigator.badgeNumber }}</td>
+                    <td class="px-5 py-4 font-semibold text-gray-900">{{ investigator.firstName }} {{ investigator.lastName }}</td>
+                    <td class="px-5 py-4 text-gray-600">{{ investigator.username }}</td>
+                    <td class="px-5 py-4 text-gray-600">{{ investigator.email }}</td>
+                    <td class="px-5 py-4 text-gray-600">
+                      <span class="px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800">
+                        {{ getSpecializationLabel(investigator.specialization) }}
+                      </span>
+                    </td>
+                    <td class="px-5 py-4 text-gray-600">{{ investigator.experienceYears ?? '—' }} yrs</td>
+                    <td class="px-5 py-4">
+                      @if (investigator.active !== false) {
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 uppercase">Active</span>
+                      } @else {
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 uppercase">Inactive</span>
+                      }
+                    </td>
+                    <td class="px-5 py-4">
+                      <div class="flex items-center gap-2">
+                        @if (investigator.active !== false) {
+                          <button (click)="deactivateInvestigator(investigator)"
+                                  class="px-3 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 text-xs font-semibold transition-colors">
+                            Deactivate
+                          </button>
+                        } @else {
+                          <button (click)="activateInvestigator(investigator)"
+                                  class="px-3 py-1 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 text-xs font-semibold transition-colors">
+                            Activate
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

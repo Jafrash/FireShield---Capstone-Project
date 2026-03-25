@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+
 export interface PublicPolicy {
   policyId: number;
   policyName: string;
@@ -22,7 +24,7 @@ export interface QuoteRequest {
 })
 export class PublicService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api';
+  private readonly apiUrl = environment.apiUrl;
 
   getPolicies(): Observable<PublicPolicy[]> {
     return this.http.get<PublicPolicy[]>(`${this.apiUrl}/policies`);

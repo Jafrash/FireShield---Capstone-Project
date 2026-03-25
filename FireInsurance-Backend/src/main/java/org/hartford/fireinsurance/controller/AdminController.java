@@ -1,6 +1,8 @@
 package org.hartford.fireinsurance.controller;
 
 import org.hartford.fireinsurance.dto.AssignUnderwriterRequest;
+import org.hartford.fireinsurance.dto.SiuInvestigatorRegistrationRequest;
+import org.hartford.fireinsurance.dto.SiuInvestigatorResponse;
 import org.hartford.fireinsurance.dto.SurveyorRegistrationRequest;
 import org.hartford.fireinsurance.dto.SurveyorResponse;
 import org.hartford.fireinsurance.dto.SubscriptionResponse;
@@ -8,10 +10,12 @@ import org.hartford.fireinsurance.dto.UnderwriterRegistrationRequest;
 import org.hartford.fireinsurance.dto.UnderwriterResponse;
 import org.hartford.fireinsurance.model.Claim;
 import org.hartford.fireinsurance.model.PolicySubscription;
+import org.hartford.fireinsurance.model.SiuInvestigator;
 import org.hartford.fireinsurance.model.Surveyor;
 import org.hartford.fireinsurance.model.Underwriter;
 import org.hartford.fireinsurance.service.ClaimService;
 import org.hartford.fireinsurance.service.PolicySubscriptionService;
+import org.hartford.fireinsurance.service.SiuInvestigatorService;
 import org.hartford.fireinsurance.service.SurveyorService;
 import org.hartford.fireinsurance.service.UnderwriterService;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +31,18 @@ public class AdminController {
 
     private final UnderwriterService underwriterService;
     private final SurveyorService surveyorService;
+    private final SiuInvestigatorService siuInvestigatorService;
     private final PolicySubscriptionService subscriptionService;
     private final ClaimService claimService;
 
     public AdminController(UnderwriterService underwriterService,
                            SurveyorService surveyorService,
+                           SiuInvestigatorService siuInvestigatorService,
                            PolicySubscriptionService subscriptionService,
                            ClaimService claimService) {
         this.underwriterService = underwriterService;
         this.surveyorService = surveyorService;
+        this.siuInvestigatorService = siuInvestigatorService;
         this.subscriptionService = subscriptionService;
         this.claimService = claimService;
     }
@@ -67,6 +74,39 @@ public class AdminController {
                 .map(this::toSurveyorResponse)
                 .toList();
         return ResponseEntity.ok(response);
+    }
+
+    // SIU Investigator Management Endpoints
+    @PostMapping("/siu-investigators")
+    public ResponseEntity<SiuInvestigatorResponse> createSiuInvestigator(@RequestBody SiuInvestigatorRegistrationRequest request) {
+        SiuInvestigator created = siuInvestigatorService.registerSiuInvestigator(request);
+        return ResponseEntity.ok(new SiuInvestigatorResponse(created));
+    }
+
+    @GetMapping("/siu-investigators")
+    public ResponseEntity<List<SiuInvestigatorResponse>> getSiuInvestigators() {
+        List<SiuInvestigatorResponse> response = siuInvestigatorService.getAllActiveInvestigators().stream()
+                .map(SiuInvestigatorResponse::new)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/siu-investigators/{investigatorId}")
+    public ResponseEntity<SiuInvestigatorResponse> getSiuInvestigator(@PathVariable Long investigatorId) {
+        SiuInvestigator investigator = siuInvestigatorService.getInvestigatorById(investigatorId);
+        return ResponseEntity.ok(new SiuInvestigatorResponse(investigator));
+    }
+
+    @PutMapping("/siu-investigators/{investigatorId}/deactivate")
+    public ResponseEntity<String> deactivateSiuInvestigator(@PathVariable Long investigatorId) {
+        siuInvestigatorService.deactivateInvestigator(investigatorId);
+        return ResponseEntity.ok("SIU Investigator deactivated successfully");
+    }
+
+    @PutMapping("/siu-investigators/{investigatorId}/activate")
+    public ResponseEntity<String> activateSiuInvestigator(@PathVariable Long investigatorId) {
+        siuInvestigatorService.activateInvestigator(investigatorId);
+        return ResponseEntity.ok("SIU Investigator activated successfully");
     }
 
     @PostMapping("/assign-underwriter/subscription")

@@ -3,6 +3,7 @@ import { HttpClient, HttpEvent, HttpEventType } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Document, DocumentType, DocumentEntityType } from '../models/document.model';
+import { environment } from '../../../environments/environment';
 
 export interface UploadProgress {
   progress: number;
@@ -15,7 +16,7 @@ export interface UploadProgress {
 })
 export class DocumentService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/documents';
+  private apiUrl = `${environment.apiUrl}/documents`;
 
   uploadDocument(file: File, documentType: DocumentType, linkedEntityId: number, linkedEntityType: DocumentEntityType): Observable<UploadProgress> {
     const formData = new FormData();

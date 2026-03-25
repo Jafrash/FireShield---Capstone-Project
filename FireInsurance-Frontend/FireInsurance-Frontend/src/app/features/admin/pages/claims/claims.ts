@@ -1,11 +1,12 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, Underwriter } from '../../../../features/admin/services/admin.service';
-import { Claim } from '../../../../core/models/claim.model';
+import { Claim, RiskLevel, FraudStatus, FraudAnalysis, SiuAssignmentRequest } from '../../../../core/models/claim.model';
 import { Surveyor } from '../../../../features/admin/services/admin.service';
 import { DocumentService } from '../../../../core/services/document.service';
 import { Document } from '../../../../core/models/document.model';
+import { FraudService, SiuInvestigator } from '../../../../core/services/fraud.service';
 
 @Component({
   selector: 'app-claims',
@@ -15,19 +16,27 @@ import { Document } from '../../../../core/models/document.model';
 })
 export class ClaimsComponent implements OnInit {
   private adminService = inject(AdminService);
-  
+  private fraudService = inject(FraudService);
+
   claims = signal<Claim[]>([]);
   filteredClaims = signal<Claim[]>([]);
   isLoading = signal<boolean>(true);
   errorMessage = signal<string>('');
   searchTerm = signal<string>('');
 
+  // Risk level filter
+  selectedRiskLevel = signal<RiskLevel | 'ALL'>('ALL');
+
   surveyors = signal<Surveyor[]>([]);
   selectedSurveyors: Record<number, number> = {};
 
   underwriters = signal<Underwriter[]>([]);
   selectedUnderwriters: Record<number, number> = {};
-  
+
+  // SIU Investigators
+  siuInvestigators = signal<SiuInvestigator[]>([]);
+  isLoadingInvestigators = signal(false);
+
   // Document Viewer logic
   private documentService = inject(DocumentService);
   selectedClaimForDocs = signal<Claim | null>(null);
@@ -35,10 +44,49 @@ export class ClaimsComponent implements OnInit {
   isDocsLoading = signal(false);
   successMessage = signal('');
 
+  // Fraud Detection UI
+  selectedClaimForFraud = signal<Claim | null>(null);
+  fraudAnalysis = signal<FraudAnalysis | null>(null);
+  showFraudModal = signal(false);
+  showSiuModal = signal(false);
+  isLoadingFraud = signal(false);
+
+  // SIU Assignment
+  siuAssignment = signal<SiuAssignmentRequest>({
+    siuInvestigatorId: 1,
+    initialNotes: ''
+  });
+
+  // Computed filtered claims based on risk level
+  riskFilteredClaims = computed(() => {
+    const claims = this.claims();
+    const riskLevel = this.selectedRiskLevel();
+    const search = this.searchTerm();
+
+    let filtered = claims;
+
+    // Filter by risk level
+    if (riskLevel !== 'ALL') {
+      filtered = filtered.filter(claim => claim.riskLevel === riskLevel);
+    }
+
+    // Filter by search term
+    if (search.trim()) {
+      const searchLower = search.toLowerCase().trim();
+      filtered = filtered.filter(claim =>
+        claim.claimId.toString().includes(searchLower) ||
+        claim.description.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return filtered;
+  });
+
   ngOnInit(): void {
     this.loadClaims();
     this.loadSurveyors();
     this.loadUnderwriters();
+    this.loadSiuInvestigators();
   }
 
   loadSurveyors(): void {
@@ -55,6 +103,31 @@ export class ClaimsComponent implements OnInit {
     });
   }
 
+  loadSiuInvestigators(): void {
+    this.isLoadingInvestigators.set(true);
+    console.log('Loading SIU investigators...');
+
+    this.fraudService.getSiuInvestigators().subscribe({
+      next: (data) => {
+        console.log('Loaded SIU investigators:', data);
+        this.siuInvestigators.set(data || []);
+        this.isLoadingInvestigators.set(false);
+
+        if (!data || data.length === 0) {
+          console.warn('No SIU investigators found in response');
+        }
+      },
+      error: (err) => {
+        console.error('Error loading SIU investigators:', err);
+        this.isLoadingInvestigators.set(false);
+        this.siuInvestigators.set([]);
+
+        // Show user-friendly error message
+        alert('Failed to load SIU investigators. Please refresh the page and try again.');
+      }
+    });
+  }
+
   loadClaims(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
@@ -63,9 +136,9 @@ export class ClaimsComponent implements OnInit {
       next: (data) => {
         // Apply smart calculation for settlement amounts
         const processedClaims = data.map(claim => this.calculateSettlementAmount(claim));
-        this.claims.set(processedClaims);
-        this.filteredClaims.set(processedClaims);
-        this.isLoading.set(false);
+
+        // Load fraud analysis data for each claim
+        this.loadFraudAnalysisForClaims(processedClaims);
       },
       error: (error) => {
         console.error('Error loading claims:', error);
@@ -73,6 +146,70 @@ export class ClaimsComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  /**
+   * Load fraud analysis data for all claims and merge with claim data
+   */
+  private loadFraudAnalysisForClaims(claims: Claim[]): void {
+    let completedRequests = 0;
+    const totalRequests = claims.length;
+    const claimsWithFraud: Claim[] = [];
+
+    if (totalRequests === 0) {
+      this.claims.set([]);
+      this.filteredClaims.set([]);
+      this.isLoading.set(false);
+      return;
+    }
+
+    claims.forEach((claim, index) => {
+      // Try to get fraud analysis for each claim
+      this.fraudService.getFraudAnalysis(claim.claimId).subscribe({
+        next: (fraudData) => {
+          // Merge fraud analysis data into claim
+          const enrichedClaim: Claim = {
+            ...claim,
+            fraudScore: fraudData.fraudScore,
+            riskLevel: fraudData.riskLevel,
+            fraudStatus: fraudData.fraudStatus,
+            fraudAnalysisTimestamp: fraudData.analysisTimestamp
+          };
+          claimsWithFraud[index] = enrichedClaim;
+
+          // Check completion in success case
+          completedRequests++;
+          this.checkFraudAnalysisCompletion(claimsWithFraud, completedRequests, totalRequests);
+        },
+        error: (error) => {
+          console.warn(`No fraud analysis for claim ${claim.claimId}:`, error);
+          // Keep original claim with default fraud values
+          claimsWithFraud[index] = {
+            ...claim,
+            fraudScore: 0,
+            riskLevel: 'LOW',
+            fraudStatus: 'CLEAR'
+          };
+
+          // Check completion in error case
+          completedRequests++;
+          this.checkFraudAnalysisCompletion(claimsWithFraud, completedRequests, totalRequests);
+        }
+      });
+    });
+  }
+
+  /**
+   * Helper method to check if fraud analysis loading is complete
+   */
+  private checkFraudAnalysisCompletion(claimsWithFraud: Claim[], completedRequests: number, totalRequests: number): void {
+    if (completedRequests === totalRequests) {
+      // All fraud analysis requests completed, update UI
+      this.claims.set(claimsWithFraud);
+      this.filteredClaims.set(claimsWithFraud);
+      this.isLoading.set(false);
+      console.log('✅ Claims loaded with fraud analysis:', claimsWithFraud);
+    }
   }
 
   searchClaims(term: string): void {
@@ -278,5 +415,308 @@ export class ClaimsComponent implements OnInit {
     }
 
     return claim;
+  }
+
+  // ==================== FRAUD DETECTION METHODS ====================
+
+  /**
+   * Filter claims by risk level
+   */
+  filterByRiskLevel(riskLevel: RiskLevel | 'ALL'): void {
+    this.selectedRiskLevel.set(riskLevel);
+  }
+
+  /**
+   * Update search term and trigger filtering
+   */
+  updateSearch(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchTerm.set(input.value);
+  }
+
+  /**
+   * View fraud analysis for a claim
+   */
+  viewFraudAnalysis(claim: Claim): void {
+    this.selectedClaimForFraud.set(claim);
+    this.isLoadingFraud.set(true);
+    this.showFraudModal.set(true);
+
+    this.fraudService.getFraudAnalysis(claim.claimId).subscribe({
+      next: (analysis) => {
+        this.fraudAnalysis.set(analysis);
+        this.isLoadingFraud.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load fraud analysis:', err);
+        this.isLoadingFraud.set(false);
+        // Show some default data or error state
+        this.fraudAnalysis.set({
+          claimId: claim.claimId,
+          fraudScore: claim.fraudScore || 0,
+          riskLevel: claim.riskLevel || 'LOW',
+          fraudStatus: claim.fraudStatus || 'CLEAR',
+          ruleBreakdown: [],
+          analysisTimestamp: new Date().toISOString(),
+          recommendation: 'Unable to load detailed analysis.'
+        });
+      }
+    });
+  }
+
+  /**
+   * Close fraud analysis modal
+   */
+  closeFraudModal(): void {
+    this.showFraudModal.set(false);
+    this.selectedClaimForFraud.set(null);
+    this.fraudAnalysis.set(null);
+  }
+
+  /**
+   * Open SIU assignment modal
+   */
+  assignToSiu(): void {
+    const investigators = this.siuInvestigators();
+
+    // Ensure investigators are loaded before showing modal
+    if (investigators.length === 0) {
+      alert('Loading SIU investigators...');
+      this.loadSiuInvestigators();
+
+      // Wait for investigators to load, then retry
+      setTimeout(() => {
+        if (this.siuInvestigators().length > 0) {
+          this.assignToSiu(); // Retry after loading
+        } else {
+          alert('No SIU investigators available. Please contact an administrator.');
+        }
+      }, 2000);
+      return;
+    }
+
+    this.showSiuModal.set(true);
+
+    // Use first available investigator as default (now guaranteed to exist)
+    this.siuAssignment.set({
+      siuInvestigatorId: investigators[0].investigatorId,
+      initialNotes: ''
+    });
+  }
+
+  /**
+   * Close SIU assignment modal
+   */
+  closeSiuModal(): void {
+    this.showSiuModal.set(false);
+  }
+
+  /**
+   * Update SIU investigator ID
+   */
+  updateSiuInvestigator(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.siuAssignment.update(assignment => ({
+      ...assignment,
+      siuInvestigatorId: parseInt(select.value)
+    }));
+  }
+
+  /**
+   * Update SIU initial notes
+   */
+  updateSiuNotes(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    this.siuAssignment.update(assignment => ({
+      ...assignment,
+      initialNotes: textarea.value
+    }));
+  }
+
+  /**
+   * Confirm SIU assignment
+   */
+  confirmSiuAssignment(): void {
+    const claim = this.selectedClaimForFraud();
+    const assignment = this.siuAssignment();
+    const investigators = this.siuInvestigators();
+
+    // Comprehensive validation before API call
+    if (!claim) {
+      alert('No claim selected for SIU assignment');
+      return;
+    }
+
+    // Check if claim is already assigned to SIU investigation
+    if (claim.fraudStatus === 'SIU_INVESTIGATION') {
+      alert('This claim is already assigned to SIU investigation. Please check the SIU investigator dashboard for details.');
+      return;
+    }
+
+    if (investigators.length === 0) {
+      alert('No SIU investigators available. Please ensure investigators are loaded.');
+      this.loadSiuInvestigators(); // Retry loading
+      return;
+    }
+
+    if (!assignment.siuInvestigatorId || assignment.siuInvestigatorId <= 0) {
+      alert('Please select a valid SIU investigator');
+      return;
+    }
+
+    // Verify selected investigator exists in loaded list
+    const selectedInvestigator = investigators.find(inv => inv.investigatorId === assignment.siuInvestigatorId);
+    if (!selectedInvestigator) {
+      alert('Selected investigator is not available. Please refresh and try again.');
+      return;
+    }
+
+    console.log(`Assigning claim ${claim.claimId} to investigator ${selectedInvestigator.username} (ID: ${assignment.siuInvestigatorId})`);
+
+    this.adminService.assignClaimToSiu(claim.claimId, assignment).subscribe({
+      next: (response) => {
+        // Update local claim state using the response data
+        this.claims.update(claims =>
+          claims.map(c =>
+            c.claimId === response.claimId
+              ? {
+                  ...c,
+                  fraudStatus: response.fraudStatus as any,
+                  siuInvestigatorId: response.siuInvestigatorId
+                }
+              : c
+          )
+        );
+
+        this.closeSiuModal();
+        this.closeFraudModal();
+        alert(response.message || 'Claim successfully assigned to SIU investigator');
+      },
+      error: (err) => {
+        console.error('Failed to assign to SIU:', err);
+        console.error('Error details:', {
+          status: err.status,
+          statusText: err.statusText,
+          error: err.error,
+          message: err.message
+        });
+
+        let errorMessage = 'Failed to assign claim to SIU investigator';
+
+        // Extract specific backend error message
+        // Backend returns SiuAssignmentResponse with message field
+        if (err.error?.message) {
+          errorMessage = err.error.message;
+        } else if (err.error && typeof err.error === 'string') {
+          errorMessage = `Assignment failed: ${err.error}`;
+        } else if (err.message) {
+          errorMessage = `Assignment failed: ${err.message}`;
+        } else if (err.status === 400) {
+          errorMessage = 'Invalid assignment data. This claim may already have an investigation case.';
+        } else if (err.status === 403) {
+          errorMessage = 'You do not have permission to assign claims to SIU investigators.';
+        } else if (err.status === 500) {
+          errorMessage = 'Server error during assignment. Please try again or contact support.';
+        }
+
+        alert(errorMessage);
+      }
+    });
+  }
+
+  // ==================== FRAUD UI HELPER METHODS ====================
+
+  /**
+   * Get fraud score color based on risk level
+   */
+  getFraudScoreColor(riskLevel?: RiskLevel): string {
+    switch (riskLevel) {
+      case 'CRITICAL': return 'bg-red-500';
+      case 'HIGH': return 'bg-orange-500';
+      case 'MEDIUM': return 'bg-yellow-500';
+      case 'LOW': return 'bg-green-500';
+      default: return 'bg-gray-300';
+    }
+  }
+
+  /**
+   * Get risk level badge classes
+   */
+  getRiskLevelClass(riskLevel?: RiskLevel): string {
+    switch (riskLevel) {
+      case 'CRITICAL': return 'bg-red-100 text-red-800 border-red-200';
+      case 'HIGH': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'LOW': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  }
+
+  /**
+   * Get fraud status badge classes
+   */
+  getFraudStatusClass(fraudStatus?: FraudStatus): string {
+    switch (fraudStatus) {
+      case 'CONFIRMED_FRAUD': return 'bg-red-100 text-red-800 border-red-200';
+      case 'SIU_INVESTIGATION': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'FLAGGED': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'UNDER_REVIEW': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'CLEARED': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'CLEAR': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  }
+
+  /**
+   * Format fraud status for display
+   */
+  formatFraudStatus(fraudStatus?: FraudStatus): string {
+    switch (fraudStatus) {
+      case 'SIU_INVESTIGATION': return 'SIU Investigation';
+      case 'UNDER_REVIEW': return 'Under Review';
+      case 'CONFIRMED_FRAUD': return 'Confirmed Fraud';
+      default: return fraudStatus || 'Clear';
+    }
+  }
+
+  /**
+   * Get risk level filter classes
+   */
+  getRiskFilterClass(riskLevel: RiskLevel | 'ALL'): string {
+    const isSelected = this.selectedRiskLevel() === riskLevel;
+
+    if (riskLevel === 'ALL') {
+      return isSelected
+        ? 'bg-gray-800 text-white'
+        : 'bg-gray-100 text-gray-600 hover:bg-gray-200';
+    }
+
+    const baseClasses = isSelected ? 'text-white' : 'hover:opacity-80';
+
+    switch (riskLevel) {
+      case 'CRITICAL':
+        return isSelected ? `${baseClasses} bg-red-600` : `${baseClasses} bg-red-50 text-red-600`;
+      case 'HIGH':
+        return isSelected ? `${baseClasses} bg-orange-600` : `${baseClasses} bg-orange-50 text-orange-600`;
+      case 'MEDIUM':
+        return isSelected ? `${baseClasses} bg-yellow-600` : `${baseClasses} bg-yellow-50 text-yellow-600`;
+      case 'LOW':
+        return isSelected ? `${baseClasses} bg-green-600` : `${baseClasses} bg-green-50 text-green-600`;
+      default:
+        return 'bg-gray-100 text-gray-600';
+    }
+  }
+
+  /**
+   * Get count for risk level filter
+   */
+  getRiskLevelCount(riskLevel: RiskLevel | 'ALL'): number {
+    const claims = this.claims();
+
+    if (riskLevel === 'ALL') {
+      return claims.length;
+    }
+
+    return claims.filter(claim => claim.riskLevel === riskLevel).length;
   }
 }

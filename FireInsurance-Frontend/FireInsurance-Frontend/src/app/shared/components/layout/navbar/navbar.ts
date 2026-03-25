@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -12,11 +12,12 @@ import { AppNotification } from '../../../../core/models';
   templateUrl: './navbar.html'
   // Styles provided via Tailwind utility classes
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   private tokenService = inject(TokenService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
   private notificationSubscription?: Subscription;
 
   username: string | null = null;
@@ -78,6 +79,9 @@ export class NavbarComponent implements OnInit {
     this.notifications = this.notificationService.decorateWithReadStatus(this.username, this.notifications);
     this.unreadCount = this.notificationService.getUnreadCount(this.notifications);
 
+    // Trigger change detection
+    this.cdr.detectChanges();
+
     if (notification.actionUrl) {
       this.router.navigateByUrl(notification.actionUrl);
     }
@@ -91,6 +95,9 @@ export class NavbarComponent implements OnInit {
     this.notificationService.markAllAsRead(this.username, this.notifications);
     this.notifications = this.notificationService.decorateWithReadStatus(this.username, this.notifications);
     this.unreadCount = 0;
+
+    // Trigger change detection
+    this.cdr.detectChanges();
   }
 
   getNotificationIcon(type: string): string {
@@ -132,16 +139,17 @@ export class NavbarComponent implements OnInit {
 
     this.notificationSubscription = this.notificationService.pollNotifications(20, 30000).subscribe({
       next: (items) => {
-        setTimeout(() => {
-          this.notifications = this.notificationService.decorateWithReadStatus(this.username!, items);
-          this.unreadCount = this.notificationService.getUnreadCount(this.notifications);
-        }, 0);
+        // Update notifications and unread count properly with change detection
+        this.notifications = this.notificationService.decorateWithReadStatus(this.username!, items);
+        this.unreadCount = this.notificationService.getUnreadCount(this.notifications);
+
+        // Trigger change detection to prevent ExpressionChangedAfterItHasBeenCheckedError
+        this.cdr.detectChanges();
       },
       error: () => {
-        setTimeout(() => {
-          this.notifications = [];
-          this.unreadCount = 0;
-        }, 0);
+        this.notifications = [];
+        this.unreadCount = 0;
+        this.cdr.detectChanges();
       }
     });
   }

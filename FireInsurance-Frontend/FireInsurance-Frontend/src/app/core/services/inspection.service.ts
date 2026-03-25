@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Surveyor } from '../../features/admin/services/admin.service';
+import { environment } from '../../../environments/environment';
 
 export interface AssignInspectionRequest {
   subscriptionId: number;
@@ -24,7 +25,7 @@ export interface InspectionDetails {
 })
 export class InspectionService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api';
+  private readonly apiUrl = environment.apiUrl;
 
   getSurveyors(): Observable<Surveyor[]> {
     return this.http.get<Surveyor[]>(`${this.apiUrl}/surveyors`);

@@ -6,6 +6,7 @@ import { Policy, PolicySubscription, CreatePolicyRequest, UpdatePolicyRequest } 
 import { Claim } from '../../../core/models/claim.model';
 import { Property } from '../../../core/models/property.model';
 import { Document } from '../../../core/models/document.model';
+import { environment } from '../../../../environments/environment';
 
 export interface DashboardStats {
   totalCustomers: number;
@@ -52,6 +53,41 @@ export interface UnderwriterRegistrationRequest {
   experienceYears?: number;
 }
 
+export interface SiuAssignmentResponse {
+  claimId: number;
+  status: string;
+  fraudStatus: string;
+  siuInvestigatorId: number;
+  message: string;
+}
+
+export interface SiuInvestigator {
+  investigatorId: number;
+  userId: number;
+  username: string;
+  email: string;
+  phoneNumber?: string;
+  firstName: string;
+  lastName: string;
+  badgeNumber: string;
+  specialization: 'FIRE' | 'THEFT' | 'FRAUD' | 'PROPERTY' | 'GENERAL';
+  experienceYears?: number;
+  active?: boolean;
+  createdAt?: string;
+}
+
+export interface SiuInvestigatorRegistrationRequest {
+  username: string;
+  email: string;
+  password: string;
+  phoneNumber?: string;
+  firstName: string;
+  lastName: string;
+  badgeNumber: string;
+  specialization: 'FIRE' | 'THEFT' | 'FRAUD' | 'PROPERTY' | 'GENERAL';
+  experienceYears?: number;
+}
+
 export interface Inspection {
   id: number;
   propertyId: number;
@@ -70,7 +106,7 @@ export interface Inspection {
 })
 export class AdminService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api';
+  private readonly apiUrl = environment.apiUrl;
 
   // Dashboard Stats
   getDashboardStats(): Observable<DashboardStats> {
@@ -125,6 +161,27 @@ export class AdminService {
       // Backend returns plain text message; avoid JSON parse errors treated as HttpErrorResponse.
       responseType: 'text'
     });
+  }
+
+  // SIU Investigator Management
+  getAllSiuInvestigators(): Observable<SiuInvestigator[]> {
+    return this.http.get<SiuInvestigator[]>(`${this.apiUrl}/admin/siu-investigators`);
+  }
+
+  getSiuInvestigatorById(id: number): Observable<SiuInvestigator> {
+    return this.http.get<SiuInvestigator>(`${this.apiUrl}/admin/siu-investigators/${id}`);
+  }
+
+  registerSiuInvestigator(data: SiuInvestigatorRegistrationRequest): Observable<SiuInvestigator> {
+    return this.http.post<SiuInvestigator>(`${this.apiUrl}/admin/siu-investigators`, data);
+  }
+
+  deactivateSiuInvestigator(id: number): Observable<string> {
+    return this.http.put(`${this.apiUrl}/admin/siu-investigators/${id}/deactivate`, {}, { responseType: 'text' });
+  }
+
+  activateSiuInvestigator(id: number): Observable<string> {
+    return this.http.put(`${this.apiUrl}/admin/siu-investigators/${id}/activate`, {}, { responseType: 'text' });
   }
 
   // Policy Management
@@ -232,5 +289,28 @@ export class AdminService {
 
   deleteDocument(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/documents/${id}`);
+  }
+
+  // ==================== FRAUD DETECTION METHODS ====================
+
+  /**
+   * Get fraud analysis for a specific claim
+   */
+  getClaimFraudAnalysis(claimId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/claims/${claimId}/fraud-analysis`);
+  }
+
+  /**
+   * Assign claim to SIU investigator
+   */
+  assignClaimToSiu(claimId: number, assignment: any): Observable<SiuAssignmentResponse> {
+    return this.http.post<SiuAssignmentResponse>(`${this.apiUrl}/fraud/siu/assign/${claimId}`, assignment);
+  }
+
+  /**
+   * Update investigation notes for a claim
+   */
+  updateInvestigationNotes(claimId: number, notesRequest: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/claims/${claimId}/investigation-notes`, notesRequest);
   }
 }

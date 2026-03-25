@@ -31,6 +31,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/underwriter/underwriter.routes').then(m => m.underwriterRoutes)
   },
   {
+    path: 'siu-investigator',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/siu-investigator/siu-investigator.routes').then(m => m.siuInvestigatorRoutes)
+  },
+  {
     path: '**',
     redirectTo: '/'
   }

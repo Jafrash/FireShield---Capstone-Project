@@ -1,0 +1,100 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< org.hartford:FireInsurance >---------------------
+[INFO] Building FireInsurance 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:4.0.3:run (default-cli) > test-compile @ FireInsurance >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ FireInsurance ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ FireInsurance ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ FireInsurance ---
+[INFO] skip non existing resourceDirectory C:\Users\Jefrash Eada\OneDrive\Desktop\Hartford\FireShield\FireInsurance-Backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ FireInsurance ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 19 source files with javac [debug parameters release 17] to target\test-classes
+[INFO] 
+[INFO] <<< spring-boot:4.0.3:run (default-cli) < test-compile @ FireInsurance <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:4.0.3:run (default-cli) @ FireInsurance ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.3)
+
+2026-03-23T10:55:07.012+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] o.h.f.FireInsuranceApplication           : Starting FireInsuranceApplication using Java 21.0.10 with PID 37124 (C:\Users\Jefrash Eada\OneDrive\Desktop\Hartford\FireShield\FireInsurance-Backend\target\classes started by Jefrash Eada in C:\Users\Jefrash Eada\OneDrive\Desktop\Hartford\FireShield\FireInsurance-Backend)
+2026-03-23T10:55:07.025+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] o.h.f.FireInsuranceApplication           : No active profile set, falling back to 1 default profile: "default"
+2026-03-23T10:55:07.144+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-03-23T10:55:07.144+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-03-23T10:55:09.892+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-23T10:55:10.229+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 310 ms. Found 14 JPA repository interfaces.
+2026-03-23T10:55:11.919+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-03-23T10:55:11.951+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-23T10:55:11.951+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-03-23T10:55:12.053+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 4906 ms
+2026-03-23T10:55:12.407+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-03-23T10:55:12.556+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.4.Final
+2026-03-23T10:55:13.372+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-23T10:55:13.426+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-23T10:55:13.643+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:file:./data/demo user=SA
+2026-03-23T10:55:13.646+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-03-23T10:55:13.694+05:30  WARN 37124 --- [FireInsurance] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-23T10:55:13.733+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:file:./data/demo]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: DEMO/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-23T10:55:16.355+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-23T10:55:16.503+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-23T10:55:16.665+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-23T10:55:19.040+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userService
+2026-03-23T10:55:19.381+05:30  WARN 37124 --- [FireInsurance] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-23T10:55:20.585+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:./data/demo'
+2026-03-23T10:55:20.650+05:30  WARN 37124 --- [FireInsurance] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-03-23T10:55:20.656+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-23T10:55:20.663+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-03-23T10:55:20.685+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-03-23T10:55:20.701+05:30  INFO 37124 --- [FireInsurance] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-03-23T10:55:20.734+05:30 ERROR 37124 --- [FireInsurance] [  restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 8080 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  38.403 s
+[INFO] Finished at: 2026-03-23T10:55:20+05:30
+[INFO] ------------------------------------------------------------------------

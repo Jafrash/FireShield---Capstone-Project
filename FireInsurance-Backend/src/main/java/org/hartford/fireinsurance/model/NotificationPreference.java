@@ -70,4 +70,13 @@ public class NotificationPreference {
         this.enabledEventKeys = getDefaultEventKeys();
         // Can customize per-role in future
     }
+
+    // Explicit getters to ensure they're available (in case Lombok has issues)
+    public Boolean getEmailEnabled() {
+        return emailEnabled;
+    }
+
+    public Set<String> getEnabledEventKeys() {
+        return enabledEventKeys;
+    }
 }

@@ -166,11 +166,22 @@ public class PolicySubscriptionController {
     }
 
     @GetMapping("/{id}/premium-breakdown")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'UNDERWRITER')")
     public ResponseEntity<PremiumBreakdownResponse> getPremiumBreakdown(Authentication authentication, @PathVariable Long id) {
         String username = authentication.getName();
         PolicySubscription existingSubscription = subscriptionService.getSubscriptionById(id);
-        if (!existingSubscription.getCustomer().getUser().getUsername().equals(username)) {
+
+        // Check if user has permission to access this subscription
+        // ADMIN and UNDERWRITER can access any subscription, CUSTOMER only their own
+        boolean hasAccess = false;
+        if (authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || auth.getAuthority().equals("ROLE_UNDERWRITER"))) {
+            hasAccess = true; // ADMIN and UNDERWRITER can access any subscription
+        } else if (existingSubscription.getCustomer().getUser().getUsername().equals(username)) {
+            hasAccess = true; // CUSTOMER can access their own subscription
+        }
+
+        if (!hasAccess) {
             return ResponseEntity.status(403).build();
         }
 

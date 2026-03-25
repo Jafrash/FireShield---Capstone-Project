@@ -160,6 +160,9 @@ export class AuthService {
       case 'UNDERWRITER':
         this.router.navigate(['/underwriter']);
         break;
+      case 'SIU_INVESTIGATOR':
+        this.router.navigate(['/siu-investigator']);
+        break;
       default:
         this.router.navigate(['/auth/login']);
     }

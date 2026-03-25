@@ -73,6 +73,16 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    // Skip Google Sign-In initialization on localhost to prevent OAuth errors
+    if (this.isLocalhost()) {
+      console.log('Skipping Google Sign-In on localhost to prevent OAuth configuration errors');
+      const buttonContainer = document.getElementById('google-signin-button');
+      if (buttonContainer) {
+        buttonContainer.style.display = 'none';
+      }
+      return;
+    }
+
     if (!this.ensureGoogleScriptLoaded()) {
       this.retryGoogleInitialization();
       return;
@@ -89,26 +99,54 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clearGoogleRetryTimer();
     this.googleInitAttempts = 0;
 
-    googleIdentity.accounts.id.initialize({
-      client_id: environment.googleClientId,
-      callback: (response: GoogleCredentialResponse) => this.handleGoogleCredential(response),
-      auto_select: false,
-      cancel_on_tap_outside: true
-    });
+    try {
+      googleIdentity.accounts.id.initialize({
+        client_id: environment.googleClientId,
+        callback: (response: GoogleCredentialResponse) => this.handleGoogleCredential(response),
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
 
-    buttonContainer.innerHTML = '';
-    googleIdentity.accounts.id.renderButton(buttonContainer, {
-      type: 'standard',
-      shape: 'pill',
-      theme: 'outline',
-      text: 'signin_with',
-      size: 'large',
-      width: 360
-    });
-    this.isGoogleScriptReady.set(true);
+      buttonContainer.innerHTML = '';
+      googleIdentity.accounts.id.renderButton(buttonContainer, {
+        type: 'standard',
+        shape: 'pill',
+        theme: 'outline',
+        text: 'signin_with',
+        size: 'large',
+        width: 360
+      });
+      this.isGoogleScriptReady.set(true);
+    } catch (error) {
+      console.warn('Google Sign-In configuration issue:', error);
+      // Hide the Google button container if there's a configuration error
+      if (buttonContainer) {
+        buttonContainer.style.display = 'none';
+      }
+      // Don't show error message, just silently disable Google Sign-In
+    }
+  }
+
+  /**
+   * Check if we're running on localhost
+   * Temporarily disabled to allow Google Sign-In during development
+   */
+  private isLocalhost(): boolean {
+    // Temporarily allow Google Sign-In on localhost for development
+    // TODO: Re-enable this check before production deployment
+    return false;
+
+    // Original localhost detection (commented for development):
+    // const hostname = window.location.hostname;
+    // return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
   }
 
   private ensureGoogleScriptLoaded(): boolean {
+    // Localhost check temporarily disabled for development
+    // if (this.isLocalhost()) {
+    //   return false;
+    // }
+
     if (this.getGoogleIdentityServices()) {
       return true;
     }
@@ -124,15 +162,30 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     script.async = true;
     script.defer = true;
     script.onerror = () => {
-      this.errorMessage.set('Unable to load Google sign-in. Please use your username and password.');
+      console.warn('Google Identity Services script failed to load - Google Sign-In will be unavailable');
+      // Silently disable Google Sign-In instead of showing error to user
     };
     document.head.appendChild(script);
     return false;
   }
 
   private retryGoogleInitialization(): void {
+    // Localhost check temporarily disabled for development
+    // if (this.isLocalhost()) {
+    //   const buttonContainer = document.getElementById('google-signin-button');
+    //   if (buttonContainer) {
+    //     buttonContainer.style.display = 'none';
+    //   }
+    //   return;
+    // }
+
     if (this.googleInitAttempts >= this.maxGoogleInitAttempts) {
-      this.errorMessage.set('Google sign-in is currently unavailable. Please use your username and password.');
+      console.warn('Google Sign-In initialization failed after maximum attempts - disabling Google Sign-In');
+      // Hide Google button instead of showing error message
+      const buttonContainer = document.getElementById('google-signin-button');
+      if (buttonContainer) {
+        buttonContainer.style.display = 'none';
+      }
       return;
     }
 

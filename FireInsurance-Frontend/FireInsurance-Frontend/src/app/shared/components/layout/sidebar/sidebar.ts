@@ -43,11 +43,11 @@ export class SidebarComponent implements OnInit {
           { label: 'Customers', path: '/admin/customers', icon: 'people' },
           { label: 'Surveyors', path: '/admin/surveyors', icon: 'badge' },
           { label: 'Underwriters', path: '/admin/underwriters', icon: 'manage_accounts' },
+          { label: 'SIU Investigators', path: '/admin/siu-investigators', icon: 'security' },
           { label: 'Policies', path: '/admin/policies', icon: 'description' },
           { label: 'Subscriptions', path: '/admin/subscriptions', icon: 'card_membership' },
           { label: 'Claims', path: '/admin/claims', icon: 'assignment' },
-          { label: 'Property Inspections', path: '/admin/property-inspections', icon: 'home' },
-          { label: 'Claim Inspections', path: '/admin/claim-inspections', icon: 'search' }
+          { label: 'Blacklist', path: '/admin/blacklist', icon: 'gpp_bad' }
         ];
         break;
 
@@ -75,7 +75,18 @@ export class SidebarComponent implements OnInit {
         this.navLinks = [
           { label: 'Dashboard', path: '/underwriter/dashboard', icon: 'dashboard' },
           { label: 'Policy Subscriptions', path: '/underwriter/subscriptions', icon: 'card_membership' },
-          { label: 'Claims', path: '/underwriter/claims', icon: 'assignment' }
+          { label: 'Claims', path: '/underwriter/claims', icon: 'assignment' },
+          { label: 'Property Inspections', path: '/underwriter/property-inspections', icon: 'home' },
+          { label: 'Claim Inspections', path: '/underwriter/claim-inspections', icon: 'search' }
+        ];
+        break;
+
+      case 'SIU_INVESTIGATOR':
+        this.navLinks = [
+          { label: 'Dashboard', path: '/siu-investigator/dashboard', icon: 'dashboard' },
+          { label: 'My Profile', path: '/siu-investigator/profile', icon: 'person' },
+          { label: 'Assigned Cases', path: '/siu-investigator/cases', icon: 'assignment' },
+          { label: 'Investigation Reports', path: '/siu-investigator/reports', icon: 'description' }
         ];
         break;
     }

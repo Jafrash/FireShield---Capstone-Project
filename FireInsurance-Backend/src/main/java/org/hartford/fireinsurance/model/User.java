@@ -153,4 +153,13 @@ public class User implements UserDetails {
     public String getName() {
         return username;
     }
+
+    // Additional methods needed by the fraud detection system
+    public Long getUserId() {
+        return this.id;
+    }
+
+    public boolean hasRole(String roleName) {
+        return this.role != null && this.role.equalsIgnoreCase(roleName);
+    }
 }

@@ -3,11 +3,13 @@ package org.hartford.fireinsurance.service;
 import org.hartford.fireinsurance.dto.CreateClaimRequest;
 import org.hartford.fireinsurance.model.Claim;
 import org.hartford.fireinsurance.model.Claim.ClaimStatus;
+import org.hartford.fireinsurance.model.Claim.FraudStatus;
 import org.hartford.fireinsurance.model.ClaimInspection;
 import org.hartford.fireinsurance.model.Customer;
 import org.hartford.fireinsurance.model.Policy;
 import org.hartford.fireinsurance.model.PolicySubscription;
 import org.hartford.fireinsurance.model.Property;
+import org.hartford.fireinsurance.model.SiuInvestigator;
 import org.hartford.fireinsurance.model.Underwriter;
 import org.hartford.fireinsurance.repository.ClaimRepository;
 import org.hartford.fireinsurance.repository.NotificationPreferenceRepository;
@@ -43,6 +45,9 @@ public class ClaimService {
     private final UnderwriterRepository underwriterRepository;
     private final EmailNotificationService emailNotificationService;
     private final NotificationPreferenceRepository notificationPreferenceRepository;
+    private final FraudDetectionService fraudDetectionService; // CRITICAL: Add fraud detection service
+    private final SiuInvestigatorService siuInvestigatorService;
+    private final InvestigationCaseService investigationCaseService; // Add investigation case service
 
     public ClaimService(ClaimRepository claimRepository,
             PolicySubscriptionRepository subscriptionRepository,
@@ -50,7 +55,10 @@ public class ClaimService {
             org.hartford.fireinsurance.repository.ClaimInspectionRepository claimInspectionRepository,
             UnderwriterRepository underwriterRepository,
             EmailNotificationService emailNotificationService,
-            NotificationPreferenceRepository notificationPreferenceRepository) {
+            NotificationPreferenceRepository notificationPreferenceRepository,
+            FraudDetectionService fraudDetectionService, // CRITICAL: Inject fraud detection service
+            SiuInvestigatorService siuInvestigatorService,
+            InvestigationCaseService investigationCaseService) { // Add investigation case service
         this.claimRepository = claimRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.customerService = customerService;
@@ -58,12 +66,18 @@ public class ClaimService {
         this.underwriterRepository = underwriterRepository;
         this.emailNotificationService = emailNotificationService;
         this.notificationPreferenceRepository = notificationPreferenceRepository;
+        this.fraudDetectionService = fraudDetectionService; // CRITICAL: Initialize fraud detection service
+        this.siuInvestigatorService = siuInvestigatorService;
+        this.investigationCaseService = investigationCaseService; // Initialize investigation case service
     }
 
     /**
-     * Create a new claim (CUSTOMER only)
+     * Create a new claim (CUSTOMER only) with integrated fraud detection
      */
     public Claim createClaim(String username, CreateClaimRequest request) {
+        log.info("=== CREATING CLAIM WITH FRAUD DETECTION ===");
+        log.info("User: {}, Subscription ID: {}, Claim Amount: {}", username, request.getSubscriptionId(), request.getClaimAmount());
+
         // Get the subscription
         PolicySubscription subscription = subscriptionRepository.findById(request.getSubscriptionId())
                 .orElseThrow(
@@ -74,7 +88,7 @@ public class ClaimService {
             throw new RuntimeException("Unauthorized: Subscription does not belong to this customer");
         }
 
-        // Create claim
+        // Create claim with initial data
         Claim claim = new Claim();
         claim.setSubscription(subscription);
         claim.setDescription(request.getDescription());
@@ -86,9 +100,51 @@ public class ClaimService {
         claim.setSalvageDetails(request.getSalvageDetails());
         claim.setStatus(ClaimStatus.SUBMITTED);
         claim.setCreatedAt(LocalDateTime.now());
-        claim.setFraudScore(0.0); // Default fraud score
 
-        return claimRepository.save(claim);
+        // Initialize fraud fields with safe defaults
+        claim.setFraudScore(0.0);
+        claim.setRiskLevel(Claim.RiskLevel.LOW);
+        claim.setFraudStatus(Claim.FraudStatus.CLEAR);
+
+        // Save claim first to get ID for fraud analysis
+        Claim savedClaim = claimRepository.save(claim);
+        log.info("Claim created with ID: {}", savedClaim.getClaimId());
+
+        // *** CRITICAL: APPLY FRAUD DETECTION ***
+        try {
+            log.info("Applying fraud detection to claim ID: {}", savedClaim.getClaimId());
+            Claim fraudAnalyzedClaim = fraudDetectionService.applyFraudAnalysis(savedClaim);
+
+            // Log fraud analysis results
+            log.info("Fraud Analysis Results - Score: {}, Risk Level: {}, Status: {}",
+                    fraudAnalyzedClaim.getFraudScore(),
+                    fraudAnalyzedClaim.getRiskLevel(),
+                    fraudAnalyzedClaim.getFraudStatus());
+
+            // Handle high-risk cases - Auto-assign to SIU if CRITICAL risk
+            if (fraudAnalyzedClaim.getRiskLevel() == Claim.RiskLevel.CRITICAL) {
+                log.warn("CRITICAL FRAUD RISK DETECTED - Claim ID: {}, Score: {}",
+                        fraudAnalyzedClaim.getClaimId(), fraudAnalyzedClaim.getFraudScore());
+
+                // Set fraud status to SIU Investigation
+                fraudAnalyzedClaim.setFraudStatus(Claim.FraudStatus.SIU_INVESTIGATION);
+
+                // Save updated fraud status
+                fraudAnalyzedClaim = claimRepository.save(fraudAnalyzedClaim);
+
+                log.info("Claim {} auto-assigned to SIU investigation due to critical fraud risk",
+                        fraudAnalyzedClaim.getClaimId());
+            }
+
+            return fraudAnalyzedClaim;
+
+        } catch (Exception e) {
+            log.error("Error applying fraud detection to claim {}: {}", savedClaim.getClaimId(), e.getMessage(), e);
+
+            // If fraud detection fails, still return the claim but log the error
+            log.warn("Proceeding with claim {} without fraud analysis due to error", savedClaim.getClaimId());
+            return savedClaim;
+        }
     }
 
     /**
@@ -417,5 +473,115 @@ public class ClaimService {
         } catch (Exception e) {
             log.error("Error updating inspection status: {}", e.getMessage());
         }
+    }
+
+    // ==================== SIU (FRAUD) METHODS ====================
+
+    /**
+     * Get all claims currently under SIU investigation.
+     */
+    public List<Claim> getSiuCases() {
+        List<Claim> cases = claimRepository.findByFraudStatus(FraudStatus.SIU_INVESTIGATION);
+        log.info("🔍 Found {} claims with SIU_INVESTIGATION status", cases.size());
+        return cases;
+    }
+
+    /**
+     * Get claims assigned to a specific SIU investigator.
+     */
+    public List<Claim> getClaimsBySiuInvestigator(Long investigatorId) {
+        List<Claim> claims = claimRepository.findBySiuInvestigatorId(investigatorId);
+        log.info("🎯 Found {} claims assigned to investigator ID: {}", claims.size(), investigatorId);
+
+        // Log details for debugging
+        if (claims.isEmpty()) {
+            log.warn("⚠️ No claims found for investigator {}. Checking if any claims have SIU assignments...", investigatorId);
+            List<Claim> allSiuClaims = claimRepository.findByFraudStatus(FraudStatus.SIU_INVESTIGATION);
+            log.info("📊 Total SIU investigation claims in system: {}", allSiuClaims.size());
+            for (Claim claim : allSiuClaims) {
+                log.info("   Claim ID: {}, Assigned to Investigator ID: {}",
+                         claim.getClaimId(), claim.getSiuInvestigatorId());
+            }
+        } else {
+            for (Claim claim : claims) {
+                log.info("   ✅ Claim ID: {}, Status: {}, FraudStatus: {}",
+                         claim.getClaimId(), claim.getStatus(), claim.getFraudStatus());
+            }
+        }
+
+        return claims;
+    }
+
+    /**
+     * Assign claim to SIU investigator
+     */
+    public Claim assignToSiu(Long claimId, Long siuInvestigatorId, String initialNotes) {
+        log.info("🔄 Starting SIU assignment - Claim ID: {}, Investigator ID: {}", claimId, siuInvestigatorId);
+
+        Claim claim = getClaimById(claimId);
+        log.info("📋 Found claim: ID={}, Current Status={}, Current FraudStatus={}",
+                claim.getClaimId(), claim.getStatus(), claim.getFraudStatus());
+
+        // Get the SIU investigator entity
+        SiuInvestigator investigator = siuInvestigatorService.getInvestigatorById(siuInvestigatorId);
+        log.info("👤 Found investigator: ID={}, Username={}, Badge={}",
+                investigator.getInvestigatorId(), investigator.getUsername(), investigator.getBadgeNumber());
+
+        // Set assignment
+        claim.setSiuInvestigator(investigator);
+        claim.setFraudStatus(Claim.FraudStatus.SIU_INVESTIGATION);
+
+        if (initialNotes != null && !initialNotes.trim().isEmpty()) {
+            String existingNotes = claim.getInvestigationNotes();
+            String newNotes = existingNotes == null ? initialNotes
+                : existingNotes + "\n--- SIU Assignment ---\n" + initialNotes;
+            claim.setInvestigationNotes(newNotes);
+        }
+
+        // Save the claim first
+        Claim savedClaim = claimRepository.save(claim);
+        log.info("💾 Saved claim assignment: ID={}, SIU Investigator ID={}, FraudStatus={}",
+                savedClaim.getClaimId(), savedClaim.getSiuInvestigatorId(), savedClaim.getFraudStatus());
+
+        // Create corresponding InvestigationCase for the SIU investigator pages
+        try {
+            investigationCaseService.createInvestigationCase(
+                claimId,
+                siuInvestigatorId,
+                initialNotes != null ? initialNotes : "Claim assigned for SIU investigation",
+                "system" // Created by system during assignment
+            );
+            log.info("✅ Successfully created investigation case for claim {} and investigator {}", claimId, siuInvestigatorId);
+        } catch (Exception e) {
+            log.warn("⚠️ Failed to create investigation case for claim {}: {}", claimId, e.getMessage());
+            // Don't fail the assignment if case creation fails
+        }
+
+        log.info("🎯 SIU assignment completed successfully for claim {} to investigator {}", claimId, siuInvestigatorId);
+        return savedClaim;
+    }
+
+    /**
+     * Update investigation notes for a claim
+     */
+    public Claim updateInvestigationNotes(Long claimId, String notes, Claim.FraudStatus newStatus) {
+        log.info("Updating investigation notes for claim {}", claimId);
+
+        Claim claim = getClaimById(claimId);
+
+        if (notes != null && !notes.trim().isEmpty()) {
+            String existingNotes = claim.getInvestigationNotes();
+            String timestamp = LocalDateTime.now().toString();
+            String newNotes = existingNotes == null
+                ? "[" + timestamp + "] " + notes
+                : existingNotes + "\n[" + timestamp + "] " + notes;
+            claim.setInvestigationNotes(newNotes);
+        }
+
+        if (newStatus != null) {
+            claim.setFraudStatus(newStatus);
+        }
+
+        return claimRepository.save(claim);
     }
 }
