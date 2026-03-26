@@ -37,11 +37,24 @@ export class BlacklistComponent implements OnInit {
 
   constructor() {
     this.blacklistForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.maxLength(50)]],
+      email: ['', [Validators.email]],
       phoneNumber: [''],
       reason: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
-    });
+    }, { validators: this.atLeastOneIdentifierValidator });
+  }
+
+  /**
+   * Custom validator: at least one of username/email/phone required
+   */
+  atLeastOneIdentifierValidator(form: FormGroup) {
+    const username = form.get('username')?.value;
+    const email = form.get('email')?.value;
+    const phone = form.get('phoneNumber')?.value;
+    if ((username && username.trim()) || (email && email.trim()) || (phone && phone.trim())) {
+      return null;
+    }
+    return { atLeastOneRequired: true };
   }
 
   ngOnInit(): void {
@@ -76,28 +89,30 @@ export class BlacklistComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.blacklistForm.valid && !this.isSubmitting()) {
-      this.isSubmitting.set(true);
-      this.errorMessage.set('');
-      this.successMessage.set('');
-
-      const formData = this.blacklistForm.value;
-
-      this.adminService.addToBlacklist(formData).subscribe({
-        next: (response) => {
-          this.successMessage.set('User successfully added to blacklist');
-          this.blacklistForm.reset();
-          this.showAddForm.set(false);
-          this.loadBlacklistedUsers();
-          this.isSubmitting.set(false);
-        },
-        error: (error) => {
-          console.error('Error adding to blacklist:', error);
-          this.errorMessage.set(error.error?.message || 'Failed to add user to blacklist');
-          this.isSubmitting.set(false);
-        }
-      });
+    if (this.blacklistForm.invalid || this.isSubmitting()) {
+      this.errorMessage.set('At least one of username, email, or phone is required.');
+      return;
     }
+    this.isSubmitting.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    const formData = this.blacklistForm.value;
+
+    this.adminService.addToBlacklist(formData).subscribe({
+      next: (response) => {
+        this.successMessage.set('User successfully added to blacklist');
+        this.blacklistForm.reset();
+        this.showAddForm.set(false);
+        this.loadBlacklistedUsers();
+        this.isSubmitting.set(false);
+      },
+      error: (error) => {
+        console.error('Error adding to blacklist:', error);
+        this.errorMessage.set(error.error?.message || 'Failed to add user to blacklist');
+        this.isSubmitting.set(false);
+      }
+    });
   }
 
   onSearch(): void {

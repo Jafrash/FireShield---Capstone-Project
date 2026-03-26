@@ -15,6 +15,8 @@ public class ClaimResponse {
     private Double depreciation;
     private Double settlementAmount;
     private Long underwriterId;
+    private String riskLevel;
+    private Double fraudScore;
 
     public ClaimResponse() {
     }
@@ -22,7 +24,7 @@ public class ClaimResponse {
     public ClaimResponse(Long claimId, Long subscriptionId, String description,
             Double claimAmount, Claim.ClaimStatus status, LocalDateTime createdAt,
             Double estimatedLoss, Double deductible, Double depreciation, Double settlementAmount,
-            Long underwriterId) {
+            Long underwriterId, String riskLevel, Double fraudScore) {
         this.claimId = claimId;
         this.subscriptionId = subscriptionId;
         this.description = description;
@@ -34,6 +36,23 @@ public class ClaimResponse {
         this.depreciation = depreciation;
         this.settlementAmount = settlementAmount;
         this.underwriterId = underwriterId;
+        this.riskLevel = riskLevel;
+        this.fraudScore = fraudScore;
+    }
+    public String getRiskLevel() {
+        return riskLevel;
+    }
+
+    public void setRiskLevel(String riskLevel) {
+        this.riskLevel = riskLevel;
+    }
+
+    public Double getFraudScore() {
+        return fraudScore;
+    }
+
+    public void setFraudScore(Double fraudScore) {
+        this.fraudScore = fraudScore;
     }
 
     public Long getClaimId() {

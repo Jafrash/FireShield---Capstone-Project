@@ -9,9 +9,11 @@ import org.hartford.fireinsurance.model.Claim;
 import org.hartford.fireinsurance.model.Customer;
 import org.hartford.fireinsurance.model.PolicySubscription;
 import org.hartford.fireinsurance.model.SiuInvestigator;
+import org.hartford.fireinsurance.model.Underwriter;
 import org.hartford.fireinsurance.model.User;
 import org.hartford.fireinsurance.repository.SiuInvestigatorRepository;
 import org.hartford.fireinsurance.repository.UserRepository;
+import org.hartford.fireinsurance.repository.UnderwriterRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,15 +40,18 @@ public class SiuService {
     private final SiuInvestigatorRepository siuInvestigatorRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UnderwriterRepository underwriterRepository;
 
     public SiuService(ClaimService claimService,
                       SiuInvestigatorRepository siuInvestigatorRepository,
                       UserRepository userRepository,
-                      PasswordEncoder passwordEncoder) {
+                      PasswordEncoder passwordEncoder,
+                      UnderwriterRepository underwriterRepository) {
         this.claimService = claimService;
         this.siuInvestigatorRepository = siuInvestigatorRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.underwriterRepository = underwriterRepository;
     }
 
     /**
@@ -199,17 +204,9 @@ public class SiuService {
      * Determine if a claim requires SIU investigation based on various risk factors.
      */
     private boolean requiresSiuInvestigation(Claim claim) {
-        if (claim.getFraudScore() == null) {
-            return false;
-        }
-
-        // Include claims with fraud score >= 30 or high claim amounts
-        double fraudScore = claim.getFraudScore();
-        Double claimAmount = claim.getClaimAmount();
-
-        return fraudScore >= 30.0 ||
-               (claimAmount != null && claimAmount > 100000.0) ||
-               isHighRiskClaim(claim);
+        // Only show HIGH risk or high fraud score claims (>= 70)
+        return (claim.getRiskLevel() != null && claim.getRiskLevel().name().equals("HIGH"))
+            || (claim.getFraudScore() != null && claim.getFraudScore() >= 70.0);
     }
 
     /**
@@ -293,9 +290,11 @@ public class SiuService {
 
         switch (status) {
             case SUBMITTED:
+                return "PENDING_REVIEW";
             case UNDER_REVIEW:
                 return "UNDER_INVESTIGATION";
-            case SURVEY_ASSIGNED:
+            case SURVEYOR_ASSIGNED:
+                return "SURVEYOR_ASSIGNED";
             case SURVEY_COMPLETED:
                 return "UNDER_INVESTIGATION";
             case APPROVED:
@@ -439,16 +438,30 @@ public class SiuService {
             log.info("Clearing claim {} as legitimate by investigator {}", request.getClaimId(), investigatorUsername);
 
             Long claimId = Long.parseLong(request.getClaimId());
-            Claim updatedClaim = claimService.updateClaimStatus(claimId, Claim.ClaimStatus.APPROVED);
+            Claim claim = claimService.getClaimById(claimId);
+            if (claim == null) {
+                throw new RuntimeException("Claim not found with ID: " + claimId);
+            }
 
-            log.info("Successfully cleared claim {} as legitimate - Status changed to APPROVED", claimId);
+            // Find an available underwriter (example: first one)
+            Underwriter underwriter = underwriterRepository.findAll().stream().findFirst().orElse(null);
+            if (underwriter == null) {
+                throw new RuntimeException("No underwriter available for assignment");
+            }
+
+            // Set status to SIU_CLEARED, not APPROVED or UNDER_REVIEW
+            claim.setStatus(Claim.ClaimStatus.SIU_CLEARED);
+            claim.setSiuStatus("CLEARED");
+            claim.setUnderwriter(underwriter);
+            claimService.saveClaim(claim);
+
+            log.info("Successfully cleared claim {} as legitimate - Status changed to SIU_CLEARED, assigned to underwriter {}", claimId, underwriter.getUnderwriterId());
 
             return SiuInvestigationActionResponse.success(
                 request.getClaimId(),
-                "APPROVED",
-                "Claim successfully cleared as legitimate. Investigation closed with no fraud detected."
+                "SIU_CLEARED",
+                "Claim successfully cleared as legitimate. Investigation closed with no fraud detected. Sent to underwriter for review."
             );
-
         } catch (NumberFormatException e) {
             log.error("Invalid claim ID format: {}", request.getClaimId());
             return SiuInvestigationActionResponse.failure(
@@ -526,3 +539,4 @@ public class SiuService {
         siuInvestigatorRepository.delete(investigator);
     }
 }
+

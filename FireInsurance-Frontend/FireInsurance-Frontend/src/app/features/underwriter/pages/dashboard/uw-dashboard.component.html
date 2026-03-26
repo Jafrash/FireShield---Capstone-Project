@@ -67,9 +67,14 @@
                     <h3 class="font-bold text-gray-900">Claim #{{ claim.claimId }}</h3>
 
                     <!-- Risk Level Badge -->
-                    <span class="px-2 py-1 text-xs font-bold uppercase rounded-full text-white"
-                          [style.background-color]="getRiskLevelColor(getClaimRiskLevel(claim))">
-                      {{ getClaimRiskLevel(claim) }} Risk
+                    <span *ngIf="getClaimRiskLevel(claim) === 'LOW'" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                      🟢 LOW
+                    </span>
+                    <span *ngIf="getClaimRiskLevel(claim) === 'MEDIUM'" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">
+                      🟡 MEDIUM <span class="ml-1 font-normal">Suspicious</span>
+                    </span>
+                    <span *ngIf="getClaimRiskLevel(claim) === 'HIGH'" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200">
+                      🔴 HIGH <span class="ml-1 font-normal">High Risk</span>
                     </span>
 
                     <!-- SIU Status Badge -->

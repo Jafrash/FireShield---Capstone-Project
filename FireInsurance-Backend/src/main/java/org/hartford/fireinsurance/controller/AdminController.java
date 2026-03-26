@@ -180,14 +180,27 @@ public class AdminController {
 
     @PostMapping("/assign-underwriter/claim")
     public ResponseEntity<String> assignUnderwriterToClaim(@RequestBody AssignUnderwriterRequest request) {
-        Claim updated = claimService.assignUnderwriter(request.getTargetId(), request.getUnderwriterId());
-        return ResponseEntity.ok("Underwriter assigned to claim " + updated.getClaimId());
+        try {
+            Claim updated = claimService.assignUnderwriter(request.getTargetId(), request.getUnderwriterId());
+            return ResponseEntity.ok("Underwriter assigned to claim " + updated.getClaimId());
+        } catch (IllegalStateException e) {
+            // Add hint for SIU_CLEARED enforcement
+            String msg = e.getMessage();
+            if (msg != null && msg.contains("SIU_CLEARED")) {
+                msg += " Only claims that have been cleared by SIU can be assigned to an underwriter.";
+            }
+            return ResponseEntity.badRequest().body(msg);
+        }
     }
 
     @PostMapping("/assign-siu")
     public ResponseEntity<String> assignSiuToClaim(@RequestBody AssignSiuRequest request) {
-        Claim updated = claimService.assignSiuInvestigator(request.getClaimId(), request.getInvestigatorId());
-        return ResponseEntity.ok("SIU investigator assigned to claim " + updated.getClaimId());
+        try {
+            Claim updated = claimService.assignSiuInvestigator(request.getClaimId(), request.getInvestigatorId());
+            return ResponseEntity.ok("SIU investigator assigned to claim " + updated.getClaimId());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // === Fraud Monitoring Dashboard ===
@@ -331,7 +344,7 @@ public class AdminController {
                 blacklistedUser.getBlacklistId(),
                 blacklistedUser.getUsername(),
                 blacklistedUser.getEmail(),
-                blacklistedUser.getPhoneNumber(),
+                blacklistedUser.getPhone(),
                 blacklistedUser.getReason(),
                 blacklistedUser.getActive(),
                 blacklistedUser.getCreatedAt(),

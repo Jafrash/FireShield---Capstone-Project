@@ -17,6 +17,7 @@ export interface Claim {
   updatedAt: string;
   siuStatus?: string; // 'UNDER_INVESTIGATION' | 'CLEARED' | 'FRAUD_CONFIRMED' | null
   fraudScore?: number; // 0-100 fraud risk score
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
 }
 
 export interface ClaimInspection {
@@ -32,5 +33,5 @@ export interface ClaimInspection {
   updatedAt: string;
 }
 
-export type ClaimStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'INSPECTING' | 'INSPECTED' | 'APPROVED' | 'REJECTED' | 'SETTLED' | 'PAID';
+export type ClaimStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'INSPECTING' | 'INSPECTED' | 'SIU_CLEARED' | 'APPROVED' | 'REJECTED' | 'SETTLED' | 'PAID';
 export type ClaimInspectionStatus = 'PENDING' | 'SCHEDULED' | 'COMPLETED' | 'APPROVED' | 'REJECTED';

@@ -45,10 +45,20 @@ public class SiuDataInitializer implements CommandLineRunner {
                     // Generate realistic fraud scores with some variety
                     double fraudScore = generateRealisticFraudScore(claim);
                     claim.setFraudScore(fraudScore);
+                    // Fix: If status is SURVEY_ASSIGNED, set to SURVEYOR_ASSIGNED
+                    if (claim.getStatus() != null && claim.getStatus().name().equals("SURVEY_ASSIGNED")) {
+                        claim.setStatus(Claim.ClaimStatus.SURVEYOR_ASSIGNED);
+                    }
+                    // Fallback: If status is not a valid enum, set to CREATED
+                    try {
+                        Claim.ClaimStatus.valueOf(claim.getStatus().name());
+                    } catch (Exception ex) {
+                        claim.setStatus(Claim.ClaimStatus.CREATED);
+                    }
                     claimRepository.save(claim);
                     updatedCount++;
 
-                    log.info("Updated claim {} with fraud score: {:.1f}%",
+                    log.info("Updated claim {} with fraud score: {}%",
                            claim.getClaimId(), fraudScore);
                 }
             }

@@ -2,6 +2,7 @@ package org.hartford.fireinsurance.service;
 
 import org.hartford.fireinsurance.dto.FraudAnalysisResponse;
 import org.hartford.fireinsurance.model.Claim;
+import org.hartford.fireinsurance.model.RiskLevel;
 import org.hartford.fireinsurance.model.Customer;
 import org.hartford.fireinsurance.model.PolicySubscription;
 import org.hartford.fireinsurance.repository.ClaimRepository;
@@ -44,10 +45,21 @@ public class FraudAnalysisService {
         List<FraudAnalysisResponse.FraudRule> ruleBreakdown = generateRuleBreakdown(claim);
 
         // Determine risk level
-        String riskLevel = determineRiskLevel(fraudScore);
+        RiskLevel riskLevel;
+        if (fraudScore >= 80) {
+            riskLevel = RiskLevel.HIGH;
+        } else if (fraudScore >= 50) {
+            riskLevel = RiskLevel.MEDIUM;
+        } else {
+            riskLevel = RiskLevel.LOW;
+        }
 
-        // Generate overall assessment
-        String overallAssessment = generateOverallAssessment(claim, fraudScore, riskLevel);
+        // Persist riskLevel in claim
+        claim.setRiskLevel(riskLevel);
+        claimRepository.save(claim);
+
+        // Generate overall assessment (pass as string for compatibility)
+        String overallAssessment = generateOverallAssessment(claim, fraudScore, riskLevel.name());
 
         // Generate suspicious indicators
         List<String> suspiciousIndicators = generateSuspiciousIndicators(claim);
@@ -58,7 +70,7 @@ public class FraudAnalysisService {
         FraudAnalysisResponse response = new FraudAnalysisResponse(
                 claimId,
                 fraudScore,
-                riskLevel,
+                riskLevel.name(),
                 ruleBreakdown,
                 overallAssessment,
                 suspiciousIndicators,

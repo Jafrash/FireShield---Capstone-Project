@@ -53,41 +53,28 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Username <span class="text-red-500">*</span>
+              Username
             </label>
             <input
               type="text"
               formControlName="username"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C72B32] focus:border-[#C72B32] outline-none transition-all"
-              placeholder="Enter username"
+              placeholder="Enter username (optional)"
             />
-            @if (formControls['username'].invalid && formControls['username'].touched) {
-              <p class="text-red-600 text-sm mt-1">
-                @if (formControls['username'].errors?.['required']) {
-                  Username is required
-                }
-                @if (formControls['username'].errors?.['minlength']) {
-                  Username must be at least 3 characters
-                }
-              </p>
-            }
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Email <span class="text-red-500">*</span>
+              Email
             </label>
             <input
               type="email"
               formControlName="email"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C72B32] focus:border-[#C72B32] outline-none transition-all"
-              placeholder="Enter email address"
+              placeholder="Enter email address (optional)"
             />
             @if (formControls['email'].invalid && formControls['email'].touched) {
               <p class="text-red-600 text-sm mt-1">
-                @if (formControls['email'].errors?.['required']) {
-                  Email is required
-                }
                 @if (formControls['email'].errors?.['email']) {
                   Please enter a valid email address
                 }
@@ -150,6 +137,10 @@
             Cancel
           </button>
         </div>
+        <!-- At least one required error -->
+        @if (blacklistForm.errors?.['atLeastOneRequired'] && (blacklistForm.touched || blacklistForm.dirty)) {
+          <p class="text-red-600 text-sm mt-2">At least one of username, email, or phone is required.</p>
+        }
       </form>
     </div>
   }
@@ -244,10 +235,10 @@
               <td class="px-6 py-4 text-sm text-gray-900">
                 <div class="flex items-center gap-2">
                   <span class="material-icons text-red-500 text-lg">person_off</span>
-                  {{ user.username }}
+                  {{ user.username || 'N/A' }}
                 </div>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-900">{{ user.email }}</td>
+              <td class="px-6 py-4 text-sm text-gray-900">{{ user.email || 'N/A' }}</td>
               <td class="px-6 py-4 text-sm text-gray-900">{{ user.phoneNumber || 'N/A' }}</td>
               <td class="px-6 py-4 text-sm text-gray-900">
                 <div class="max-w-xs truncate" [title]="user.reason">

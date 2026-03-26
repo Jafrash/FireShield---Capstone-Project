@@ -145,8 +145,10 @@ public class UnderwriterController {
                 claimService.getEstimatedLoss(claim),
                 claimService.getCalculatedDeductible(claim),
                 claimService.getCalculatedDepreciation(claim),
-            claim.getSettlementAmount() != null ? claim.getSettlementAmount() : 0.0,
-            claim.getUnderwriter() != null ? claim.getUnderwriter().getUnderwriterId() : null
+                claim.getSettlementAmount() != null ? claim.getSettlementAmount() : 0.0,
+                claim.getUnderwriter() != null ? claim.getUnderwriter().getUnderwriterId() : null,
+                claim.getRiskLevel() != null ? claim.getRiskLevel().name() : null,
+                claim.getFraudScore()
         );
     }
 

@@ -11,14 +11,15 @@ public class BlacklistedUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long blacklistId;
 
-    @Column(nullable = false)
+
+    @Column(nullable = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String email;
 
-    @Column(name = "phone_number")
-    private String phoneNumber;
+    @Column(name = "phone_number", nullable = true)
+    private String phone;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String reason;
@@ -40,20 +41,36 @@ public class BlacklistedUser {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }
+        // Validation: at least one identifier must be present
+        if ((username == null || username.isBlank()) && (email == null || email.isBlank()) && (phone == null || phone.isBlank())) {
+            throw new IllegalArgumentException("At least one of username, email, or phone must be provided for blacklist entry.");
+        }
     }
 
     // Constructors
     public BlacklistedUser() {
     }
 
-    public BlacklistedUser(String username, String email, String phoneNumber, String reason, String createdBy) {
+    public BlacklistedUser(String username, String email, String phone, String reason, String createdBy) {
         this.username = username;
         this.email = email;
-        this.phoneNumber = phoneNumber;
+        this.phone = phone;
         this.reason = reason;
         this.createdBy = createdBy;
         this.active = true;
         this.createdAt = LocalDateTime.now();
+    }
+
+    /**
+     * Validates that at least one identifier is present (username, email, phone).
+     * Throws IllegalArgumentException if not valid.
+     */
+    public void validateIdentifiers() {
+        if ((username == null || username.isBlank()) &&
+            (email == null || email.isBlank()) &&
+            (phone == null || phone.isBlank())) {
+            throw new IllegalArgumentException("At least one of username, email, or phone must be provided for blacklist entry.");
+        }
     }
 
     // Getters and Setters
@@ -81,12 +98,12 @@ public class BlacklistedUser {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getReason() {

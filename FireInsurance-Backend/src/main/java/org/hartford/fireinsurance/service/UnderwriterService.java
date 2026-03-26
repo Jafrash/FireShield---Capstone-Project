@@ -266,7 +266,7 @@ public class UnderwriterService {
         }
 
         claimInspectionService.assignSurveyor(request.getClaimId(), request.getSurveyorId());
-        claim.setStatus(Claim.ClaimStatus.SURVEY_ASSIGNED);
+        claim.setStatus(Claim.ClaimStatus.SURVEYOR_ASSIGNED);
         return claimRepository.save(claim);
     }
 
@@ -306,6 +306,11 @@ public class UnderwriterService {
             throw new RuntimeException("Unauthorized: claim is not assigned to this underwriter");
         }
 
+        // Only allow approval if claim is in UNDER_REVIEW (not SIU_CLEARED)
+        if (claim.getStatus() != Claim.ClaimStatus.UNDER_REVIEW) {
+            throw new RuntimeException("Claim must be in UNDER_REVIEW status to be approved by underwriter.");
+        }
+
         claim.setStatus(Claim.ClaimStatus.APPROVED);
         return claimRepository.save(claim);
     }
@@ -317,6 +322,11 @@ public class UnderwriterService {
 
         if (claim.getUnderwriter() == null || !claim.getUnderwriter().getUnderwriterId().equals(underwriter.getUnderwriterId())) {
             throw new RuntimeException("Unauthorized: claim is not assigned to this underwriter");
+        }
+
+        // Only allow rejection if claim is in UNDER_REVIEW (not SIU_CLEARED)
+        if (claim.getStatus() != Claim.ClaimStatus.UNDER_REVIEW) {
+            throw new RuntimeException("Claim must be in UNDER_REVIEW status to be rejected by underwriter.");
         }
 
         claim.setStatus(Claim.ClaimStatus.REJECTED);

@@ -1,3 +1,4 @@
+
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +15,37 @@ import { Document } from '../../../../core/models/document.model';
   templateUrl: './claims.html'
 })
 export class ClaimsComponent implements OnInit {
+  public invalidAssignmentMessage: Record<number, string> = {};
+
+  public canAssignUnderwriter(claim: Claim): boolean {
+    // Allow for LOW/MEDIUM risk, or HIGH risk after SIU cleared
+    if ((claim.riskLevel === 'LOW' || claim.riskLevel === 'MEDIUM') && !claim.underwriterId) {
+      return true;
+    }
+    // Allow underwriter assignment after SIU clears a HIGH risk claim
+    if (claim.riskLevel === 'HIGH' && claim.siuStatus === 'CLEARED' && !claim.underwriterId && claim.status === 'SIU_CLEARED') {
+      return true;
+    }
+    return false;
+  }
+
+  public canAssignSiuUI(claim: Claim): boolean {
+    // Only allow SIU assignment for HIGH risk, not already assigned, not resolved
+    if (claim.riskLevel !== 'HIGH') return false;
+    if (this.isSiuAssigned(claim)) return false;
+    if ([ 'APPROVED', 'REJECTED', 'SETTLED', 'PAID' ].includes(claim.status)) return false;
+    return ['SUBMITTED', 'UNDER_REVIEW', 'INSPECTING', 'INSPECTED'].includes(claim.status);
+  }
+
+  public setInvalidAssignmentMessage(claim: Claim, type: 'UW' | 'SIU'): void {
+    this.invalidAssignmentMessage[claim.claimId] = 'Invalid assignment for this risk level';
+    setTimeout(() => {
+      delete this.invalidAssignmentMessage[claim.claimId];
+    }, 3000);
+  }
+
+  // ...existing code above...
+  // (No duplicate properties or methods below this line)
   private adminService = inject(AdminService);
   private router = inject(Router);
 
@@ -208,6 +240,11 @@ export class ClaimsComponent implements OnInit {
   assignUnderwriter(claim: Claim): void {
     const claimId = claim.claimId;
     const underwriterId = this.selectedUnderwriters[claimId];
+    // Prevent invalid assignment
+    if (claim.underwriterId || !(claim.riskLevel === 'LOW' || claim.riskLevel === 'MEDIUM')) {
+      this.setInvalidAssignmentMessage(claim, 'UW');
+      return;
+    }
     if (!underwriterId) {
       this.successMessage.set('');
       alert('Please select an underwriter first');
@@ -216,7 +253,6 @@ export class ClaimsComponent implements OnInit {
     this.adminService.assignUnderwriterToClaim(claimId, underwriterId).subscribe({
       next: () => {
         this.successMessage.set('Underwriter assigned to claim successfully!');
-        
         // Update local state to hide the assign button immediately
         const updatedClaims = this.claims().map(c => {
           if (c.claimId === claimId) {
@@ -226,7 +262,6 @@ export class ClaimsComponent implements OnInit {
         });
         this.claims.set(updatedClaims);
         this.filteredClaims.set(updatedClaims);
-
         setTimeout(() => this.successMessage.set(''), 3500);
       },
       error: (err) => {
@@ -240,26 +275,26 @@ export class ClaimsComponent implements OnInit {
   assignSiuToClaim(claim: Claim): void {
     const claimId = claim.claimId;
     const investigatorId = this.selectedSiuInvestigators[claimId];
-
+    // Prevent invalid assignment
+    if (this.isSiuAssigned(claim) || claim.riskLevel !== 'HIGH') {
+      this.setInvalidAssignmentMessage(claim, 'SIU');
+      return;
+    }
     if (!investigatorId) {
       this.errorMessage.set('Please select an SIU investigator first');
       setTimeout(() => this.errorMessage.set(''), 4000);
       return;
     }
-
     // Get investigator name for confirmation
     const investigator = this.siuInvestigators().find(inv => inv.investigatorId === investigatorId);
     const investigatorName = investigator?.username || 'Unknown Investigator';
-
     // Confirmation dialog
     if (!confirm(`Are you sure you want to assign ${investigatorName} to investigate Claim #CLM-${claimId}? This will mark the claim as under SIU investigation and block approval/rejection until investigation is complete.`)) {
       return;
     }
-
     this.adminService.assignSiuToClaim(claimId, investigatorId).subscribe({
       next: () => {
         this.successMessage.set(`SIU investigator ${investigatorName} assigned to claim #CLM-${claimId} successfully!`);
-
         // Update local state to reflect SIU assignment
         const updatedClaims = this.claims().map(c => {
           if (c.claimId === claimId) {
@@ -269,10 +304,8 @@ export class ClaimsComponent implements OnInit {
         });
         this.claims.set(updatedClaims);
         this.filteredClaims.set(updatedClaims);
-
         // Clear selection
         delete this.selectedSiuInvestigators[claimId];
-
         setTimeout(() => this.successMessage.set(''), 5000);
       },
       error: (err) => {

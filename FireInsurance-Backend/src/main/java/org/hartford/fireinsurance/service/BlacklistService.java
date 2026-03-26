@@ -14,7 +14,19 @@ import java.util.List;
 @Service
 @Transactional
 public class BlacklistService {
-
+        /**
+         * Check if a user is blacklisted by username, email, or phone (OR logic, null-safe)
+         */
+        public boolean isBlacklisted(String username, String email, String phone) {
+            if ((username == null || username.isBlank()) && (email == null || email.isBlank()) && (phone == null || phone.isBlank())) {
+                return false;
+            }
+            return blacklistedUserRepository.existsByUsernameOrEmailOrPhoneAndActiveTrue(
+                username != null ? username : "",
+                email != null ? email : "",
+                phone != null ? phone : ""
+            );
+        }
     private static final Logger log = LoggerFactory.getLogger(BlacklistService.class);
 
     private final BlacklistedUserRepository blacklistedUserRepository;
@@ -27,31 +39,23 @@ public class BlacklistService {
      * Add a user to the blacklist
      */
     public BlacklistedUser addToBlacklist(BlacklistRequest request, String adminUsername) {
-        log.info("Adding user to blacklist: username={}, email={}, admin={}",
-                 request.getUsername(), request.getEmail(), adminUsername);
-
-        // Check if user is already blacklisted by username or email
         if (blacklistedUserRepository.findByUsernameAndActiveTrue(request.getUsername()).isPresent()) {
             throw new RuntimeException("User with username '" + request.getUsername() + "' is already blacklisted");
         }
-
         if (blacklistedUserRepository.findByEmailAndActiveTrue(request.getEmail()).isPresent()) {
             throw new RuntimeException("User with email '" + request.getEmail() + "' is already blacklisted");
         }
-
         // Create new blacklist entry
         BlacklistedUser blacklistedUser = new BlacklistedUser();
         blacklistedUser.setUsername(request.getUsername());
         blacklistedUser.setEmail(request.getEmail());
-        blacklistedUser.setPhoneNumber(request.getPhoneNumber());
+        blacklistedUser.setPhone(request.getPhoneNumber());
         blacklistedUser.setReason(request.getReason());
         blacklistedUser.setCreatedBy(adminUsername);
         blacklistedUser.setActive(true);
         blacklistedUser.setCreatedAt(LocalDateTime.now());
-
         BlacklistedUser saved = blacklistedUserRepository.save(blacklistedUser);
         log.info("Successfully added user to blacklist: ID={}", saved.getBlacklistId());
-
         return saved;
     }
 
