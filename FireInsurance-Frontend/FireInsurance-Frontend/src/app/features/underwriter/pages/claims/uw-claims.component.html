@@ -68,9 +68,16 @@
                       }
                     </td>
 
-                    <!-- Claim Amount -->
-                    <td class="px-5 py-4 font-semibold text-gray-800">
-                      ₹{{ (claim.claimAmount || 0).toLocaleString('en-IN') }}
+                    <!-- Claim Amount (Actual/Adjusted) -->
+                    <td class="px-5 py-4">
+                      <div class="flex flex-col">
+                        @if (claim.estimatedLoss && claim.estimatedLoss > 0 && claim.estimatedLoss !== claim.claimAmount) {
+                          <span class="text-xs text-gray-400 line-through">₹{{ (claim.claimAmount || 0).toLocaleString('en-IN') }}</span>
+                          <span class="font-bold text-fire-red">₹{{ (claim.estimatedLoss || 0).toLocaleString('en-IN') }}</span>
+                        } @else {
+                          <span class="font-semibold text-gray-800">₹{{ (claim.claimAmount || 0).toLocaleString('en-IN') }}</span>
+                        }
+                      </div>
                     </td>
 
                     <!-- Status -->

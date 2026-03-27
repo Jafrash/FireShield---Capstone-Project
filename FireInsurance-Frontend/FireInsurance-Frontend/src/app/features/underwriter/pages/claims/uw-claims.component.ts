@@ -215,7 +215,7 @@ export class UwClaimsComponent implements OnInit {
   }
 
   canApprove(claim: UwClaim): boolean {
-    const readyStatuses = ['UNDER_REVIEW', 'SURVEY_COMPLETED', 'SURVEYOR_COMPLETED', 'INSPECTED', 'SIU_CLEARED'];
+    const readyStatuses = ['SURVEY_COMPLETED', 'SURVEYOR_COMPLETED', 'INSPECTED'];
     return readyStatuses.includes(claim.status);
   }
 

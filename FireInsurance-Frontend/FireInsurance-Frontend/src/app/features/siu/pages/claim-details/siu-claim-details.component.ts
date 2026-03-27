@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { SiuService, SiuClaimDetails, SiuInvestigationActionResponse } from '../../services/siu.service';
+import { FraudEngineService, FraudAnalysisResult } from '../../services/fraud-engine.service';
+import { DocumentService } from '../../../../core/services/document.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -13,6 +15,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class SiuClaimDetailsComponent implements OnInit {
   private readonly siuService = inject(SiuService);
+  private readonly fraudEngine = inject(FraudEngineService);
+  private readonly documentService = inject(DocumentService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
@@ -22,6 +26,11 @@ export class SiuClaimDetailsComponent implements OnInit {
   isLoading = signal(true);
   errorMessage = signal('');
   claimId = signal('');
+
+  // Analysis state
+  isAnalyzing = signal(false);
+  analysisResult = signal<FraudAnalysisResult | null>(null);
+  documents = signal<any[]>([]);
 
   // Investigation action loading states
   isStartingInvestigation = signal(false);
@@ -93,11 +102,13 @@ export class SiuClaimDetailsComponent implements OnInit {
 
   canMarkAsFraud = computed(() => {
     const claim = this.claimDetails();
-    if (!claim || !claim.status || typeof claim.fraudScore !== 'number') return false;
-
-    // Can mark as fraud if investigation is active or claim is suspicious
+    const result = this.analysisResult();
+    if (!claim || !claim.status || !result) return false;
+ 
+    // Must have a HIGH risk score (>= 70) to mark as fraud
+    const isHighRisk = result.totalScore >= 70;
+ 
     const validStatuses = ['UNDER_REVIEW', 'SURVEY_COMPLETED', 'SURVEY_ASSIGNED'];
-    const isHighRisk = claim.fraudScore >= 70; // Only allow marking high-risk claims as fraud
     return validStatuses.includes(claim.status.toUpperCase()) &&
            isHighRisk &&
            !this.isMarkingFraud() &&
@@ -106,17 +117,21 @@ export class SiuClaimDetailsComponent implements OnInit {
 
   canClearClaim = computed(() => {
     const claim = this.claimDetails();
-    if (!claim || !claim.status) return false;
-
-    // Can clear claim if under investigation or review
+    const result = this.analysisResult();
+    if (!claim || !claim.status || !result) return false;
+ 
+    // Must have a LOW or MEDIUM risk score (< 70) to clear claim
+    const isLowMediumRisk = result.totalScore < 70;
+ 
     const validStatuses = ['UNDER_REVIEW', 'SURVEY_COMPLETED', 'SURVEY_ASSIGNED', 'SUBMITTED'];
     return validStatuses.includes(claim.status.toUpperCase()) &&
+           isLowMediumRisk &&
            !this.isClearingClaim() &&
            !this.isPerformingAnyAction();
   });
 
   isPerformingAnyAction = computed(() => {
-    return this.isStartingInvestigation() || this.isMarkingFraud() || this.isClearingClaim();
+    return this.isStartingInvestigation() || this.isMarkingFraud() || this.isClearingClaim() || this.isAnalyzing();
   });
 
   investigationStatusMessage = computed(() => {
@@ -149,6 +164,7 @@ export class SiuClaimDetailsComponent implements OnInit {
     if (claimId) {
       this.claimId.set(claimId);
       this.loadClaimDetails(claimId);
+      this.loadDocuments(claimId);
     } else {
       this.errorMessage.set('No claim ID provided in route');
       this.isLoading.set(false);
@@ -180,6 +196,39 @@ export class SiuClaimDetailsComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  /**
+   * Load documents associated with this claim for cross-validation
+   */
+  private loadDocuments(claimId: string): void {
+    this.documentService.getDocumentsForEntity(Number(claimId), 'CLAIM').subscribe({
+      next: (docs) => this.documents.set(docs || []),
+      error: (err) => console.error('Failed to load documents for fraud analysis', err)
+    });
+  }
+
+  /**
+   * Executes the AI-Inspired Smart Scan via the Fraud Engine
+   */
+  runSmartScan(): void {
+    const claim = this.claimDetails();
+    if (!claim) return;
+
+    this.isAnalyzing.set(true);
+    this.analysisResult.set(null);
+
+    // Simulate "Deep Analysis" processing time for better UX
+    setTimeout(() => {
+      const result = this.fraudEngine.analyzeClaim(claim, this.documents());
+      this.analysisResult.set(result);
+      this.isAnalyzing.set(false);
+      
+      // If score is high, optionally update local fraudScore for UI consistency
+      if (result.totalScore > (claim.fraudScore || 0)) {
+        this.claimDetails.set({ ...claim, fraudScore: result.totalScore });
+      }
+    }, 1500);
   }
 
   /**

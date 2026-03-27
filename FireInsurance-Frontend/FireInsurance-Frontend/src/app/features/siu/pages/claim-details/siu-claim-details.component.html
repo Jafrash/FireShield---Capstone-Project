@@ -54,58 +54,112 @@
         <div class="lg:col-span-2 space-y-6">
 
           <!-- Fraud Analysis Card -->
-          <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-200">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
               <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <span class="material-icons text-red-600">analytics</span>
-                Fraud Risk Analysis
+                <span class="material-icons text-red-600">psychology</span>
+                AI-Powered Risk Assessment
               </h2>
+              @if (analysisResult()) {
+                <span class="text-xs text-gray-500">Last Scan: {{ analysisResult()?.analysisTimestamp | date:'shortTime' }}</span>
+              }
             </div>
             <div class="p-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Fraud Score -->
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-600">Fraud Score</span>
-                    <span class="text-2xl font-bold" [ngClass]="getFraudScoreClass(claimDetails()!.fraudScore)">
-                      {{ claimDetails()!.fraudScore }}%
-                    </span>
+              @if (!analysisResult() && !isAnalyzing()) {
+               <div class="text-center py-8">
+                  <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-icons text-red-600 text-3xl">troubleshoot</span>
                   </div>
-                  <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="h-2 rounded-full transition-all"
-                         [style.width.%]="claimDetails()!.fraudScore"
-                         [ngClass]="{
-                           'bg-red-500': claimDetails()!.fraudScore >= 80,
-                           'bg-orange-500': claimDetails()!.fraudScore >= 50 && claimDetails()!.fraudScore < 80,
-                           'bg-green-500': claimDetails()!.fraudScore < 50
-                         }"></div>
-                  </div>
+                  <h3 class="text-lg font-semibold text-gray-900 mb-2">No Analysis Performed</h3>
+                  <p class="text-gray-600 mb-6 max-w-sm mx-auto">Click "Run Smart Fraud Analysis" in the sidebar to initiate the AI-driven heuristic scan.</p>
+                  <button (click)="runSmartScan()" 
+                          class="inline-flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all font-medium shadow-md">
+                    <span class="material-icons text-sm">bolt</span>
+                    Run Smart Scan
+                  </button>
+               </div>
+              } @else if (isAnalyzing()) {
+                <div class="text-center py-12">
+                  <div class="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p class="text-gray-900 font-medium">Running Heuristic Intelligence Scans...</p>
+                  <p class="text-gray-400 text-sm">Analyzing temporal anomalies and evidence patterns</p>
                 </div>
-
-                <!-- Risk Level -->
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-600">Risk Level</span>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border"
-                          [ngClass]="getFraudRiskClass()">
-                      {{ fraudRiskLevel().toUpperCase() }} RISK
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Suspicious Indicators -->
-              <div class="mt-6">
-                <h4 class="text-sm font-medium text-gray-900 mb-3">Suspicious Indicators</h4>
-                <div class="space-y-2">
-                  @for (indicator of suspiciousIndicators(); track indicator) {
-                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded-lg">
-                      <span class="material-icons text-red-600 text-sm">flag</span>
-                      <span class="text-sm text-red-800">{{ indicator }}</span>
+              } @else if (analysisResult()) {
+                <div class="space-y-6">
+                  <!-- Risk Scorecard Header -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                      <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-gray-600">AI Fraud Score</span>
+                        <span class="text-3xl font-bold" [ngClass]="getFraudScoreClass(analysisResult()!.totalScore)">
+                          {{ analysisResult()!.totalScore }}%
+                        </span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div class="h-3 rounded-full transition-all duration-1000"
+                             [style.width.%]="analysisResult()!.totalScore"
+                             [ngClass]="{
+                               'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]': analysisResult()!.totalScore >= 70,
+                               'bg-orange-500': analysisResult()!.totalScore >= 35 && analysisResult()!.totalScore < 70,
+                               'bg-green-500': analysisResult()!.totalScore < 35
+                             }"></div>
+                      </div>
                     </div>
-                  }
+
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-col justify-center">
+                      <span class="text-sm font-medium text-gray-600 mb-2">Heuristic Risk Level</span>
+                      <div>
+                        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold border-2"
+                              [ngClass]="{
+                                'bg-red-50 text-red-700 border-red-200': analysisResult()!.riskLevel === 'HIGH',
+                                'bg-orange-50 text-orange-700 border-orange-200': analysisResult()!.riskLevel === 'MEDIUM',
+                                'bg-green-50 text-green-700 border-green-200': analysisResult()!.riskLevel === 'LOW'
+                              }">
+                          <span class="material-icons text-sm mr-1">
+                            {{ analysisResult()!.riskLevel === 'HIGH' ? 'gavel' : (analysisResult()!.riskLevel === 'MEDIUM' ? 'warning' : 'check_circle') }}
+                          </span>
+                          {{ analysisResult()!.riskLevel }} RISK
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Triggered Rules Breakdown -->
+                  <div>
+                    <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                       <span class="material-icons text-red-600 text-sm">list_alt</span>
+                       Assessment Findings
+                    </h4>
+                    <div class="space-y-3">
+                      @for (rule of analysisResult()!.allRules; track rule.id) {
+                        <div class="flex items-start gap-4 p-4 rounded-xl border transition-all"
+                             [ngClass]="{
+                               'bg-white border-red-200 shadow-sm border-l-4 border-l-red-600': rule.isTriggered,
+                               'bg-gray-50 border-gray-100 opacity-60': !rule.isTriggered
+                             }">
+                          <div class="mt-1">
+                            <span class="material-icons text-xl" 
+                                  [ngClass]="rule.isTriggered ? 'text-red-600' : 'text-gray-300'">
+                              {{ rule.isTriggered ? 'warning' : 'check_circle_outline' }}
+                            </span>
+                          </div>
+                          <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                              <h5 class="text-sm font-bold text-gray-900">{{ rule.name }}</h5>
+                              @if (rule.isTriggered) {
+                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-red-700">
+                                  +{{ rule.impactScore }}% Impact
+                                </span>
+                              }
+                            </div>
+                            <p class="text-xs text-gray-600 leading-relaxed">{{ rule.description }}</p>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
                 </div>
-              </div>
+              }
             </div>
           </div>
 
@@ -371,32 +425,25 @@
 
               <!-- Primary Investigation Actions -->
               <div class="space-y-3">
-                <!-- Start Investigation Button -->
+                <!-- Smart Fraud Analysis Button -->
                 <button
                   class="w-full flex items-center gap-3 p-4 text-left border rounded-lg transition-all font-medium"
-                  [disabled]="!canStartInvestigation()"
+                  [disabled]="isAnalyzing()"
                   [ngClass]="{
-                    'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-900': canStartInvestigation() && !isStartingInvestigation(),
-                    'bg-blue-100 border-blue-300 text-blue-700 cursor-wait': isStartingInvestigation(),
-                    'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed': !canStartInvestigation()
+                    'bg-red-600 hover:bg-red-700 border-red-700 text-white shadow-md': !isAnalyzing(),
+                    'bg-red-400 border-red-500 text-white cursor-wait': isAnalyzing()
                   }"
-                  (click)="startInvestigation()">
+                  (click)="runSmartScan()">
 
-                  @if (isStartingInvestigation()) {
-                    <div class="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  @if (isAnalyzing()) {
+                    <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   } @else {
-                    <span class="material-icons"
-                          [ngClass]="{
-                            'text-blue-600': canStartInvestigation(),
-                            'text-gray-400': !canStartInvestigation()
-                          }">
-                      play_arrow
-                    </span>
+                    <span class="material-icons text-white">bolt</span>
                   }
 
                   <div class="flex-1">
-                    <div class="text-sm">Start Investigation</div>
-                    <div class="text-xs opacity-75">Begin formal SIU investigation process</div>
+                    <div class="text-sm">Run Smart Fraud Analysis</div>
+                    <div class="text-xs opacity-90">Execute AI-Inspired Heuristic intelligence scan</div>
                   </div>
                 </button>
 
@@ -426,10 +473,12 @@
                   <div class="flex-1">
                     <div class="text-sm">Mark as Fraud</div>
                     <div class="text-xs opacity-75">
-                      @if (canMarkAsFraud()) {
-                        Confirm fraudulent activity detected
+                      @if (!analysisResult()) {
+                        Requires Smart Fraud Analysis scan
+                      } @else if (analysisResult()!.totalScore < 70) {
+                        Requires high risk score (>= 70) to confirm fraud
                       } @else {
-                        Requires investigation or high risk score
+                        Confirm fraudulent activity detected
                       }
                     </div>
                   </div>
@@ -460,7 +509,15 @@
 
                   <div class="flex-1">
                     <div class="text-sm">Clear Claim</div>
-                    <div class="text-xs opacity-75">Mark as legitimate - no fraud detected</div>
+                    <div class="text-xs opacity-75">
+                      @if (!analysisResult()) {
+                        Requires Smart Fraud Analysis scan
+                      } @else if (analysisResult()!.totalScore >= 70) {
+                        High risk detected - cannot clear without additional review
+                      } @else {
+                        Mark as legitimate - no fraud detected
+                      }
+                    </div>
                   </div>
                 </button>
               </div>

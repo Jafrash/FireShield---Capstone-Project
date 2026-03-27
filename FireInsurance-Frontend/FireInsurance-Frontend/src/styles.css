@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @theme {
   --color-fire-red: #C72B32;
   --color-fire-orange: #FF6B35;
@@ -10,11 +11,14 @@
 }
 
 @layer base {
-  html, body {
+
+  html,
+  body {
     height: 100%;
     margin: 0;
     padding: 0;
   }
+
   body {
     background-color: var(--color-warmgray);
     color: rgb(17, 24, 39);
@@ -51,6 +55,7 @@
 }
 
 @layer components {
+
   /* Typography Scale */
   .text-h1 {
     font-size: 40px;
@@ -254,7 +259,7 @@
     color: rgb(75, 85, 99);
     background-color: rgb(243, 244, 246);
   }
-  
+
   /* Status Badge Styles */
   .badge {
     display: inline-flex;
@@ -595,8 +600,13 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes slideUp {
@@ -604,6 +614,7 @@
       opacity: 0;
       transform: translateY(20px) scale(0.95);
     }
+
     to {
       opacity: 1;
       transform: translateY(0) scale(1);
@@ -615,6 +626,7 @@
       opacity: 0;
       transform: translateY(-10px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -701,7 +713,9 @@
   }
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   /* Empty State */
@@ -854,27 +868,36 @@
 
   /* Hero Animation Styles */
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0px) scale(1);
     }
+
     50% {
       transform: translateY(-20px) scale(1.05);
     }
   }
 
   @keyframes float-delayed {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0px) translateX(0px);
     }
+
     50% {
       transform: translateY(-15px) translateX(10px);
     }
   }
 
   @keyframes float-slow {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0px) rotate(0deg);
     }
+
     50% {
       transform: translateY(-25px) rotate(5deg);
     }
@@ -900,6 +923,7 @@
       opacity: 0;
       transform: translateY(30px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -911,6 +935,7 @@
       opacity: 0;
       transform: translateY(-30px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -922,6 +947,7 @@
       opacity: 0;
       transform: scale(0.9);
     }
+
     to {
       opacity: 1;
       transform: scale(1);
@@ -933,6 +959,7 @@
       opacity: 0;
       transform: translateX(-30px);
     }
+
     to {
       opacity: 1;
       transform: translateX(0);
@@ -944,6 +971,7 @@
       opacity: 0;
       transform: translateX(30px);
     }
+
     to {
       opacity: 1;
       transform: translateX(0);
@@ -951,9 +979,12 @@
   }
 
   @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
       opacity: 1;
     }
+
     50% {
       opacity: 0.5;
     }
@@ -963,15 +994,19 @@
     0% {
       background-position: -1000px 0;
     }
+
     100% {
       background-position: 1000px 0;
     }
   }
 
   @keyframes glow {
-    0%, 100% {
+
+    0%,
+    100% {
       box-shadow: 0 0 20px rgba(199, 43, 50, 0.2);
     }
+
     50% {
       box-shadow: 0 0 30px rgba(255, 107, 53, 0.4);
     }
@@ -1047,9 +1082,12 @@
   }
 
   @keyframes gradient-shift {
-    0%, 100% {
+
+    0%,
+    100% {
       background-position: 0% 50%;
     }
+
     50% {
       background-position: 100% 50%;
     }
@@ -1131,9 +1169,12 @@
   }
 
   @keyframes bounce {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0);
     }
+
     50% {
       transform: translateY(-5px);
     }
@@ -1153,7 +1194,9 @@
   }
 
   @keyframes ping {
-    75%, 100% {
+
+    75%,
+    100% {
       transform: scale(2);
       opacity: 0;
     }
@@ -1348,12 +1391,10 @@
   .shimmer-effect {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(
-      90deg,
-      #f0f0f0 0%,
-      #f8f8f8 50%,
-      #f0f0f0 100%
-    );
+    background: linear-gradient(90deg,
+        #f0f0f0 0%,
+        #f8f8f8 50%,
+        #f0f0f0 100%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }

@@ -39,7 +39,12 @@ export class SiuDashboardComponent implements OnInit {
   claims = computed(() => {
     let filteredClaims = this.allClaims();
 
-    // Apply state filter
+    // 1. Strict Triage Filter: Only show HIGH risk claims to the SIU investigator
+    filteredClaims = filteredClaims.filter(claim =>
+      claim.priority === 'HIGH' || (claim.fraudScore && claim.fraudScore >= 70)
+    );
+
+    // 2. Apply state filter
     if (this.stateFilter() !== 'ALL') {
       filteredClaims = filteredClaims.filter(claim => claim.state === this.stateFilter());
     }
