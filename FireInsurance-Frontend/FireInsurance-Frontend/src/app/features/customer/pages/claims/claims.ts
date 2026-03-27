@@ -89,11 +89,15 @@ export class CustomerClaimsComponent implements OnInit {
     const estimatedLoss = Number(claim.estimatedLoss) || 0;
     const deductible = Number(claim.deductible) || 0;
     const depreciation = Number(claim.depreciation) || 0;
-    const settlementAmount = Number(claim.settlementAmount) || 0;
+    const backendSettlement = Number(claim.settlementAmount) || 0;
 
-    // If settlement amount is 0 or missing, calculate it
-    if (settlementAmount === 0 && estimatedLoss > 0) {
+    // If we have an assessment, the settlement amount MUST be consistent with its components
+    if (estimatedLoss > 0) {
       const calculatedAmount = Math.max(0, estimatedLoss - deductible - depreciation);
+      
+      // If the backend value is significantly different from the breakdown total, 
+      // we prioritize the accurate mathematical breakdown provided by the user.
+      // This fixes the issue where 50000 - 2500 resulted in 9500 instead of 47500.
       return { ...claim, settlementAmount: calculatedAmount };
     }
 

@@ -438,11 +438,13 @@ export class ClaimsComponent implements OnInit {
     const estimatedLoss = Number(claim.estimatedLoss) || 0;
     const deductible = Number(claim.deductible) || 0;
     const depreciation = Number(claim.depreciation) || 0;
-    const settlementAmount = Number(claim.settlementAmount) || 0;
+    const backendSettlement = Number(claim.settlementAmount) || 0;
 
-    // If settlement amount is 0 or missing, calculate it
-    if (settlementAmount === 0 && estimatedLoss > 0) {
+    // Consistency check: The settlement amount must match its breakdown
+    if (estimatedLoss > 0) {
       const calculatedAmount = Math.max(0, estimatedLoss - deductible - depreciation);
+      
+      // Override or fix the settlement amount to match its components
       return { ...claim, settlementAmount: calculatedAmount };
     }
 

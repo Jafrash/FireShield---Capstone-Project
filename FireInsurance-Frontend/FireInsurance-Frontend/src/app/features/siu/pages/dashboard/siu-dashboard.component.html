@@ -232,7 +232,7 @@
                       <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                               [ngClass]="getStateBadgeClass(claim.state)">
-                          {{ claim.state?.replace('_', ' ') }}
+                          {{ claim.state.replace('_', ' ') }}
                         </span>
                       </td>
 
@@ -278,8 +278,8 @@
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button (click)="viewClaimDetails(claim.claimId)"
                                 class="text-red-600 hover:text-red-900 transition-colors font-medium flex items-center gap-1">
-                          <span class="material-icons text-sm">search</span>
-                          <span>Investigate</span>
+                          <span class="material-icons text-sm">{{ (claim.state === 'CLEARED' || claim.state === 'FRAUD_CONFIRMED') ? 'visibility' : 'search' }}</span>
+                          <span>{{ (claim.state === 'CLEARED' || claim.state === 'FRAUD_CONFIRMED') ? 'View Details' : 'Investigate' }}</span>
                         </button>
                       </td>
                     </tr>

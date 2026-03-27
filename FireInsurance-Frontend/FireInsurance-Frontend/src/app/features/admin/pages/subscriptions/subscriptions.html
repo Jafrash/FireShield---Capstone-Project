@@ -86,7 +86,7 @@
               </td>
 
               <td class="px-6 py-4">
-                @if (sub.premiumAmount && sub.basePremiumAmount && sub.riskScore !== undefined) {
+                @if (sub.premiumAmount && sub.basePremiumAmount && sub.riskScore !== undefined && sub.status !== 'SUBMITTED' && sub.status !== 'REQUESTED' && sub.status !== 'PENDING' && sub.status !== 'INSPECTING') {
                   <div class="text-sm">
                     <div class="font-bold text-gray-900 mb-1">₹{{ sub.premiumAmount | number:'1.0-0' }}/mo</div>
                     <div class="text-xs text-gray-500 space-y-0.5">

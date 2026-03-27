@@ -71,7 +71,11 @@
 
                     <!-- Total Premium -->
                     <td class="px-5 py-4 text-gray-700">
-                      ₹{{ (sub.premiumAmount || 0).toLocaleString('en-IN') }}
+                      @if (sub.status === 'INSPECTED' || sub.status === 'APPROVED' || sub.status === 'ACTIVE') {
+                        ₹{{ (sub.premiumAmount || 0).toLocaleString('en-IN') }}
+                      } @else {
+                        <span class="text-gray-400 italic text-xs">Awaiting Inspection</span>
+                      }
                     </td>
 
                     <!-- Status -->
@@ -84,11 +88,11 @@
 
                     <!-- Risk Score -->
                     <td class="px-5 py-4">
-                      @if (sub.riskScore !== undefined && sub.riskScore !== null) {
+                      @if ((sub.status === 'INSPECTED' || sub.status === 'APPROVED' || sub.status === 'ACTIVE') && sub.riskScore !== undefined && sub.riskScore !== null) {
                         <span class="font-bold text-gray-700">{{ sub.riskScore }}</span>
                         <span class="text-gray-400 text-xs"> / 10</span>
                       } @else {
-                        <span class="text-gray-400">—</span>
+                        <span class="text-gray-400 italic text-xs">—</span>
                       }
                     </td>
 
@@ -103,7 +107,7 @@
 
                     <!-- Assign Surveyor -->
                     <td class="px-5 py-4">
-                      @if (sub.status === 'UNDER_REVIEW' || sub.status === 'PENDING' || sub.status === 'REQUESTED') {
+                      @if (sub.status === 'SUBMITTED' || sub.status === 'UNDER_REVIEW' || sub.status === 'PENDING' || sub.status === 'REQUESTED' || sub.status === 'SURVEYOR_ASSIGNED' || sub.status === 'SURVEY_ASSIGNED' || sub.status === 'INSPECTION_PENDING') {
                         <div class="flex items-center gap-2">
                           <select (change)="onSurveyorSelect(sub.subscriptionId, $event)"
                                   class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:ring-1 focus:ring-fire-red focus:border-fire-red outline-none">
@@ -139,14 +143,14 @@
                     <td class="px-5 py-4">
                       @if (sub.status !== 'APPROVED' && sub.status !== 'REJECTED' && sub.status !== 'ACTIVE' && sub.status !== 'CANCELLED' && sub.status !== 'EXPIRED') {
                         <div class="flex items-center gap-2">
-                          <button (click)="approveSubscription(sub.subscriptionId)"
-                                  [disabled]="!canApprove(sub)"
-                                  class="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1">
+                          <button (click)="approveSubscription(sub)"
+                                   [disabled]="!canApprove(sub)"
+                                   class="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1">
                             <span class="material-icons text-sm">check_circle</span>
                             Approve
                           </button>
-                          <button (click)="rejectSubscription(sub.subscriptionId)"
-                                  class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 transition-colors flex items-center gap-1">
+                          <button (click)="rejectSubscription(sub)"
+                                   class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 transition-colors flex items-center gap-1">
                             <span class="material-icons text-sm">cancel</span>
                             Reject
                           </button>
