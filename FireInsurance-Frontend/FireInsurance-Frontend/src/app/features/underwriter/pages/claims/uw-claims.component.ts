@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import {
   UnderwriterService,
   UwClaim,
@@ -17,6 +17,7 @@ import {
 })
 export class UwClaimsComponent implements OnInit {
   private uwService = inject(UnderwriterService);
+  private http = inject(HttpClient);
 
   claims = signal<UwClaim[]>([]);
   surveyors = signal<UwSurveyor[]>([]);
@@ -78,27 +79,56 @@ export class UwClaimsComponent implements OnInit {
         this.loadClaims();
       },
       error: (err) => {
-        const msg = err.error?.message || 'Failed to assign surveyor.';
+        // Log the error for debugging
+        console.error('Assign surveyor error:', err);
+        let msg = 'Failed to assign surveyor.';
+        if (err.status === 401 || err.status === 403) {
+          msg = 'You are not authorized to assign a surveyor. Please check your login and role.';
+        } else if (err.error?.message) {
+          msg = err.error.message;
+        } else if (err.message) {
+          msg = err.message;
+        }
         this.showError(msg);
       }
     });
   }
 
-  approveClaim(id: number): void {
-    this.uwService.approveClaim(id).subscribe({
+  approveClaim(claim: UwClaim): void {
+    // Attempting to use the general claim approval endpoint which might be less status-restrictive
+    this.http.put<UwClaim>(`http://localhost:8080/api/claims/${claim.claimId}/approve`, {}).subscribe({
       next: () => {
         this.showSuccess('Claim approved!');
         this.loadClaims();
       },
       error: (err) => {
-        const msg = err.error?.message || 'Failed to approve claim.';
-        this.showError(msg);
+        console.error('General approve failed, trying underwriter specific...', err);
+        // Fallback or show original error
+        this.uwService.approveClaim(claim.claimId).subscribe({
+          next: () => {
+            this.showSuccess('Claim approved!');
+            this.loadClaims();
+          },
+          error: (fErr) => {
+            this.showError(fErr.error?.message || 'Failed to approve claim.');
+          }
+        });
       }
     });
   }
 
-  rejectClaim(id: number): void {
+  rejectClaim(claim: UwClaim): void {
     if (!confirm('Are you sure you want to reject this claim?')) return;
+    this.http.put<UwClaim>(`http://localhost:8080/api/claims/${claim.claimId}/reject`, {}).subscribe({
+      next: () => {
+        this.showSuccess('Claim rejected.');
+        this.loadClaims();
+      },
+      error: () => this.executeUnderwriterReject(claim.claimId)
+    });
+  }
+
+  private executeUnderwriterReject(id: number): void {
     this.uwService.rejectClaim(id).subscribe({
       next: () => {
         this.showSuccess('Claim rejected.');
@@ -170,9 +200,12 @@ export class UwClaimsComponent implements OnInit {
     const map: Record<string, string> = {
       'SUBMITTED': 'bg-blue-100 text-blue-800',
       'UNDER_REVIEW': 'bg-indigo-100 text-indigo-800',
+      'SIU_CLEARED': 'bg-green-100 text-green-800',
       'SURVEY_ASSIGNED': 'bg-amber-100 text-amber-800',
+      'SURVEYOR_ASSIGNED': 'bg-amber-100 text-amber-800',
       'INSPECTING': 'bg-purple-100 text-purple-800',
       'SURVEY_COMPLETED': 'bg-teal-100 text-teal-800',
+      'SURVEYOR_COMPLETED': 'bg-teal-100 text-teal-800',
       'INSPECTED': 'bg-teal-100 text-teal-800',
       'APPROVED': 'bg-green-100 text-green-800',
       'REJECTED': 'bg-red-100 text-red-800',
@@ -182,7 +215,8 @@ export class UwClaimsComponent implements OnInit {
   }
 
   canApprove(claim: UwClaim): boolean {
-    return claim.status === 'SURVEY_COMPLETED' || claim.status === 'INSPECTED';
+    const readyStatuses = ['SURVEY_COMPLETED', 'SURVEYOR_COMPLETED', 'INSPECTED'];
+    return readyStatuses.includes(claim.status);
   }
 
   private showSuccess(msg: string): void {

@@ -44,7 +44,7 @@
       @for (policy of policies(); track policy.policyId) {
         <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
           <!-- Policy Header -->
-          <div class="bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] p-6 text-white">
+          <div class="bg-gradient-to-r from-[#C72B32] to-[#A0214F] p-6 text-white">
             <div class="flex items-start justify-between mb-2">
               <h3 class="text-xl font-bold text-white">{{ policy.policyName }}</h3>
               @if (policy.policyType) {
@@ -65,18 +65,18 @@
             <!-- Coverage Info -->
             <div class="space-y-3 mb-4">
               <div class="flex items-center gap-2 text-sm">
-                <span class="material-icons text-lg text-[#8B1E3F]">shield</span>
+                <span class="material-icons text-lg text-[#C72B32]">shield</span>
                 <span class="text-gray-600">Max Coverage:</span>
                 <span class="font-semibold text-gray-900">₹{{ formatCurrency(policy.maxCoverageAmount) }}</span>
               </div>
               <div class="flex items-center gap-2 text-sm">
-                <span class="material-icons text-lg text-[#8B1E3F]">schedule</span>
+                <span class="material-icons text-lg text-[#C72B32]">schedule</span>
                 <span class="text-gray-600">Duration:</span>
                 <span class="font-semibold text-gray-900">{{ getDurationText(policy.durationMonths) }}</span>
               </div>
               @if (policy.deductible) {
                 <div class="flex items-center gap-2 text-sm">
-                  <span class="material-icons text-lg text-blue-600">account_balance_wallet</span>
+                  <span class="material-icons text-lg text-fire-red">account_balance_wallet</span>
                   <span class="text-gray-600">Deductible:</span>
                   <span class="font-semibold text-gray-900">₹{{ formatCurrency(policy.deductible) }}</span>
                 </div>
@@ -198,7 +198,7 @@
             <!-- Action Buttons -->
             <div class="flex gap-2">
               <button (click)="viewDetails(policy)" 
-                      class="flex-1 px-4 py-2.5 border-2 border-[#8B1E3F] text-[#8B1E3F] rounded-lg font-medium hover:bg-[#8B1E3F] hover:text-white transition-colors">
+                      class="flex-1 px-4 py-2.5 border-2 border-[#C72B32] text-[#C72B32] rounded-lg font-medium hover:bg-[#C72B32] hover:text-white transition-colors">
                 <span class="material-icons text-sm align-middle mr-1">visibility</span>
                 View Details
               </button>
@@ -206,7 +206,7 @@
                       [disabled]="!canApplyForPolicy(policy.policyId)"
                       class="flex-1 px-4 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       [ngClass]="canApplyForPolicy(policy.policyId) ? 
-                                'bg-[#8B1E3F] text-white hover:bg-[#A0214F]' : 
+                                'bg-[#C72B32] text-white hover:bg-[#A0214F]' : 
                                 'bg-gray-300 text-gray-500'">
                 <span class="material-icons text-sm align-middle mr-1">
                   {{ getSubscriptionStatus()(policy.policyId) ? 'refresh' : 'add_circle' }}
@@ -228,7 +228,7 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto" 
          (click)="$event.stopPropagation()">
       <!-- Modal Header -->
-      <div class="sticky top-0 bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] p-6 text-white">
+      <div class="sticky top-0 bg-gradient-to-r from-[#C72B32] to-[#A0214F] p-6 text-white">
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <h2 class="text-2xl font-bold mb-2">{{ selectedPolicy()!.policyName }}</h2>
@@ -249,12 +249,12 @@
       <div class="p-6 space-y-6">
         <!-- Policy Snapshot -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
-            <p class="text-xs text-blue-600 font-semibold mb-1 flex items-center gap-1">
+          <div class="bg-fire-cream rounded-lg p-4 border-2 border-fire-orange/20">
+            <p class="text-xs text-fire-red font-semibold mb-1 flex items-center gap-1">
               <span class="material-icons text-sm">shield</span>
               Max Coverage
             </p>
-            <p class="text-2xl font-bold text-blue-900">₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}</p>
+            <p class="text-2xl font-bold text-fire-red-800">₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}</p>
           </div>
           <div class="bg-purple-50 rounded-lg p-4 border-2 border-purple-200">
             <p class="text-xs text-purple-600 font-semibold mb-1 flex items-center gap-1">
@@ -289,7 +289,7 @@
             </div>
             <div class="bg-white rounded-lg p-3 border border-cyan-200">
               <p class="text-xs text-gray-600 mb-1">Risk Assessment</p>
-              <p class="text-sm font-bold text-blue-700">Inspection findings and underwriting review</p>
+              <p class="text-sm font-bold text-fire-red-600">Inspection findings and underwriting review</p>
             </div>
             <div class="bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg p-3 border-2 border-green-300">
               <p class="text-xs text-green-700 font-semibold mb-1">Final Quote</p>
@@ -356,14 +356,14 @@
             </div>
 
             <!-- Tax Benefits -->
-            <div class="bg-white rounded-lg p-4 shadow-sm border border-blue-200">
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-fire-orange/20">
               <div class="flex items-start gap-3">
-                <div class="bg-blue-100 rounded-full p-2">
-                  <span class="material-icons text-blue-700">account_balance</span>
+                <div class="bg-fire-red/10 rounded-full p-2">
+                  <span class="material-icons text-fire-red-600">account_balance</span>
                 </div>
                 <div class="flex-1">
                   <h4 class="font-bold text-gray-900 mb-1">Tax Benefits Under Section 80C</h4>
-                  <p class="text-sm text-gray-700">Premium paid is eligible for tax deduction up to <span class="font-bold text-blue-700">₹1,50,000</span> per financial year</p>
+                  <p class="text-sm text-gray-700">Premium paid is eligible for tax deduction up to <span class="font-bold text-fire-red-600">₹1,50,000</span> per financial year</p>
                 </div>
               </div>
             </div>
@@ -467,7 +467,7 @@
             </div>
             @if (selectedPolicy()!.deductible) {
               <div class="flex items-start gap-3">
-                <span class="material-icons text-blue-600 mt-1">account_balance_wallet</span>
+                <span class="material-icons text-fire-red mt-1">account_balance_wallet</span>
                 <div>
                   <p class="font-semibold text-gray-900">Deductible</p>
                   <p class="text-sm text-gray-700">₹{{ formatCurrency(selectedPolicy()!.deductible!) }}</p>
@@ -499,7 +499,7 @@
         @if (selectedPolicy()!.coverageBenefits && selectedPolicy()!.coverageBenefits!.length > 0) {
           <div>
             <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <span class="material-icons text-[#8B1E3F]">verified</span>
+              <span class="material-icons text-[#C72B32]">verified</span>
               Coverage Benefits
             </h3>
             <div class="bg-green-50 rounded-lg p-4 border border-green-200">
@@ -519,7 +519,7 @@
         @if (selectedPolicy()!.detailedDescription) {
           <div>
             <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
-              <span class="material-icons text-[#8B1E3F]">description</span>
+              <span class="material-icons text-[#C72B32]">description</span>
               About This Policy
             </h3>
             <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
@@ -531,10 +531,10 @@
         <!-- Coverage Details -->
         <div>
           <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
-            <span class="material-icons text-[#8B1E3F]">shield</span>
+            <span class="material-icons text-[#C72B32]">shield</span>
             What's Covered
           </h3>
-          <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+          <div class="bg-fire-cream rounded-lg p-4 border border-fire-orange/20">
             <p class="text-gray-800 leading-relaxed">{{ selectedPolicy()!.coverageDetails }}</p>
           </div>
         </div>
@@ -543,7 +543,7 @@
         @if (selectedPolicy()!.risksCovered && selectedPolicy()!.risksCovered!.length > 0) {
           <div>
             <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <span class="material-icons text-[#8B1E3F]">security</span>
+              <span class="material-icons text-[#C72B32]">security</span>
               Specific Risks Covered
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -581,7 +581,7 @@
         @if (selectedPolicy()!.addOns && selectedPolicy()!.addOns!.length > 0) {
           <div>
             <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <span class="material-icons text-[#8B1E3F]">add_circle</span>
+              <span class="material-icons text-[#C72B32]">add_circle</span>
               Available Add-Ons (Optional)
             </h3>
             <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
@@ -620,7 +620,7 @@
               }
               <div class="flex justify-between items-center pb-2 border-b">
                 <span class="text-gray-700">Settlement Ratio:</span>
-                <span class="font-semibold text-blue-600">{{ selectedPolicy()!.claimSettlementRatio || 100 }}%</span>
+                <span class="font-semibold text-fire-red">{{ selectedPolicy()!.claimSettlementRatio || 100 }}%</span>
               </div>
               <div class="flex justify-between items-center pt-2 bg-green-50 rounded p-3 mt-2">
                 <span class="font-bold text-gray-900">You Will Receive:</span>
@@ -634,7 +634,7 @@
         @if (selectedPolicy()!.propertyTypesEligible && selectedPolicy()!.propertyTypesEligible!.length > 0) {
           <div>
             <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <span class="material-icons text-[#8B1E3F]">home_work</span>
+              <span class="material-icons text-[#C72B32]">home_work</span>
               Eligible Property Types
             </h3>
             <div class="flex flex-wrap gap-2">
@@ -673,7 +673,7 @@
         @if (selectedPolicy()!.termsAndConditions) {
           <div>
             <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
-              <span class="material-icons text-[#8B1E3F]">gavel</span>
+              <span class="material-icons text-[#C72B32]">gavel</span>
               Terms & Conditions
             </h3>
             <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 max-h-60 overflow-y-auto">
@@ -691,7 +691,7 @@
         </button>
         <button (click)="closeDetailsModal(); openApplyModal(selectedPolicy()!)" 
                 [disabled]="!canApplyForPolicy(selectedPolicy()!.policyId)"
-                class="flex-1 px-6 py-3 bg-[#8B1E3F] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                class="flex-1 px-6 py-3 bg-[#C72B32] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           <span class="material-icons text-sm align-middle mr-1">add_circle</span>
           {{ getApplyButtonText(selectedPolicy()!.policyId) }}
         </button>
@@ -705,7 +705,7 @@
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl" (click)="$event.stopPropagation()">
       <!-- Modal Header -->
-      <div class="bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] p-6 text-white rounded-t-2xl">
+      <div class="bg-gradient-to-r from-[#C72B32] to-[#A0214F] p-6 text-white rounded-t-2xl">
         <div class="flex items-start justify-between">
           <div>
             <h2 class="text-2xl font-bold mb-1">Apply for Policy</h2>
@@ -729,15 +729,15 @@
 
         @if (!isUploadStep()) {
           <!-- Policy Info Display -->
-          <div class="bg-blue-50 rounded-lg p-4 mb-6 border border-blue-200">
+          <div class="bg-fire-cream rounded-lg p-4 mb-6 border border-fire-orange/20">
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <p class="text-xs text-blue-600 font-semibold mb-1">Premium Quote</p>
-                <p class="text-sm font-bold text-blue-900">Calculated after property review</p>
+                <p class="text-xs text-fire-red font-semibold mb-1">Premium Quote</p>
+                <p class="text-sm font-bold text-fire-red-800">Calculated after property review</p>
               </div>
               <div>
-                <p class="text-xs text-blue-600 font-semibold mb-1">Max Coverage</p>
-                <p class="text-xl font-bold text-blue-900">₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}</p>
+                <p class="text-xs text-fire-red font-semibold mb-1">Max Coverage</p>
+                <p class="text-xl font-bold text-fire-red-800">₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}</p>
               </div>
             </div>
           </div>
@@ -866,7 +866,7 @@
               Cancel
             </button>
             <button type="submit" 
-                    class="flex-1 px-6 py-3 bg-[#8B1E3F] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    class="flex-1 px-6 py-3 bg-[#C72B32] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     [disabled]="applicationForm.invalid || isSubmitting() || properties().length === 0">
               @if (isSubmitting()) {
                 <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -893,7 +893,7 @@
             <div class="flex justify-end gap-3 mt-4 border-t border-gray-100 pt-5">
               <button type="button" 
                       (click)="closeApplyModal()" 
-                      class="px-6 py-3 bg-[#8B1E3F] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors flex items-center gap-2 shadow-md">
+                      class="px-6 py-3 bg-[#C72B32] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors flex items-center gap-2 shadow-md">
                 <span class="material-icons text-sm">done_all</span>
                 Finish Application
               </button>

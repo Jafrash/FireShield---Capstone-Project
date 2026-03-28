@@ -3,7 +3,7 @@
     <div class="max-w-3xl mx-auto">
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
         <div class="px-6 py-8 sm:p-10">
-          <h3 class="text-2xl leading-6 font-bold text-center uppercase tracking-wider text-claret">Get a Quote</h3>
+          <h3 class="text-2xl leading-6 font-bold text-center uppercase tracking-wider text-fire-red">Get a Quote</h3>
           <p class="mt-4 text-center text-lg text-gray-500 mb-8">
             Tell us about your property to receive a tailored fire insurance estimate perfectly suited to your needs.
           </p>
@@ -14,7 +14,7 @@
               <div class="sm:col-span-2">
                 <label for="propertyType" class="block text-sm font-medium text-gray-700">Property Type</label>
                 <div class="mt-1">
-                  <select id="propertyType" formControlName="propertyType" class="py-3 px-4 block w-full shadow-sm focus:ring-claret focus:border-claret border-gray-300 rounded-md">
+                  <select id="propertyType" formControlName="propertyType" class="py-3 px-4 block w-full shadow-sm focus:ring-fire-red focus:border-fire-red border-gray-300 rounded-md">
                     <option value="">Select Property Type</option>
                     <option value="RESIDENTIAL">Residential</option>
                     <option value="COMMERCIAL">Commercial</option>
@@ -30,7 +30,7 @@
               <div>
                 <label for="buildingArea" class="block text-sm font-medium text-gray-700">Building Area (sq ft)</label>
                 <div class="mt-1">
-                  <input type="number" id="buildingArea" formControlName="buildingArea" min="1" class="py-3 px-4 block w-full shadow-sm focus:ring-claret focus:border-claret border-gray-300 rounded-md placeholder-gray-400" placeholder="e.g. 2500">
+                  <input type="number" id="buildingArea" formControlName="buildingArea" min="1" class="py-3 px-4 block w-full shadow-sm focus:ring-fire-red focus:border-fire-red border-gray-300 rounded-md placeholder-gray-400" placeholder="e.g. 2500">
                 </div>
                 @if (hasError('buildingArea', 'required')) {
                   <p class="mt-2 text-sm text-red-600">Area is required</p>
@@ -43,7 +43,7 @@
               <div>
                 <label for="constructionType" class="block text-sm font-medium text-gray-700">Construction Type</label>
                 <div class="mt-1">
-                  <select id="constructionType" formControlName="constructionType" class="py-3 px-4 block w-full shadow-sm focus:ring-claret focus:border-claret border-gray-300 rounded-md">
+                  <select id="constructionType" formControlName="constructionType" class="py-3 px-4 block w-full shadow-sm focus:ring-fire-red focus:border-fire-red border-gray-300 rounded-md">
                     <option value="">Select Construction Type</option>
                     <option value="BRICK">Brick</option>
                     <option value="WOOD">Wood</option>
@@ -60,7 +60,7 @@
               <div class="sm:col-span-2">
                 <label for="city" class="block text-sm font-medium text-gray-700">City</label>
                 <div class="mt-1">
-                  <input type="text" id="city" formControlName="city" class="py-3 px-4 block w-full shadow-sm focus:ring-claret focus:border-claret border-gray-300 rounded-md placeholder-gray-400" placeholder="e.g. New York">
+                  <input type="text" id="city" formControlName="city" class="py-3 px-4 block w-full shadow-sm focus:ring-fire-red focus:border-fire-red border-gray-300 rounded-md placeholder-gray-400" placeholder="e.g. New York">
                 </div>
                 @if (hasError('city', 'required')) {
                   <p class="mt-2 text-sm text-red-600">City is required</p>
@@ -95,7 +95,7 @@
             }
 
             <div class="mt-8 pt-5">
-              <button type="submit" [disabled]="isSubmitting" class="w-full inline-flex items-center justify-center px-6 py-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-claret hover:bg-claret/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-claret disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+              <button type="submit" [disabled]="isSubmitting" class="w-full inline-flex items-center justify-center px-6 py-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-fire-red hover:bg-fire-red/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fire-red disabled:opacity-50 disabled:cursor-not-allowed transition-all">
                 @if (isSubmitting) {
                   <span class="material-icons animate-spin mr-2">refresh</span>
                   Submitting Request...

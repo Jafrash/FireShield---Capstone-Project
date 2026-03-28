@@ -25,7 +25,7 @@
       <button
         (click)="setFilter(filter)"
         [class]="activeFilter() === filter
-          ? 'px-4 py-2 rounded-lg text-white bg-[#8B1E3F] font-medium text-sm shadow-md'
+          ? 'px-4 py-2 rounded-lg text-white bg-[#C72B32] font-medium text-sm shadow-md'
           : 'px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors'">
         {{ filter === 'ALL' ? 'All' : filter.charAt(0) + filter.slice(1).toLowerCase() }}
         <span class="ml-1 text-xs opacity-75">({{ getCount(filter) }})</span>
@@ -55,7 +55,7 @@
             <tr>
               <td colspan="8" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center gap-3">
-                  <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#8B1E3F]"></div>
+                  <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#C72B32]"></div>
                   <p class="text-gray-600">Loading subscriptions...</p>
                 </div>
               </td>
@@ -86,7 +86,7 @@
               </td>
 
               <td class="px-6 py-4">
-                @if (sub.premiumAmount && sub.basePremiumAmount && sub.riskScore !== undefined) {
+                @if (sub.premiumAmount && sub.basePremiumAmount && sub.riskScore !== undefined && sub.status !== 'SUBMITTED' && sub.status !== 'REQUESTED' && sub.status !== 'PENDING' && sub.status !== 'INSPECTING') {
                   <div class="text-sm">
                     <div class="font-bold text-gray-900 mb-1">₹{{ sub.premiumAmount | number:'1.0-0' }}/mo</div>
                     <div class="text-xs text-gray-500 space-y-0.5">
@@ -103,7 +103,7 @@
                 } @else {
                   <div class="text-sm">
                     <div class="font-semibold text-gray-900">₹{{ (sub.premiumAmount || sub.requestedCoverage) | number:'1.0-0' }}</div>
-                    <div class="text-xs text-gray-400 mt-1">Awaiting inspection</div>
+                    <div class="text-xs text-gray-400 mt-1">Auto Premium</div>
                   </div>
                 }
               </td>
@@ -122,14 +122,6 @@
                       <span class="material-icons text-[14px] mr-1">attachment</span> Docs
                     </button>
 
-                    @if (sub.status === 'PENDING' || sub.status === 'REQUESTED' || sub.status === 'INSPECTING' || sub.status === 'INSPECTED' || sub.status === 'UNDER_INSPECTION') {
-                      
-                      @if (sub.status === 'UNDER_INSPECTION' || sub.status === 'INSPECTING' || (inspections()[sub.subscriptionId || sub.id || 0] && inspections()[sub.subscriptionId || sub.id || 0].status !== 'COMPLETED')) {
-                        <span class="text-xs text-purple-800 bg-purple-100 px-3 py-1.5 rounded-lg whitespace-nowrap font-medium border border-purple-200 mr-2">
-                          Inspection Assigned: {{ inspections()[sub.subscriptionId || sub.id || 0]?.surveyorName || 'Surveyor' }}
-                        </span>
-                      }
-                    }
                     @if (sub.underwriterId) {
                       <span class="text-xs text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg whitespace-nowrap font-medium border border-purple-200">
                         <span class="material-icons text-[14px] align-middle mr-1">person</span> Underwriter Assigned
@@ -169,7 +161,7 @@
 @if (showDocsModal() && selectedSubscriptionForDocs()) {
   <div class="fixed inset-0 bg-black/60 shadow-lg backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
-      <div class="bg-gradient-to-r from-[#8B1E3F] to-[#A0214F] p-5 text-white rounded-t-2xl flex justify-between items-center z-10">
+      <div class="bg-gradient-to-r from-[#C72B32] to-[#A0214F] p-5 text-white rounded-t-2xl flex justify-between items-center z-10">
         <div>
           <h2 class="text-xl font-bold flex items-center gap-2"><span class="material-icons">folder</span> Policy Documents</h2>
           <p class="text-xs text-white/90 mt-1">Subscription #SUB-{{ selectedSubscriptionForDocs()!.subscriptionId || selectedSubscriptionForDocs()!.id }}</p>
@@ -182,7 +174,7 @@
       <div class="p-6 max-h-[60vh] overflow-y-auto bg-gray-50">
         @if (docsLoading()) {
           <div class="flex flex-col items-center justify-center p-8">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#8B1E3F] mb-3"></div>
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#C72B32] mb-3"></div>
             <p class="text-gray-500 text-sm">Fetching documents...</p>
           </div>
         } @else if (currentDocs().length === 0) {
@@ -196,8 +188,8 @@
             @for (doc of currentDocs(); track doc.documentId) {
               <li class="flex items-center justify-between p-4 bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md transition-shadow">
                 <div class="flex items-center gap-4 overflow-hidden">
-                  <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-lg">
-                    <span class="material-icons text-blue-600 text-xl">description</span>
+                  <div class="bg-fire-cream border border-fire-red/20 p-2.5 rounded-lg">
+                    <span class="material-icons text-fire-red text-xl">description</span>
                   </div>
                   <div class="flex flex-col overflow-hidden">
                     <span class="text-sm font-bold text-gray-800 truncate" [title]="doc.fileName">{{ doc.fileName || 'Document' }}</span>
@@ -205,7 +197,7 @@
                   </div>
                 </div>
                 <button (click)="downloadDocument(doc)" 
-                   class="px-4 py-2 text-sm bg-blue-50 text-blue-700 font-bold border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1 shadow-sm">
+                   class="px-4 py-2 text-sm bg-fire-cream text-fire-red-600 font-bold border border-fire-orange/20 rounded-lg hover:bg-fire-red/10 transition-colors flex items-center gap-1 shadow-sm">
                   <span class="material-icons text-[16px]">file_download</span>
                   View
                 </button>

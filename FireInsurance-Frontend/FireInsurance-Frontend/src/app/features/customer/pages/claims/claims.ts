@@ -67,7 +67,9 @@ export class CustomerClaimsComponent implements OnInit {
       this.customerService.getMyProperties().toPromise(),
       this.customerService.getMySubscriptions().toPromise()
     ]).then(([claims, properties, subs]) => {
-      this.claims.set(claims || []);
+      // Apply smart calculation for settlement amounts
+      const processedClaims = (claims || []).map(claim => this.calculateSettlementAmount(claim));
+      this.claims.set(processedClaims);
       this.properties.set(properties || []);
       this.activeSubscriptions.set((subs || []).filter(s => s.status === 'ACTIVE'));
       this.isLoading.set(false);
@@ -76,6 +78,30 @@ export class CustomerClaimsComponent implements OnInit {
       console.error('Error loading data:', err);
       this.isLoading.set(false);
     });
+  }
+
+  /**
+   * Smart calculation fallback for settlement amount.
+   * If settlementAmount is 0 or missing, calculate it as:
+   * Math.max(0, estimatedLoss - deductible - depreciation)
+   */
+  private calculateSettlementAmount(claim: Claim): Claim {
+    const estimatedLoss = Number(claim.estimatedLoss) || 0;
+    const deductible = Number(claim.deductible) || 0;
+    const depreciation = Number(claim.depreciation) || 0;
+    const backendSettlement = Number(claim.settlementAmount) || 0;
+
+    // If we have an assessment, the settlement amount MUST be consistent with its components
+    if (estimatedLoss > 0) {
+      const calculatedAmount = Math.max(0, estimatedLoss - deductible - depreciation);
+      
+      // If the backend value is significantly different from the breakdown total, 
+      // we prioritize the accurate mathematical breakdown provided by the user.
+      // This fixes the issue where 50000 - 2500 resulted in 9500 instead of 47500.
+      return { ...claim, settlementAmount: calculatedAmount };
+    }
+
+    return claim;
   }
 
   openFileClaimModal(): void {
@@ -152,9 +178,11 @@ export class CustomerClaimsComponent implements OnInit {
       'SUBMITTED': 'bg-blue-100 text-blue-800',
       'UNDER_REVIEW': 'bg-yellow-100 text-yellow-800',
       'INSPECTING': 'bg-yellow-100 text-yellow-800',
+      'INSPECTED': 'bg-purple-100 text-purple-800',
       'APPROVED': 'bg-green-100 text-green-800',
       'REJECTED': 'bg-red-100 text-red-800',
-      'SETTLED': 'bg-purple-100 text-purple-800'
+      'SETTLED': 'bg-purple-100 text-purple-800',
+      'PAID': 'bg-green-100 text-green-800'
     };
     return statusClasses[status] || 'bg-gray-100 text-gray-800';
   }

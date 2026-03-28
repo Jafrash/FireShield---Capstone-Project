@@ -5,7 +5,7 @@
       <h1 class="page-title">Manage Customers</h1>
       <p class="text-gray-600 mt-2">View and manage all customer accounts in the system</p>
     </div>
-    <button class="flex items-center gap-2 px-6 py-3 bg-[#8B1E3F] text-white rounded-lg hover:bg-[#6f1732] transition-all font-medium shadow-md hover:shadow-lg">
+    <button class="flex items-center gap-2 px-6 py-3 bg-[#C72B32] text-white rounded-lg hover:bg-[#A01E28] transition-all font-medium shadow-md hover:shadow-lg">
       <span class="material-icons text-xl">person_add</span>
       <span>Add Customer</span>
     </button>
@@ -19,7 +19,7 @@
         <input 
           type="text" 
           placeholder="Search by name, email, or customer ID..." 
-          class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B1E3F] focus:border-[#8B1E3F] outline-none transition-all"
+          class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C72B32] focus:border-[#C72B32] outline-none transition-all"
           (input)="searchCustomers($any($event.target).value)"
         />
       </div>
@@ -55,7 +55,7 @@
             <tr>
               <td colspan="8" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center gap-3">
-                  <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#8B1E3F]"></div>
+                  <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#C72B32]"></div>
                   <p class="text-gray-600">Loading customers...</p>
                 </div>
               </td>
@@ -67,7 +67,7 @@
             <tr>
               <td colspan="8" class="px-6 py-12 text-center">
                 <p class="text-red-600 mb-4">{{ errorMessage() }}</p>
-                <button (click)="loadCustomers()" class="px-4 py-2 bg-[#8B1E3F] text-white rounded-lg hover:bg-[#6f1732] transition-colors">
+                <button (click)="loadCustomers()" class="px-4 py-2 bg-[#C72B32] text-white rounded-lg hover:bg-[#A01E28] transition-colors">
                   Retry
                 </button>
               </td>
@@ -89,7 +89,7 @@
               <td class="px-6 py-4 text-sm font-medium text-gray-900">#CUST-{{ customer.id }}</td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-linear-to-br from-[#8B1E3F] to-[#D81B60] flex items-center justify-center text-white font-semibold">
+                  <div class="w-10 h-10 rounded-full bg-linear-to-br from-[#C72B32] to-[#D81B60] flex items-center justify-center text-white font-semibold">
                     {{ (customer.firstName || 'U')[0] }}{{ (customer.lastName || 'N')[0] }}
                   </div>
                   <span class="text-sm font-medium text-gray-900">{{ customer.firstName }} {{ customer.lastName }}</span>
@@ -107,7 +107,7 @@
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
-                  <button class="p-2 text-[#8B1E3F] hover:bg-[#8B1E3F]/10 rounded-lg transition-all" title="View">
+                  <button class="p-2 text-[#C72B32] hover:bg-[#C72B32]/10 rounded-lg transition-all" title="View">
                     <span class="material-icons text-lg">visibility</span>
                   </button>
                   <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Delete"
@@ -129,7 +129,7 @@
         <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all">
           Previous
         </button>
-        <button class="px-4 py-2 bg-[#8B1E3F] text-white rounded-lg font-medium">1</button>
+        <button class="px-4 py-2 bg-[#C72B32] text-white rounded-lg font-medium">1</button>
         <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all">2</button>
         <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all">3</button>
         <span class="px-2">...</span>

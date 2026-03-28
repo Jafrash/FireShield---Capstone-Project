@@ -33,6 +33,9 @@ export interface UwClaim {
   calculatedDeductible?: number;
   calculatedDepreciation?: number;
   settlementAmount?: number;
+  fraudScore?: number; // 0-100 fraud risk score
+  siuStatus?: string; // 'UNDER_INVESTIGATION' | 'CLEARED' | 'FRAUD_CONFIRMED' | null
+  riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 }
 
 export interface UwDocument {
@@ -107,6 +110,22 @@ export class UnderwriterService {
 
   rejectSubscription(id: number): Observable<UwSubscription> {
     return this.http.post<UwSubscription>(`${this.apiUrl}/underwriter/subscriptions/${id}/reject`, {});
+  }
+
+  updateClaimStatus(id: number, status: string): Observable<UwClaim> {
+    return this.http.patch<UwClaim>(`${this.apiUrl}/claims/${id}/status`, { status });
+  }
+
+  updateSubscriptionStatus(id: number, status: string): Observable<UwSubscription> {
+    return this.http.patch<UwSubscription>(`${this.apiUrl}/subscriptions/${id}/status`, { status });
+  }
+
+  startReview(id: number): Observable<UwClaim> {
+    return this.http.post<UwClaim>(`${this.apiUrl}/underwriter/claims/${id}/review`, {});
+  }
+
+  startSubscriptionReview(id: number): Observable<UwSubscription> {
+    return this.http.post<UwSubscription>(`${this.apiUrl}/underwriter/subscriptions/${id}/review`, {});
   }
 
   approveClaim(id: number): Observable<UwClaim> {

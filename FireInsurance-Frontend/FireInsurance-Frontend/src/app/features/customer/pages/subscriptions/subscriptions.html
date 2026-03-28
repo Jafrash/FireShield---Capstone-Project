@@ -69,7 +69,7 @@
         @for (policy of subscriptions(); track policy.subscriptionId) {
           <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
             <!-- Header with Gradient -->
-            <div class="bg-linear-to-br from-claret to-fuchsia p-6 text-white relative overflow-hidden">
+            <div class="bg-linear-to-br from-fire-red to-fire-orange p-6 text-white relative overflow-hidden">
               <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div class="relative flex items-start justify-between">
                 <div class="flex-1">
@@ -112,7 +112,7 @@
                   <div class="text-right">
                     <div class="text-sm font-bold text-gray-900">{{ policy.premiumAmount | currency:'INR':'symbol' }}</div>
                     @if (getMonthlyInstallment(policy); as monthlyInstallment) {
-                      <div class="text-[10px] text-claret font-semibold mt-0.5">
+                      <div class="text-[10px] text-fire-red font-semibold mt-0.5">
                         {{ monthlyInstallment | currency:'INR':'symbol' }} / month
                       </div>
                     }
@@ -130,7 +130,7 @@
                   <div class="text-right">
                     <div class="text-sm font-bold text-gray-900">{{ policy.premiumAmount | currency:'INR':'symbol' }}</div>
                     @if (getMonthlyInstallment(policy); as monthlyInstallment) {
-                      <div class="text-[10px] text-claret font-semibold mt-0.5">
+                      <div class="text-[10px] text-fire-red font-semibold mt-0.5">
                         {{ monthlyInstallment | currency:'INR':'symbol' }} / month
                       </div>
                     }
@@ -161,11 +161,11 @@
                     Legal Documents
                   </div>
                   <div class="flex flex-wrap gap-2">
-                    <button class="px-3 py-1.5 text-xs font-semibold border border-claret/30 text-claret rounded-lg hover:bg-claret/5"
+                    <button class="px-3 py-1.5 text-xs font-semibold border border-fire-red/30 text-fire-red rounded-lg hover:bg-fire-red/5"
                             (click)="downloadCoverNote(policy)">
                       Download Cover Note
                     </button>
-                    <button class="px-3 py-1.5 text-xs font-semibold border border-fuchsia/30 text-fuchsia rounded-lg hover:bg-fuchsia/5"
+                    <button class="px-3 py-1.5 text-xs font-semibold border border-fire-orange/30 text-fire-orange rounded-lg hover:bg-fire-orange/5"
                             (click)="downloadPolicyDocument(policy)">
                       Download Policy Document
                     </button>
@@ -181,7 +181,7 @@
                   </div>
                   <div class="flex items-center gap-2">
                     @if (canViewPremiumBreakdown(policy)) {
-                      <button class="px-3 py-1.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200"
+                      <button class="px-3 py-1.5 text-xs font-semibold bg-fire-red/10 text-fire-red-700 rounded-lg hover:bg-fire-orange/10"
                               (click)="openPremiumBreakdown(policy)">
                         View Breakdown
                       </button>
@@ -260,7 +260,7 @@
                     <span class="px-3 py-1 rounded-full text-xs font-semibold"
                           [ngClass]="{
                             'bg-yellow-100 text-yellow-700': subscription.status === 'PENDING' || subscription.status === 'REQUESTED' || subscription.status === 'SUBMITTED' || subscription.status === 'INSPECTION_PENDING' || subscription.status === 'UNDER_REVIEW',
-                            'bg-blue-100 text-blue-700': subscription.status === 'PAYMENT_PENDING',
+                            'bg-fire-red/10 text-fire-red-600': subscription.status === 'PAYMENT_PENDING',
                             'bg-red-100 text-red-700': subscription.status === 'REJECTED',
                             'bg-green-100 text-green-700': subscription.status === 'ACTIVE'
                           }">
@@ -272,13 +272,13 @@
                       <div>
                         <div>{{ subscription.premiumAmount ? (subscription.premiumAmount | currency:'INR':'symbol') : '-' }}</div>
                         @if (getMonthlyInstallment(subscription); as monthlyInstallment) {
-                          <div class="text-[11px] text-claret font-semibold mt-0.5">
+                          <div class="text-[11px] text-fire-red font-semibold mt-0.5">
                             {{ monthlyInstallment | currency:'INR':'symbol' }} / month
                           </div>
                         }
                       </div>
                       @if (canViewPremiumBreakdown(subscription)) {
-                        <button class="px-3 py-1.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200"
+                        <button class="px-3 py-1.5 text-xs font-semibold bg-fire-red/10 text-fire-red-700 rounded-lg hover:bg-fire-orange/10"
                                 (click)="openPremiumBreakdown(subscription)">
                           View Breakdown
                         </button>
@@ -288,10 +288,10 @@
                 </tr>
                 <!-- Status Message Row -->
                 @if (subscription.status === 'REQUESTED' || subscription.status === 'SUBMITTED' || subscription.status === 'PENDING' || subscription.status === 'INSPECTION_PENDING' || subscription.status === 'UNDER_REVIEW') {
-                  <tr class="bg-blue-50/30">
+                  <tr class="bg-fire-cream/30">
                     <td colspan="3" class="px-6 py-4 border-t border-dashed border-gray-100 text-sm">
-                      <div class="flex items-center gap-2 text-blue-700">
-                        <span class="material-icons text-blue-600 text-[18px]">hourglass_empty</span>
+                      <div class="flex items-center gap-2 text-fire-red-600">
+                        <span class="material-icons text-fire-red text-[18px]">hourglass_empty</span>
                         <span class="font-medium">Application submitted and documents attached. Awaiting admin review...</span>
                       </div>
                     </td>
@@ -424,9 +424,9 @@
               <p class="mt-2 text-2xl font-bold text-gray-900">{{ breakdown.totalPremium | currency:'INR':'symbol' }}</p>
               <p class="mt-1 text-sm text-gray-600">Authoritative premium calculated after underwriting and inspection.</p>
             </div>
-            <div class="rounded-xl border border-claret/20 bg-claret/5 p-4">
-              <p class="text-xs font-semibold uppercase tracking-wide text-claret">Monthly Premium</p>
-              <p class="mt-2 text-2xl font-bold text-claret">{{ breakdown.monthlyPremium | currency:'INR':'symbol' }}</p>
+            <div class="rounded-xl border border-fire-red/20 bg-fire-red/5 p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-fire-red">Monthly Premium</p>
+              <p class="mt-2 text-2xl font-bold text-fire-red">{{ breakdown.monthlyPremium | currency:'INR':'symbol' }}</p>
               <p class="mt-1 text-sm text-gray-600">Shown as {{ breakdown.installmentMonths }} monthly installment(s) for customer clarity.</p>
             </div>
           </div>

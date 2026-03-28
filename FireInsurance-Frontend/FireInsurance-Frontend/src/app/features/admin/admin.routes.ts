@@ -39,16 +39,20 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./pages/subscriptions/subscriptions').then(m => m.AdminSubscriptionsComponent)
       },
       {
-        path: 'property-inspections',
-        loadComponent: () => import('./pages/property-inspections/property-inspections').then(m => m.PropertyInspectionsComponent)
-      },
-      {
-        path: 'claim-inspections',
-        loadComponent: () => import('./pages/claim-inspections/claim-inspections').then(m => m.ClaimInspectionsComponent)
-      },
-      {
         path: 'underwriters',
         loadComponent: () => import('./pages/underwriters/underwriters').then(m => m.UnderwritersComponent)
+      },
+      {
+        path: 'siu-investigators',
+        loadComponent: () => import('./pages/siu-investigators/siu-investigators').then(m => m.SiuInvestigatorsComponent)
+      },
+      {
+        path: 'blacklist',
+        loadComponent: () => import('./pages/blacklist/blacklist').then(m => m.BlacklistComponent)
+      },
+      {
+        path: 'fraud-monitoring',
+        loadComponent: () => import('./pages/fraud-monitoring/fraud-monitoring.component').then(m => m.FraudMonitoringComponent)
       }
     ]
   }

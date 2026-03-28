@@ -29,7 +29,7 @@ export class CustomerDashboardComponent implements OnInit {
       title: 'Total Properties',
       value: 0,
       icon: 'home',
-      color: '#3b82f6'
+      color: '#C72B32'
     },
     {
       title: 'Active Policies',
@@ -41,19 +41,19 @@ export class CustomerDashboardComponent implements OnInit {
       title: 'Claims Filed',
       value: 0,
       icon: 'assignment',
-      color: '#f59e0b'
+      color: '#FF6B35'
     },
     {
       title: 'Pending Claims',
       value: 0,
       icon: 'pending',
-      color: '#eab308'
+      color: '#FF6B35'
     },
     {
       title: 'Uploaded Documents',
       value: 0,
       icon: 'folder',
-      color: '#8b5cf6'
+      color: '#E2725B'
     }
   ]);
 
@@ -96,15 +96,17 @@ export class CustomerDashboardComponent implements OnInit {
 
     this.customerService.getMyClaims().subscribe({
       next: (claims) => {
-        const pendingClaims = claims?.filter(c => c.status === 'SUBMITTED' || c.status === 'INSPECTING') || [];
+        // Apply smart calculation for settlement amounts
+        const processedClaims = (claims || []).map(claim => this.calculateSettlementAmount(claim));
+        const pendingClaims = processedClaims.filter(c => c.status === 'SUBMITTED' || c.status === 'INSPECTING');
         this.dashboardCards.update(cards => {
           const updated = [...cards];
-          updated[2].value = claims?.length || 0;
+          updated[2].value = processedClaims.length;
           updated[3].value = pendingClaims.length;
           return updated;
         });
         // Store recent 2 claims
-        this.recentClaims.set(claims?.slice(0, 2) || []);
+        this.recentClaims.set(processedClaims.slice(0, 2));
       },
       error: (err) => console.error('Error loading claims:', err)
     });
@@ -177,9 +179,11 @@ export class CustomerDashboardComponent implements OnInit {
       'SUBMITTED': 'bg-blue-100 text-blue-800',
       'UNDER_REVIEW': 'bg-yellow-100 text-yellow-800',
       'INSPECTING': 'bg-yellow-100 text-yellow-800',
+      'INSPECTED': 'bg-purple-100 text-purple-800',
       'APPROVED': 'bg-green-100 text-green-800',
       'REJECTED': 'bg-red-100 text-red-800',
-      'INSPECTED': 'bg-purple-100 text-purple-800'
+      'SETTLED': 'bg-purple-100 text-purple-800',
+      'PAID': 'bg-green-100 text-green-800'
     };
     return statusMap[status] || 'bg-gray-100 text-gray-800';
   }
@@ -190,6 +194,26 @@ export class CustomerDashboardComponent implements OnInit {
 
   navigateTo(route: string): void {
     this.router.navigate([`/customer/${route}`]);
+  }
+
+  /**
+   * Smart calculation fallback for settlement amount.
+   * If settlementAmount is 0 or missing, calculate it as:
+   * Math.max(0, estimatedLoss - deductible - depreciation)
+   */
+  private calculateSettlementAmount(claim: Claim): Claim {
+    const estimatedLoss = Number(claim.estimatedLoss) || 0;
+    const deductible = Number(claim.deductible) || 0;
+    const depreciation = Number(claim.depreciation) || 0;
+    const settlementAmount = Number(claim.settlementAmount) || 0;
+
+    // If settlement amount is 0 or missing, calculate it
+    if (settlementAmount === 0 && estimatedLoss > 0) {
+      const calculatedAmount = Math.max(0, estimatedLoss - deductible - depreciation);
+      return { ...claim, settlementAmount: calculatedAmount };
+    }
+
+    return claim;
   }
 }
 

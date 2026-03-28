@@ -38,5 +38,22 @@ public class AdminInitializer implements CommandLineRunner {
 
             System.out.println("Default admin created");
         }
+
+        // Create SIU Investigator user
+        if (userRepository.findByUsername("Mohit Kumar").isEmpty()) {
+
+            User siuUser = new User();
+            siuUser.setUsername("Mohit Kumar");
+            siuUser.setEmail("mohit.kumar@fireinsurance.com");
+            siuUser.setPhoneNumber("8888888888");
+            siuUser.setRole("SIU_INVESTIGATOR");
+            siuUser.setActive(true);
+            siuUser.setCreatedAt(LocalDateTime.now());
+            siuUser.setPassword(passwordEncoder.encode("Mohit@123"));
+
+            userRepository.save(siuUser);
+
+            System.out.println("Default SIU Investigator created");
+        }
     }
 }

@@ -1,3 +1,4 @@
+
 package org.hartford.fireinsurance.model;
 
 import jakarta.persistence.*;
@@ -10,14 +11,18 @@ public class Claim {
 
     // Nested ENUM for Claim Status
     public enum ClaimStatus {
-        SUBMITTED,
-        UNDER_REVIEW,
-        SURVEY_ASSIGNED,
+        CREATED,
+        SIU_UNDER_REVIEW,
+        SIU_CLEARED,
+        REJECTED,
+        UNDERWRITER_ASSIGNED,
+        SURVEYOR_ASSIGNED,
         SURVEY_COMPLETED,
         APPROVED,
-        REJECTED,
         PAID,
-        // Legacy statuses retained for backward compatibility
+        // Deprecated/legacy statuses for backward compatibility
+        SUBMITTED,
+        UNDER_REVIEW,
         INSPECTING,
         INSPECTED,
         SETTLED
@@ -52,6 +57,10 @@ public class Claim {
     @Enumerated(EnumType.STRING)
     private ClaimStatus status;
 
+
+    @Enumerated(EnumType.STRING)
+    private RiskLevel riskLevel;
+
     private Double fraudScore;
 
     private LocalDateTime createdAt;
@@ -66,6 +75,19 @@ public class Claim {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "underwriter_id")
     private Underwriter underwriter;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "siu_investigator_id")
+    private SiuInvestigator siuInvestigator;
+
+    @Column(name = "siu_status")
+    private String siuStatus; // 'UNDER_INVESTIGATION' | 'CLEARED' | 'FRAUD_CONFIRMED'
+
+    @Column(name = "deductible")
+    private Double deductible;
+
+    @Column(name = "depreciation")
+    private Double depreciation;
 
     // Constructors
     public Claim() {
@@ -156,6 +178,14 @@ public class Claim {
         return fraudScore;
     }
 
+    public RiskLevel getRiskLevel() {
+        return riskLevel;
+    }
+
+    public void setRiskLevel(RiskLevel riskLevel) {
+        this.riskLevel = riskLevel;
+    }
+
     public void setFraudScore(Double fraudScore) {
         this.fraudScore = fraudScore;
     }
@@ -198,5 +228,48 @@ public class Claim {
 
     public void setUnderwriter(Underwriter underwriter) {
         this.underwriter = underwriter;
+    }
+
+    public SiuInvestigator getSiuInvestigator() {
+        return siuInvestigator;
+    }
+
+    public void setSiuInvestigator(SiuInvestigator siuInvestigator) {
+        this.siuInvestigator = siuInvestigator;
+    }
+
+    public String getSiuStatus() {
+        return siuStatus;
+    }
+
+    public void setSiuStatus(String siuStatus) {
+        this.siuStatus = siuStatus;
+    }
+
+    public Double getDeductible() {
+        return deductible;
+    }
+
+    public void setDeductible(Double deductible) {
+        this.deductible = deductible;
+    }
+
+    public Double getDepreciation() {
+        return depreciation;
+    }
+
+    public void setDepreciation(Double depreciation) {
+        this.depreciation = depreciation;
+    }
+
+    // ...existing code...
+    @Column(name = "analysis_details", columnDefinition = "TEXT")
+    private String analysisDetails;
+    public String getAnalysisDetails() {
+        return analysisDetails;
+    }
+
+    public void setAnalysisDetails(String analysisDetails) {
+        this.analysisDetails = analysisDetails;
     }
 }

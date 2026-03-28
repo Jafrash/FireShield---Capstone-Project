@@ -1,0 +1,546 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header with Back Button -->
+    <div class="mb-8">
+      <div class="flex items-center gap-4 mb-4">
+        <button (click)="goBack()"
+                class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+          <span class="material-icons">arrow_back</span>
+          <span class="font-medium">Back to Dashboard</span>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center shadow-lg">
+          <span class="material-icons text-white text-2xl">security</span>
+        </div>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">
+            Claim Investigation: {{ claimId() }}
+          </h1>
+          <p class="text-gray-600">SIU Detailed Analysis & Investigation</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="flex justify-center items-center py-20">
+        <div class="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (errorMessage() && !isLoading()) {
+      <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-red-800 mb-2">Error Loading Claim</h3>
+            <p class="text-sm text-red-700">{{ errorMessage() }}</p>
+          </div>
+          <button (click)="retryLoad()"
+                  class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+            Retry
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Claim Details Content -->
+    @if (claimDetails() && !isLoading()) {
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Main Claim Information -->
+        <div class="lg:col-span-2 space-y-6">
+
+          <!-- Fraud Analysis Card -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+              <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <span class="material-icons text-red-600">psychology</span>
+                AI-Powered Risk Assessment
+              </h2>
+              @if (analysisResult()) {
+                <span class="text-xs text-gray-500">Last Scan: {{ analysisResult()?.analysisTimestamp | date:'shortTime' }}</span>
+              }
+            </div>
+            <div class="p-6">
+              @if (!analysisResult() && !isAnalyzing()) {
+               <div class="text-center py-8">
+                  <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-icons text-red-600 text-3xl">troubleshoot</span>
+                  </div>
+                  <h3 class="text-lg font-semibold text-gray-900 mb-2">No Analysis Performed</h3>
+                  <p class="text-gray-600 mb-6 max-w-sm mx-auto">Click "Run Smart Fraud Analysis" in the sidebar to initiate the AI-driven heuristic scan.</p>
+                  <button (click)="runSmartScan()" 
+                          class="inline-flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all font-medium shadow-md">
+                    <span class="material-icons text-sm">bolt</span>
+                    Run Smart Scan
+                  </button>
+               </div>
+              } @else if (isAnalyzing()) {
+                <div class="text-center py-12">
+                  <div class="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p class="text-gray-900 font-medium">Running Heuristic Intelligence Scans...</p>
+                  <p class="text-gray-400 text-sm">Analyzing temporal anomalies and evidence patterns</p>
+                </div>
+              } @else if (analysisResult()) {
+                <div class="space-y-6">
+                  <!-- Risk Scorecard Header -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                      <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-gray-600">AI Fraud Score</span>
+                        <span class="text-3xl font-bold" [ngClass]="getFraudScoreClass(analysisResult()!.totalScore)">
+                          {{ analysisResult()!.totalScore }}%
+                        </span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div class="h-3 rounded-full transition-all duration-1000"
+                             [style.width.%]="analysisResult()!.totalScore"
+                             [ngClass]="{
+                               'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]': analysisResult()!.totalScore >= 70,
+                               'bg-orange-500': analysisResult()!.totalScore >= 35 && analysisResult()!.totalScore < 70,
+                               'bg-green-500': analysisResult()!.totalScore < 35
+                             }"></div>
+                      </div>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-col justify-center">
+                      <span class="text-sm font-medium text-gray-600 mb-2">Heuristic Risk Level</span>
+                      <div>
+                        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold border-2"
+                              [ngClass]="{
+                                'bg-red-50 text-red-700 border-red-200': analysisResult()!.riskLevel === 'HIGH',
+                                'bg-orange-50 text-orange-700 border-orange-200': analysisResult()!.riskLevel === 'MEDIUM',
+                                'bg-green-50 text-green-700 border-green-200': analysisResult()!.riskLevel === 'LOW'
+                              }">
+                          <span class="material-icons text-sm mr-1">
+                            {{ analysisResult()!.riskLevel === 'HIGH' ? 'gavel' : (analysisResult()!.riskLevel === 'MEDIUM' ? 'warning' : 'check_circle') }}
+                          </span>
+                          {{ analysisResult()!.riskLevel }} RISK
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Triggered Rules Breakdown -->
+                  <div>
+                    <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                       <span class="material-icons text-red-600 text-sm">list_alt</span>
+                       Assessment Findings
+                    </h4>
+                    <div class="space-y-3">
+                      @for (rule of analysisResult()!.allRules; track rule.id) {
+                        <div class="flex items-start gap-4 p-4 rounded-xl border transition-all"
+                             [ngClass]="{
+                               'bg-white border-red-200 shadow-sm border-l-4 border-l-red-600': rule.isTriggered,
+                               'bg-gray-50 border-gray-100 opacity-60': !rule.isTriggered
+                             }">
+                          <div class="mt-1">
+                            <span class="material-icons text-xl" 
+                                  [ngClass]="rule.isTriggered ? 'text-red-600' : 'text-gray-300'">
+                              {{ rule.isTriggered ? 'warning' : 'check_circle_outline' }}
+                            </span>
+                          </div>
+                          <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                              <h5 class="text-sm font-bold text-gray-900">{{ rule.name }}</h5>
+                              @if (rule.isTriggered) {
+                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-red-700">
+                                  +{{ rule.impactScore }}% Impact
+                                </span>
+                              }
+                            </div>
+                            <p class="text-xs text-gray-600 leading-relaxed">{{ rule.description }}</p>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Claim Status & Timeline -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <span class="material-icons text-blue-600">timeline</span>
+                Claim Status & Information
+              </h2>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Current Status -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                        [ngClass]="getStateBadgeClass(claimDetails()!.status)">
+                    {{ claimDetails()!.status.replace('_', ' ') }}
+                  </span>
+                </div>
+
+                <!-- Claim Amount -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Claim Amount</label>
+                  <span class="text-lg font-bold text-gray-900">
+                    {{ formatCurrency(claimDetails()!.claimAmount) }}
+                  </span>
+                </div>
+
+                <!-- Incident Date -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Incident Date</label>
+                  <span class="text-gray-900">{{ formatDate(claimDetails()!.incidentDate) }}</span>
+                </div>
+
+                <!-- Created Date -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Claim Filed</label>
+                  <span class="text-gray-900">{{ formatDate(claimDetails()!.createdAt) }}</span>
+                </div>
+
+                <!-- Settlement Amount -->
+                @if (claimDetails()!.settlementAmount > 0) {
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Settlement Amount</label>
+                    <span class="text-lg font-bold text-green-600">
+                      {{ formatCurrency(claimDetails()!.settlementAmount) }}
+                    </span>
+                  </div>
+                }
+
+                <!-- Estimated Loss -->
+                @if (claimDetails()!.estimatedLoss > 0) {
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Estimated Loss</label>
+                    <span class="text-gray-900">
+                      {{ formatCurrency(claimDetails()!.estimatedLoss) }}
+                    </span>
+                  </div>
+                }
+              </div>
+
+              <!-- Description -->
+              @if (claimDetails()!.description) {
+                <div class="mt-6">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-gray-900">{{ claimDetails()!.description }}</p>
+                  </div>
+                </div>
+              }
+
+              <!-- Fire Incident Details -->
+              @if (claimDetails()!.causeOfFire || claimDetails()!.firNumber) {
+                <div class="mt-6">
+                  <h4 class="text-sm font-medium text-gray-900 mb-3">Fire Incident Details</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @if (claimDetails()!.causeOfFire) {
+                      <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Cause of Fire</label>
+                        <span class="text-gray-900">{{ claimDetails()!.causeOfFire }}</span>
+                      </div>
+                    }
+                    @if (claimDetails()!.firNumber) {
+                      <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">FIR Number</label>
+                        <span class="text-gray-900">{{ claimDetails()!.firNumber }}</span>
+                      </div>
+                    }
+                    @if (claimDetails()!.fireBrigadeReportNumber) {
+                      <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Fire Brigade Report</label>
+                        <span class="text-gray-900">{{ claimDetails()!.fireBrigadeReportNumber }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Salvage Details -->
+              @if (claimDetails()!.salvageDetails) {
+                <div class="mt-6">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Salvage Details</label>
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-gray-900">{{ claimDetails()!.salvageDetails }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Information -->
+        <div class="space-y-6">
+
+          <!-- Customer Information -->
+          @if (claimDetails()!.customer) {
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+              <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <span class="material-icons text-green-600">person</span>
+                  Customer Information
+                </h3>
+              </div>
+              <div class="p-6 space-y-4">
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Name</label>
+                  <p class="font-medium text-gray-900">{{ customerDisplayName() }}</p>
+                </div>
+
+                @if (claimDetails()!.customer!.email) {
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Email</label>
+                    <p class="text-gray-900">{{ claimDetails()!.customer!.email }}</p>
+                  </div>
+                }
+
+                @if (claimDetails()!.customer!.phoneNumber) {
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Phone</label>
+                    <p class="text-gray-900">{{ claimDetails()!.customer!.phoneNumber }}</p>
+                  </div>
+                }
+
+                @if (claimDetails()!.customer!.address) {
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Address</label>
+                    <p class="text-gray-900">
+                      {{ claimDetails()!.customer!.address }}<br>
+                      {{ claimDetails()!.customer!.city }}, {{ claimDetails()!.customer!.state }}
+                    </p>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Policy Information -->
+          @if (claimDetails()!.policy) {
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+              <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <span class="material-icons text-blue-600">description</span>
+                  Policy Information
+                </h3>
+              </div>
+              <div class="p-6 space-y-4">
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Policy ID</label>
+                  <p class="font-medium text-gray-900">{{ claimDetails()!.policy!.policyId }}</p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Policy Name</label>
+                  <p class="text-gray-900">{{ claimDetails()!.policy!.policyName }}</p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Type</label>
+                  <p class="text-gray-900">{{ claimDetails()!.policy!.policyType }}</p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Max Coverage</label>
+                  <p class="text-gray-900 font-semibold">{{ formatCurrency(claimDetails()!.policy!.maxCoverageAmount) }}</p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Deductible</label>
+                  <p class="text-gray-900">{{ formatCurrency(claimDetails()!.policy!.deductible) }}</p>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Property Information -->
+          @if (claimDetails()!.property) {
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+              <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <span class="material-icons text-orange-600">home</span>
+                  Property Information
+                </h3>
+              </div>
+              <div class="p-6 space-y-4">
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Property Type</label>
+                  <p class="text-gray-900">{{ claimDetails()!.property!.propertyType }}</p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Address</label>
+                  <p class="text-gray-900">{{ claimDetails()!.property!.address }}</p>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Property Value</label>
+                  <p class="text-gray-900 font-semibold">{{ formatCurrency(claimDetails()!.property!.propertyValue) }}</p>
+                </div>
+
+                @if (claimDetails()!.property!.propertyAge) {
+                  <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Property Age</label>
+                    <p class="text-gray-900">{{ claimDetails()!.property!.propertyAge }} years</p>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Investigation Actions -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <span class="material-icons text-red-600">gavel</span>
+                Investigation Actions
+              </h3>
+              <!-- Investigation Status Message -->
+              <p class="text-sm text-gray-600 mt-2">{{ investigationStatusMessage() }}</p>
+            </div>
+
+            <div class="p-6">
+              <!-- Action Results Message -->
+              @if (actionMessage()) {
+                <div class="mb-4 p-3 rounded-lg border"
+                     [ngClass]="{
+                       'bg-green-50 border-green-200 text-green-800': actionSuccess() === true,
+                       'bg-red-50 border-red-200 text-red-800': actionSuccess() === false
+                     }">
+                  <div class="flex items-center gap-2">
+                    <span class="material-icons text-sm"
+                          [ngClass]="{
+                            'text-green-600': actionSuccess() === true,
+                            'text-red-600': actionSuccess() === false
+                          }">
+                      {{ actionSuccess() === true ? 'check_circle' : 'error' }}
+                    </span>
+                    <span class="text-sm font-medium">{{ actionMessage() }}</span>
+                  </div>
+                </div>
+              }
+
+              <!-- Primary Investigation Actions -->
+              <div class="space-y-3">
+                <!-- Smart Fraud Analysis Button -->
+                <button
+                  class="w-full flex items-center gap-3 p-4 text-left border rounded-lg transition-all font-medium"
+                  [disabled]="isAnalyzing()"
+                  [ngClass]="{
+                    'bg-red-600 hover:bg-red-700 border-red-700 text-white shadow-md': !isAnalyzing(),
+                    'bg-red-400 border-red-500 text-white cursor-wait': isAnalyzing()
+                  }"
+                  (click)="runSmartScan()">
+
+                  @if (isAnalyzing()) {
+                    <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  } @else {
+                    <span class="material-icons text-white">bolt</span>
+                  }
+
+                  <div class="flex-1">
+                    <div class="text-sm">Run Smart Fraud Analysis</div>
+                    <div class="text-xs opacity-90">Execute AI-Inspired Heuristic intelligence scan</div>
+                  </div>
+                </button>
+
+                <!-- Mark as Fraud Button -->
+                <button
+                  class="w-full flex items-center gap-3 p-4 text-left border rounded-lg transition-all font-medium"
+                  [disabled]="!canMarkAsFraud()"
+                  [ngClass]="{
+                    'bg-red-50 hover:bg-red-100 border-red-200 text-red-900': canMarkAsFraud() && !isMarkingFraud(),
+                    'bg-red-100 border-red-300 text-red-700 cursor-wait': isMarkingFraud(),
+                    'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed': !canMarkAsFraud()
+                  }"
+                  (click)="markAsFraud()">
+
+                  @if (isMarkingFraud()) {
+                    <div class="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                  } @else {
+                    <span class="material-icons"
+                          [ngClass]="{
+                            'text-red-600': canMarkAsFraud(),
+                            'text-gray-400': !canMarkAsFraud()
+                          }">
+                      report
+                    </span>
+                  }
+
+                  <div class="flex-1">
+                    <div class="text-sm">Mark as Fraud</div>
+                    <div class="text-xs opacity-75">
+                      @if (!analysisResult()) {
+                        Requires Smart Fraud Analysis scan
+                      } @else if (analysisResult()!.totalScore < 70) {
+                        Requires high risk score (>= 70) to confirm fraud
+                      } @else {
+                        Confirm fraudulent activity detected
+                      }
+                    </div>
+                  </div>
+                </button>
+
+                <!-- Clear Claim Button -->
+                <button
+                  class="w-full flex items-center gap-3 p-4 text-left border rounded-lg transition-all font-medium"
+                  [disabled]="!canClearClaim()"
+                  [ngClass]="{
+                    'bg-green-50 hover:bg-green-100 border-green-200 text-green-900': canClearClaim() && !isClearingClaim(),
+                    'bg-green-100 border-green-300 text-green-700 cursor-wait': isClearingClaim(),
+                    'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed': !canClearClaim()
+                  }"
+                  (click)="clearClaim()">
+
+                  @if (isClearingClaim()) {
+                    <div class="w-5 h-5 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                  } @else {
+                    <span class="material-icons"
+                          [ngClass]="{
+                            'text-green-600': canClearClaim(),
+                            'text-gray-400': !canClearClaim()
+                          }">
+                      verified
+                    </span>
+                  }
+
+                  <div class="flex-1">
+                    <div class="text-sm">Clear Claim</div>
+                    <div class="text-xs opacity-75">
+                      @if (!analysisResult()) {
+                        Requires Smart Fraud Analysis scan
+                      } @else if (analysisResult()!.totalScore >= 70) {
+                        High risk detected - cannot clear without additional review
+                      } @else {
+                        Mark as legitimate - no fraud detected
+                      }
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <!-- Secondary Actions -->
+              <div class="mt-6 pt-4 border-t border-gray-200">
+                <h4 class="text-sm font-medium text-gray-700 mb-3">Additional Tools</h4>
+                <div class="space-y-2">
+                  <button class="w-full flex items-center gap-3 p-3 text-left bg-gray-50 hover:bg-blue-50 hover:border-blue-200 border border-gray-200 rounded-lg transition-colors">
+                    <span class="material-icons text-blue-600">assessment</span>
+                    <span class="text-sm font-medium text-gray-900">Generate Report</span>
+                  </button>
+
+                  <button class="w-full flex items-center gap-3 p-3 text-left bg-gray-50 hover:bg-purple-50 hover:border-purple-200 border border-gray-200 rounded-lg transition-colors">
+                    <span class="material-icons text-purple-600">history</span>
+                    <span class="text-sm font-medium text-gray-900">View Investigation History</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

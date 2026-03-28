@@ -23,28 +23,30 @@ export class AdminDashboardComponent implements OnInit {
   errorMessage = signal('');
 
   // Advanced analytics state
-  analyticsCards = signal<AnalyticsCard[]>([...ADVANCED_ANALYTICS]);
+  analyticsCards = signal<AnalyticsCard[]>([]);
 
   // Raw data for analytics
   allClaims: Claim[] = [];
   allPolicies: any[] = [];
-  allInspections: any[] = [];
   allSubscriptions: PolicySubscription[] = [];
 
   ngOnInit(): void {
     this.loadDashboardData();
     this.loadAnalyticsData();
   }
+
   // Load all data needed for analytics
   private loadAnalyticsData(): void {
     // Claims
     this.adminService.getAllClaims().subscribe({
       next: (claims) => {
-        this.allClaims = claims || [];
+        // Apply smart calculation for settlement amounts
+        this.allClaims = (claims || []).map(claim => this.calculateSettlementAmount(claim));
         this.updateAnalyticsCards();
       },
       error: () => {}
     });
+
     // Policies
     this.adminService.getAllPolicies().subscribe({
       next: (policies) => {
@@ -53,14 +55,7 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: () => {}
     });
-    // Inspections
-    this.adminService.getAllInspections().subscribe({
-      next: (inspections) => {
-        this.allInspections = inspections || [];
-        this.updateAnalyticsCards();
-      },
-      error: () => {}
-    });
+
     // Subscriptions
     this.adminService.getAllSubscriptions().subscribe({
       next: (subs) => {
@@ -75,7 +70,6 @@ export class AdminDashboardComponent implements OnInit {
   private updateAnalyticsCards(): void {
     const claims = this.allClaims;
     const policies = this.allPolicies;
-    const inspections = this.allInspections;
     const subs = this.allSubscriptions;
 
     // Claims Approval Rate
@@ -86,12 +80,12 @@ export class AdminDashboardComponent implements OnInit {
     const avgClaimAmount = claims.length > 0 ?
       (claims.reduce((sum, c) => sum + (c.claimAmount || 0), 0) / claims.length).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : '--';
 
-    // Average Settlement Time (days between claimDate and updatedAt for APPROVED/SETTLED claims)
+    // Average Settlement Time (days between createdAt and updatedAt for APPROVED/SETTLED claims)
     const settledClaims = claims.filter(c => c.status === 'APPROVED' || c.status === 'SETTLED');
     let avgSettlementTime = '--';
     if (settledClaims.length > 0) {
       const totalDays = settledClaims.reduce((sum, c) => {
-        const start = new Date(c.claimDate).getTime();
+        const start = new Date(c.createdAt).getTime();
         const end = new Date(c.updatedAt).getTime();
         return sum + Math.max(0, Math.round((end - start) / (1000 * 60 * 60 * 24)));
       }, 0);
@@ -103,23 +97,20 @@ export class AdminDashboardComponent implements OnInit {
     const totalPolicies = subs.length;
     const activePolicyRatio = totalPolicies > 0 ? ((activePolicies / totalPolicies) * 100).toFixed(1) + '%' : '--';
 
-    // Pending Inspections
-    const pendingInspections = inspections.filter(i => i.status === 'PENDING' || i.status === 'ASSIGNED').length;
-
-    // Update analytics cards
+    // Update analytics cards - removed inspections analytics
     this.analyticsCards.set([
       {
         title: 'Claims Approval Rate',
         value: approvalRate,
         icon: 'percent',
-        color: '#3b82f6',
+        color: '#C72B32',
         description: 'Percentage of claims approved out of total claims.'
       },
       {
         title: 'Average Claim Amount',
         value: avgClaimAmount ? `₹${avgClaimAmount}` : '--',
         icon: 'payments',
-        color: '#8b5cf6',
+        color: '#E2725B',
         description: 'Mean value of all claims submitted.'
       },
       {
@@ -133,15 +124,8 @@ export class AdminDashboardComponent implements OnInit {
         title: 'Active Policy Ratio',
         value: activePolicyRatio,
         icon: 'pie_chart',
-        color: '#f59e0b',
+        color: '#FF6B35',
         description: 'Ratio of active policies to total policies.'
-      },
-      {
-        title: 'Pending Inspections',
-        value: pendingInspections,
-        icon: 'assignment_late',
-        color: '#ef4444',
-        description: 'Number of inspections pending completion.'
       }
     ]);
   }
@@ -152,7 +136,6 @@ export class AdminDashboardComponent implements OnInit {
     // Load all data in parallel
     let customersCount = 0;
     let totalClaims = 0;
-    let pendingInspections = 0;
     let activePolicies = 0;
     let pendingSubs = 0;
     let totalPolicies = 0;
@@ -161,7 +144,7 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAllUnderwriters().subscribe({
       next: (uws) => {
         totalUnderwriters = uws?.length || 0;
-        this.updateCards(customersCount, totalClaims, pendingInspections, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
+        this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
       },
       error: () => {}
     });
@@ -169,16 +152,18 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAllCustomers().subscribe({
       next: (customers) => {
         customersCount = customers?.length || 0;
-        this.updateCards(customersCount, totalClaims, pendingInspections, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
+        this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
       },
       error: () => {}
     });
 
     this.adminService.getAllClaims().subscribe({
       next: (claims) => {
-        totalClaims = claims?.length || 0;
-        this.recentClaims.set((claims || []).slice(0, 5));
-        this.updateCards(customersCount, totalClaims, pendingInspections, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
+        // Apply smart calculation for settlement amounts
+        const processedClaims = (claims || []).map(claim => this.calculateSettlementAmount(claim));
+        totalClaims = processedClaims.length;
+        this.recentClaims.set(processedClaims.slice(0, 5));
+        this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
       },
       error: () => {}
     });
@@ -188,7 +173,7 @@ export class AdminDashboardComponent implements OnInit {
         activePolicies = subs?.filter((s: PolicySubscription) => s.status === 'ACTIVE').length || 0;
         pendingSubs = subs?.filter((s: PolicySubscription) => s.status === 'PENDING').length || 0;
         this.pendingSubscriptions.set(subs?.filter((s: PolicySubscription) => s.status === 'PENDING').slice(0, 5) || []);
-        this.updateCards(customersCount, totalClaims, pendingInspections, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
+        this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
       },
       error: (err: Error) => {
         console.error('Error loading subscriptions:', err);
@@ -199,21 +184,21 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getAllPolicies().subscribe({
       next: (policies) => {
         totalPolicies = policies?.length || 0;
-        this.updateCards(customersCount, totalClaims, pendingInspections, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
+        this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
         this.isLoading.set(false);
       },
       error: () => { this.isLoading.set(false); }
     });
   }
 
-  private updateCards(customers: number, claims: number, inspections: number, active: number, pending: number, policies: number, underwriters: number): void {
+  private updateCards(customers: number, claims: number, active: number, pending: number, policies: number, underwriters: number): void {
     this.dashboardCards.set([
-      { title: 'Total Customers', value: customers, icon: 'people', color: '#8B1538', route: '/admin/customers' },
+      { title: 'Total Customers', value: customers, icon: 'people', color: '#C72B32', route: '/admin/customers' },
       { title: 'Underwriters', value: underwriters, icon: 'manage_accounts', color: '#8b5cf6', route: '/admin/underwriters' },
       { title: 'Total Policies', value: policies, icon: 'description', color: '#D41F59', route: '/admin/policies' },
       { title: 'Active Subscriptions', value: active, icon: 'verified', color: '#10b981', route: '/admin/subscriptions' },
       { title: 'Pending Approvals', value: pending, icon: 'pending_actions', color: '#f59e0b', route: '/admin/subscriptions' },
-      { title: 'Total Claims', value: claims, icon: 'assignment', color: '#8B1538', route: '/admin/claims' }
+      { title: 'Total Claims', value: claims, icon: 'assignment', color: '#C72B32', route: '/admin/claims' }
     ]);
   }
 
@@ -243,13 +228,13 @@ export class AdminDashboardComponent implements OnInit {
 
   getStatusColor(status: string): string {
     const colorMap: { [key: string]: string } = {
-      'SUBMITTED': '#3b82f6',
-      'INSPECTING': '#f59e0b',
-      'INSPECTED': '#8b5cf6',
+      'SUBMITTED': '#C72B32',
+      'INSPECTING': '#FF6B35',
+      'INSPECTED': '#E2725B',
       'APPROVED': '#10b981',
-      'REJECTED': '#ef4444',
-      'SETTLED': '#8B1538',
-      'PENDING': '#f59e0b',
+      'REJECTED': '#C72B32',
+      'SETTLED': '#C72B32',
+      'PENDING': '#FF6B35',
       'ACTIVE': '#10b981'
     };
     return colorMap[status] || '#cbd5e1';
@@ -273,5 +258,25 @@ export class AdminDashboardComponent implements OnInit {
         this.errorMessage.set('Failed to reject subscription');
       }
     });
+  }
+
+  /**
+   * Smart calculation fallback for settlement amount.
+   * If settlementAmount is 0 or missing, calculate it as:
+   * Math.max(0, estimatedLoss - deductible - depreciation)
+   */
+  private calculateSettlementAmount(claim: Claim): Claim {
+    const estimatedLoss = Number(claim.estimatedLoss) || 0;
+    const deductible = Number(claim.deductible) || 0;
+    const depreciation = Number(claim.depreciation) || 0;
+    const settlementAmount = Number(claim.settlementAmount) || 0;
+
+    // If settlement amount is 0 or missing, calculate it
+    if (settlementAmount === 0 && estimatedLoss > 0) {
+      const calculatedAmount = Math.max(0, estimatedLoss - deductible - depreciation);
+      return { ...claim, settlementAmount: calculatedAmount };
+    }
+
+    return claim;
   }
 }

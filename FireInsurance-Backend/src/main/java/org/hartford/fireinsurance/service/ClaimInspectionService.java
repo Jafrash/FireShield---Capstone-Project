@@ -30,7 +30,7 @@ public class ClaimInspectionService {
         inspection.setSurveyor(surveyor);
         inspection.setStatus(ClaimInspectionStatus.ASSIGNED);
 
-        claimService.updateClaimStatus(claimId, Claim.ClaimStatus.SURVEY_ASSIGNED);
+        claimService.updateClaimStatus(claimId, Claim.ClaimStatus.SURVEYOR_ASSIGNED);
         return claimInspectionRepository.save(inspection);
     }
 

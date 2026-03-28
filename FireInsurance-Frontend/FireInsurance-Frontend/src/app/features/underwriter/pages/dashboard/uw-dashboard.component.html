@@ -9,7 +9,7 @@
     <!-- Loading -->
     @if (isLoading()) {
       <div class="flex justify-center items-center py-20">
-        <div class="w-12 h-12 border-4 border-claret border-t-transparent rounded-full animate-spin"></div>
+        <div class="w-12 h-12 border-4 border-fire-red border-t-transparent rounded-full animate-spin"></div>
       </div>
     }
 
@@ -28,9 +28,12 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">{{ card.title }}</p>
-                <p class="text-4xl font-black text-gray-900 mt-2 group-hover:text-claret transition-colors">
+                <p class="text-4xl font-black text-gray-900 mt-2 group-hover:text-fire-red transition-colors">
                   {{ card.value }}
                 </p>
+                @if (card.subtitle) {
+                  <p class="text-xs text-gray-500 mt-1">{{ card.subtitle }}</p>
+                }
               </div>
               <div class="p-4 rounded-2xl transition-all duration-300 shadow-inner group-hover:scale-110"
                    [style.background]="card.color + '20'">
@@ -41,34 +44,135 @@
         }
       </div>
 
+      <!-- Enhanced Claims Section -->
+      @if (claims().length > 0) {
+        <div class="glass-card p-8 mb-8">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-black text-gray-900 tracking-tight">Recent Assigned Claims</h2>
+            <button routerLink="/underwriter/claims" class="text-fire-red hover:text-fire-red-dark text-sm font-semibold">
+              View All →
+            </button>
+          </div>
+
+          <div class="space-y-4 max-h-96 overflow-y-auto">
+            @for (claim of claims().slice(0, 5); track claim.claimId) {
+              <div class="flex items-center justify-between p-4 rounded-lg border-2 transition-all"
+                   [class]="isClaimBlocked(claim) ?
+                     'border-red-200 bg-red-50 opacity-60' :
+                     'border-gray-100 bg-white hover:border-fire-red hover:shadow-lg'">
+
+                <!-- Claim Info -->
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-2">
+                    <h3 class="font-bold text-gray-900">Claim #{{ claim.claimId }}</h3>
+
+                    <!-- Risk Level Badge -->
+                    <span *ngIf="getClaimRiskLevel(claim) === 'LOW'" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                      🟢 LOW
+                    </span>
+                    <span *ngIf="getClaimRiskLevel(claim) === 'MEDIUM'" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">
+                      🟡 MEDIUM <span class="ml-1 font-normal">Suspicious</span>
+                    </span>
+                    <span *ngIf="getClaimRiskLevel(claim) === 'HIGH'" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200">
+                      🔴 HIGH <span class="ml-1 font-normal">High Risk</span>
+                    </span>
+
+                    <!-- SIU Status Badge -->
+                    @if (claim.siuStatus === 'UNDER_INVESTIGATION') {
+                      <span class="px-2 py-1 text-xs font-bold uppercase rounded-full bg-red-100 text-red-800">
+                        🔒 SIU Investigation
+                      </span>
+                    }
+                    @if (claim.siuStatus === 'FRAUD_CONFIRMED') {
+                      <span class="px-2 py-1 text-xs font-bold uppercase rounded-full bg-red-600 text-white">
+                        ⚠️ Fraud Confirmed
+                      </span>
+                    }
+                    @if (claim.siuStatus === 'CLEARED') {
+                      <span class="px-2 py-1 text-xs font-bold uppercase rounded-full bg-green-100 text-green-800">
+                        ✅ SIU Cleared
+                      </span>
+                    }
+                  </div>
+
+                  <p class="text-sm text-gray-600 mb-2">{{ claim.description || 'No description available' }}</p>
+
+                  <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <span>Amount: ${{ (claim.claimAmount || 0).toLocaleString() }}</span>
+                    <span>Status: {{ claim.status }}</span>
+                    @if (claim.createdAt) {
+                      <span>Created: {{ claim.createdAt | date:'short' }}</span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Fraud Score -->
+                @if (claim.fraudScore !== null && claim.fraudScore !== undefined) {
+                  <div class="flex flex-col items-center ml-4">
+                    <div class="text-xs text-gray-500 mb-1">Fraud Score</div>
+                    <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center font-bold text-sm"
+                         [style.border-color]="getFraudScoreColor(claim.fraudScore)"
+                         [style.color]="getFraudScoreColor(claim.fraudScore)">
+                      {{ claim.fraudScore }}%
+                    </div>
+                  </div>
+                }
+
+                <!-- Action Button -->
+                <div class="ml-4">
+                  @if (isClaimBlocked(claim)) {
+                    <button disabled
+                            class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 text-gray-500 cursor-not-allowed">
+                      Blocked by SIU
+                    </button>
+                  } @else {
+                    <button routerLink="/underwriter/claims"
+                            class="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-fire-red hover:bg-fire-red-dark transition-colors">
+                      Review
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
       <!-- Quick Actions -->
       <div class="glass-card p-8 bg-gradient-to-br from-white to-gray-50">
         <h2 class="text-xl font-black text-gray-900 mb-6 tracking-tight">Quick Actions</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <button routerLink="/underwriter/subscriptions"
-                  class="flex items-center gap-5 p-6 rounded-2xl border-2 border-gray-100 hover:border-claret hover:shadow-xl hover:shadow-claret/10 transition-all group bg-white">
+                  class="flex items-center gap-5 p-6 rounded-2xl border-2 border-gray-100 hover:border-fire-red hover:shadow-xl hover:shadow-fire-red/10 transition-all group bg-white">
             <div class="w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
-                 style="background: #8B1E3F20">
-              <span class="material-icons text-3xl" style="color: #8B1E3F">card_membership</span>
+                 style="background: #C72B3220">
+              <span class="material-icons text-3xl" style="color: #C72B32">card_membership</span>
             </div>
             <div class="text-left">
               <p class="font-black text-gray-900 uppercase tracking-widest text-sm">Policy Subscriptions</p>
               <p class="text-gray-500 text-xs mt-1">Review, assign surveyors &amp; decide</p>
             </div>
-            <span class="material-icons text-gray-300 ml-auto group-hover:text-claret transition-colors">arrow_forward</span>
+            <span class="material-icons text-gray-300 ml-auto group-hover:text-fire-red transition-colors">arrow_forward</span>
           </button>
 
           <button routerLink="/underwriter/claims"
-                  class="flex items-center gap-5 p-6 rounded-2xl border-2 border-gray-100 hover:border-fuchsia hover:shadow-xl hover:shadow-fuchsia/10 transition-all group bg-white">
+                  class="flex items-center gap-5 p-6 rounded-2xl border-2 border-gray-100 hover:border-fire-orange hover:shadow-xl hover:shadow-fire-orange/10 transition-all group bg-white">
             <div class="w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
                  style="background: #D81B6020">
               <span class="material-icons text-3xl" style="color: #D81B60">assignment</span>
             </div>
-            <div class="text-left">
-              <p class="font-black text-gray-900 uppercase tracking-widest text-sm">Claims</p>
+            <div class="text-left flex-1">
+              <div class="flex items-center gap-2">
+                <p class="font-black text-gray-900 uppercase tracking-widest text-sm">Claims</p>
+                @if (siuBlockedClaims() > 0) {
+                  <span class="px-2 py-1 text-xs font-bold uppercase rounded-full bg-red-100 text-red-800">
+                    {{ siuBlockedClaims() }} Blocked
+                  </span>
+                }
+              </div>
               <p class="text-gray-500 text-xs mt-1">Assess &amp; approve/reject claims</p>
             </div>
-            <span class="material-icons text-gray-300 ml-auto group-hover:text-fuchsia transition-colors">arrow_forward</span>
+            <span class="material-icons text-gray-300 ml-auto group-hover:text-fire-orange transition-colors">arrow_forward</span>
           </button>
         </div>
       </div>

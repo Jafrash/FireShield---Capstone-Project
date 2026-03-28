@@ -42,7 +42,7 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
     @for (filter of ['ALL', 'ASSIGNED', 'COMPLETED', 'REJECTED']; track filter) {
       <button (click)="applyFilter(filter)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-        [class]="activeFilter() === filter ? 'bg-[#8B1E3F] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'">
+        [class]="activeFilter() === filter ? 'bg-[#C72B32] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'">
         {{ filter }}
       </button>
     }
@@ -50,7 +50,7 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
 
   @if (isLoading()) {
     <div class="flex items-center justify-center py-16">
-      <div class="w-10 h-10 border-4 border-gray-200 border-t-[#8B1E3F] rounded-full animate-spin"></div>
+      <div class="w-10 h-10 border-4 border-gray-200 border-t-[#C72B32] rounded-full animate-spin"></div>
       <p class="ml-3 text-gray-600">Loading inspections...</p>
     </div>
   }
@@ -71,6 +71,7 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Property ID</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Property</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Requested Coverage</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer Docs</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Inspection Date</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Risk Score</th>
@@ -81,7 +82,7 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
           <tbody class="divide-y divide-gray-100">
             @if (filteredInspections().length === 0) {
               <tr>
-                <td colspan="9" class="px-6 py-16 text-center">
+                <td colspan="10" class="px-6 py-16 text-center">
                   <span class="material-icons text-5xl text-gray-300 mb-3 block">home_work</span>
                   <p class="text-gray-500 font-medium">No inspections found</p>
                   <p class="text-gray-400 text-sm mt-1">Check back when the admin assigns inspections to you</p>
@@ -89,12 +90,30 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
               </tr>
             }
             @for (insp of filteredInspections(); track insp.inspectionId) {
-              <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 text-sm font-bold text-gray-900">#INS-{{ insp.inspectionId }}</td>
+              <tr class="hover:bg-gray-50 transition-colors" [class.bg-orange-50]="insp.isDuplicateProperty" [class.border-l-4]="insp.isDuplicateProperty" [class.border-orange-400]="insp.isDuplicateProperty">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-gray-900">#INS-{{ insp.inspectionId }}</span>
+                    @if (insp.isDuplicateProperty) {
+                      <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
+                        <span class="material-icons text-xs mr-1">content_copy</span>
+                        Duplicate
+                      </span>
+                    }
+                  </div>
+                </td>
                 <td class="px-6 py-4 text-sm text-gray-700">
                   <div class="flex items-center gap-2">
                     <span class="material-icons text-blue-500 text-lg">home</span>
-                    #PROP-{{ insp.propertyId }}
+                    <div>
+                      <div class="font-medium">#PROP-{{ insp.propertyId }}</div>
+                      @if (insp.isDuplicateProperty) {
+                        <div class="text-xs text-orange-600 font-medium">
+                          <span class="material-icons text-xs">info</span>
+                          Already inspected (INS-{{ insp.referenceInspectionId }})
+                        </div>
+                      }
+                    </div>
                   </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-700">
@@ -105,6 +124,14 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
                 <td class="px-6 py-4 text-sm text-gray-700">
                   <div class="font-medium text-gray-900">{{ insp.propertyType || 'N/A' }}</div>
                   <div class="text-xs text-gray-500">{{ insp.propertyAddress || 'No address' }}</div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700">
+                  @if (insp.requestedSumInsured != null) {
+                    <div class="font-semibold text-blue-700">₹{{ getPolicyCoverageAmount(insp.requestedSumInsured) }}</div>
+                    <div class="text-xs text-blue-600 font-medium">Requested by Customer</div>
+                  } @else {
+                    <span class="text-gray-400">—</span>
+                  }
                 </td>
                 <td class="px-6 py-4 text-sm">
                   @if ((insp.customerDocuments?.length || 0) > 0) {
@@ -126,9 +153,20 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
                   {{ insp.inspectionDate ? (insp.inspectionDate | date:'mediumDate') : '—' }}
                 </td>
                 <td class="px-6 py-4 text-sm">
-                  <span [class]="getRiskClass(insp.assessedRiskScore)">
-                    {{ insp.assessedRiskScore != null ? (insp.assessedRiskScore + '/10') : '—' }}
-                  </span>
+                  @if (insp.isDuplicateProperty && insp.existingRiskScore != null) {
+                    <div class="flex items-center gap-2">
+                      <span [class]="getRiskClass(insp.existingRiskScore)">
+                        {{ insp.existingRiskScore }}/10
+                      </span>
+                      <span class="text-xs text-orange-600 font-medium bg-orange-100 px-2 py-1 rounded">
+                        From INS-{{ insp.referenceInspectionId }}
+                      </span>
+                    </div>
+                  } @else {
+                    <span [class]="getRiskClass(insp.assessedRiskScore)">
+                      {{ insp.assessedRiskScore != null ? (insp.assessedRiskScore + '/10') : '—' }}
+                    </span>
+                  }
                 </td>
                 <td class="px-6 py-4">
                   <span class="px-2.5 py-1 text-xs font-semibold rounded-full" [ngClass]="getStatusClass(insp.status)">
@@ -137,11 +175,19 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
                 </td>
                 <td class="px-6 py-4">
                   @if (insp.status === 'ASSIGNED') {
-                    <button (click)="openReportModal(insp)"
-                      class="flex items-center gap-1.5 px-4 py-2 bg-[#8B1E3F] text-white text-sm rounded-lg hover:bg-[#6f1732] transition-colors font-medium">
-                      <span class="material-icons text-sm">upload_file</span>
-                      Submit Report
-                    </button>
+                    @if (insp.isDuplicateProperty) {
+                      <button (click)="openReportModal(insp)"
+                        class="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors font-medium">
+                        <span class="material-icons text-sm">content_copy</span>
+                        Apply Existing Score
+                      </button>
+                    } @else {
+                      <button (click)="openReportModal(insp)"
+                        class="flex items-center gap-1.5 px-4 py-2 bg-[#C72B32] text-white text-sm rounded-lg hover:bg-[#A01E28] transition-colors font-medium">
+                        <span class="material-icons text-sm">upload_file</span>
+                        Submit Report
+                      </button>
+                    }
                   } @else {
                     <span class="text-xs text-gray-400 italic">Report submitted</span>
                   }
@@ -158,64 +204,183 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
 @if (showReportModal() && selectedInspection()) {
   <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" (click)="closeReportModal()">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
-      <div class="bg-gradient-to-r from-[#8B1E3F] to-[#6f1732] px-6 py-4 rounded-t-xl">
+      <div class="bg-gradient-to-r from-[#C72B32] to-[#A01E28] px-6 py-4 rounded-t-xl" [class.from-orange-600]="selectedInspection()!.isDuplicateProperty" [class.to-orange-700]="selectedInspection()!.isDuplicateProperty">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="p-2 bg-white/20 rounded-lg"><span class="material-icons text-white">home_work</span></div>
+            <div class="p-2 bg-white/20 rounded-lg">
+              <span class="material-icons text-white">
+                {{ selectedInspection()!.isDuplicateProperty ? 'content_copy' : 'home_work' }}
+              </span>
+            </div>
             <div>
-              <h2 class="text-white font-bold text-lg">Submit Inspection Report</h2>
-              <p class="text-white/80 text-sm">Inspection #INS-{{ selectedInspection()!.inspectionId }}</p>
+              @if (selectedInspection()!.isDuplicateProperty) {
+                <h2 class="text-white font-bold text-lg">Apply Existing Risk Assessment</h2>
+                <p class="text-white/80 text-sm">Property already inspected - applying results from INS-{{ selectedInspection()!.referenceInspectionId }}</p>
+              } @else {
+                <h2 class="text-white font-bold text-lg">Submit Inspection Report</h2>
+                <p class="text-white/80 text-sm">Inspection #INS-{{ selectedInspection()!.inspectionId }}</p>
+              }
             </div>
           </div>
           <button (click)="closeReportModal()" class="text-white/70 hover:text-white"><span class="material-icons">close</span></button>
         </div>
       </div>
       <div class="p-6">
+        <!-- Duplicate Property Warning -->
+        @if (selectedInspection()!.isDuplicateProperty) {
+          <div class="mb-5 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div class="flex items-start gap-3">
+              <span class="material-icons text-orange-600 mt-0.5">info</span>
+              <div class="flex-1">
+                <h3 class="text-sm font-semibold text-orange-800 mb-1">Property Already Inspected</h3>
+                <p class="text-sm text-orange-700 mb-2">
+                  This property (#PROP-{{ selectedInspection()!.propertyId }}) was already inspected in inspection
+                  #INS-{{ selectedInspection()!.referenceInspectionId }} with a risk score of
+                  <span class="font-semibold">{{ selectedInspection()!.existingRiskScore }}/10</span>.
+                </p>
+                <p class="text-xs text-orange-600">
+                  The existing risk assessment will be applied to this policy subscription to avoid duplicate work.
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+        <!-- Policy & Customer Context Information -->
+        <div class="mb-5 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 class="text-sm font-semibold text-gray-700 mb-3">Policy & Customer Context</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <div class="text-gray-500 text-xs font-medium">Customer Information</div>
+              <div class="font-semibold text-gray-900">{{ selectedInspection()!.customerName || 'Customer Name Not Available' }}</div>
+              <div class="text-xs text-gray-600">{{ selectedInspection()!.customerEmail || 'No email provided' }}</div>
+              <div class="text-xs text-gray-600">{{ selectedInspection()!.customerPhone || 'No phone provided' }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 text-xs font-medium">Property Details</div>
+              <div class="font-medium text-gray-900">{{ selectedInspection()!.propertyType || 'Property type not specified' }}</div>
+              <div class="text-xs text-gray-600">{{ selectedInspection()!.propertyAddress || 'Address not provided' }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 text-xs font-medium">Customer's Requested Coverage</div>
+              @if (selectedInspection()!.requestedSumInsured != null) {
+                <div class="font-semibold text-blue-700">₹{{ getPolicyCoverageAmount(selectedInspection()!.requestedSumInsured!) }}</div>
+                <div class="text-xs text-blue-600 font-medium">Sum Insured Requested</div>
+              } @else {
+                <div class="text-gray-500 italic">Coverage amount to be determined</div>
+              }
+            </div>
+            <div>
+              <div class="text-gray-500 text-xs font-medium">Policy & Maximum Coverage</div>
+              @if (selectedInspection()!.policyName && selectedInspection()!.maxCoverage != null) {
+                <div class="font-semibold text-gray-900">{{ selectedInspection()!.policyName }}</div>
+                <div class="text-xs text-green-700 font-medium">Max Coverage: ₹{{ getPolicyCoverageAmount(selectedInspection()!.maxCoverage!) }}</div>
+              } @else {
+                <div class="text-gray-500 italic">Policy details being processed</div>
+              }
+            </div>
+          </div>
+        </div>
+
         <form [formGroup]="reportForm" class="space-y-5">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Risk Score <span class="text-red-500">*</span> <span class="font-normal text-gray-500">(0 = Low, 10 = High)</span></label>
-            <input type="number" formControlName="assessedRiskScore" step="0.1" min="0" max="10"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors"
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              Risk Score <span class="text-red-500">*</span>
+              <span class="font-normal text-gray-500">(0 = Low, 10 = High)</span>
+              @if (selectedInspection()!.isDuplicateProperty) {
+                <span class="ml-2 text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full font-medium">
+                  Auto-populated from INS-{{ selectedInspection()!.referenceInspectionId }}
+                </span>
+              }
+            </label>
+            <input
+              type="number"
+              formControlName="assessedRiskScore"
+              step="0.1"
+              min="0"
+              max="10"
+              [class.bg-orange-50]="selectedInspection()!.isDuplicateProperty"
+              [class.border-orange-200]="selectedInspection()!.isDuplicateProperty"
+              [class.cursor-not-allowed]="selectedInspection()!.isDuplicateProperty"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32] focus:bg-white transition-colors"
               placeholder="e.g. 3.5" />
             @if (reportForm.get('assessedRiskScore')?.touched && reportForm.get('assessedRiskScore')?.invalid) {
               <p class="text-red-500 text-xs mt-1">Risk score between 0 and 10 is required.</p>
             }
           </div>
+
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Inspection Remarks <span class="text-red-500">*</span></label>
-            <textarea formControlName="remarks" rows="5"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors resize-none"
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              Inspection Remarks <span class="text-red-500">*</span>
+              @if (selectedInspection()!.isDuplicateProperty) {
+                <span class="ml-2 text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full font-medium">
+                  Auto-generated
+                </span>
+              }
+            </label>
+            <textarea
+              formControlName="remarks"
+              rows="5"
+              [class.bg-orange-50]="selectedInspection()!.isDuplicateProperty"
+              [class.border-orange-200]="selectedInspection()!.isDuplicateProperty"
+              [class.cursor-not-allowed]="selectedInspection()!.isDuplicateProperty"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32] focus:bg-white transition-colors resize-none"
               placeholder="Describe the property condition, fire safety measures observed, and overall assessment..."></textarea>
             @if (reportForm.get('remarks')?.touched && reportForm.get('remarks')?.invalid) {
               <p class="text-red-500 text-xs mt-1">Remarks must be at least 20 characters.</p>
             }
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" formControlName="fireSafetyAvailable"> Fire safety available</label>
-            <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" formControlName="sprinklerSystem"> Sprinkler system available</label>
-            <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" formControlName="fireExtinguishers"> Fire extinguishers available</label>
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 mb-1">Distance from Fire Station (km)</label>
-              <input type="number" formControlName="distanceFromFireStation" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg" min="0" step="0.1">
+          @if (selectedInspection()!.isDuplicateProperty) {
+            <div class="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <h4 class="text-sm font-semibold text-orange-800 mb-2">Risk Assessment Details (from previous inspection):</h4>
+              <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="flex items-center gap-2 text-orange-700">
+                  <span class="material-icons text-sm">{{ selectedInspection()!.existingRiskData?.fireSafetyAvailable ? 'check_circle' : 'cancel' }}</span>
+                  Fire Safety: {{ selectedInspection()!.existingRiskData?.fireSafetyAvailable ? 'Available' : 'Not Available' }}
+                </div>
+                <div class="flex items-center gap-2 text-orange-700">
+                  <span class="material-icons text-sm">{{ selectedInspection()!.existingRiskData?.sprinklerSystem ? 'check_circle' : 'cancel' }}</span>
+                  Sprinkler System: {{ selectedInspection()!.existingRiskData?.sprinklerSystem ? 'Available' : 'Not Available' }}
+                </div>
+                <div class="flex items-center gap-2 text-orange-700">
+                  <span class="material-icons text-sm">{{ selectedInspection()!.existingRiskData?.fireExtinguishers ? 'check_circle' : 'cancel' }}</span>
+                  Fire Extinguishers: {{ selectedInspection()!.existingRiskData?.fireExtinguishers ? 'Available' : 'Not Available' }}
+                </div>
+                <div class="text-orange-700">
+                  <span class="font-medium">Distance from Fire Station:</span>
+                  {{ selectedInspection()!.existingRiskData?.distanceFromFireStation || 'N/A' }} km
+                </div>
+                @if (selectedInspection()!.existingRiskData?.constructionRisk != null) {
+                  <div class="text-orange-700">
+                    <span class="font-medium">Construction Risk:</span> {{ selectedInspection()!.existingRiskData?.constructionRisk }}
+                  </div>
+                }
+                @if (selectedInspection()!.existingRiskData?.hazardRisk != null) {
+                  <div class="text-orange-700">
+                    <span class="font-medium">Hazard Risk:</span> {{ selectedInspection()!.existingRiskData?.hazardRisk }}
+                  </div>
+                }
+              </div>
             </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 mb-1">Construction Risk (0-1)</label>
-              <input type="number" formControlName="constructionRisk" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg" min="0" max="1" step="0.1">
+          } @else {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" formControlName="fireSafetyAvailable"> Fire safety available</label>
+              <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" formControlName="sprinklerSystem"> Sprinkler system available</label>
+              <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" formControlName="fireExtinguishers"> Fire extinguishers available</label>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Distance from Fire Station (km)</label>
+                <input type="number" formControlName="distanceFromFireStation" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg" min="0" step="0.1">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Construction Risk (0-1)</label>
+                <input type="number" formControlName="constructionRisk" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32]" min="0" max="1" step="0.1">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Hazard Risk (0-1)</label>
+                <input type="number" formControlName="hazardRisk" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32]" min="0" max="1" step="0.1">
+              </div>
             </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 mb-1">Hazard Risk (0-1)</label>
-              <input type="number" formControlName="hazardRisk" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg" min="0" max="1" step="0.1">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 mb-1">Recommended Coverage (₹)</label>
-              <input type="number" formControlName="recommendedCoverage" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg" min="0" step="1000">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-600 mb-1">Recommended Premium (₹)</label>
-              <input type="number" formControlName="recommendedPremium" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg" min="0" step="100">
-            </div>
-          </div>
+          }
           @if (errorMessage()) {
             <div class="flex gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
               <span class="material-icons text-sm mt-0.5">error</span>{{ errorMessage() }}
@@ -232,11 +397,19 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
       </div>
       <div class="px-6 pb-6 flex gap-3 justify-end">
         <button type="button" (click)="closeReportModal()" class="px-5 py-2.5 text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</button>
-        <button type="button" (click)="submitReport()" [disabled]="isSubmitting() || reportForm.invalid"
-          class="flex items-center gap-2 px-5 py-2.5 bg-[#8B1E3F] text-white font-medium rounded-lg hover:bg-[#6f1732] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          @if (isSubmitting()) { <span class="material-icons animate-spin text-sm">autorenew</span> } @else { <span class="material-icons text-sm">check_circle</span> }
-          {{ isSubmitting() ? 'Submitting...' : 'Submit Report' }}
-        </button>
+        @if (selectedInspection()!.isDuplicateProperty) {
+          <button type="button" (click)="submitReport()" [disabled]="isSubmitting()"
+            class="flex items-center gap-2 px-5 py-2.5 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (isSubmitting()) { <span class="material-icons animate-spin text-sm">autorenew</span> } @else { <span class="material-icons text-sm">content_copy</span> }
+            {{ isSubmitting() ? 'Applying...' : 'Apply Existing Assessment' }}
+          </button>
+        } @else {
+          <button type="button" (click)="submitReport()" [disabled]="isSubmitting() || reportForm.invalid"
+            class="flex items-center gap-2 px-5 py-2.5 bg-[#C72B32] text-white font-medium rounded-lg hover:bg-[#A01E28] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (isSubmitting()) { <span class="material-icons animate-spin text-sm">autorenew</span> } @else { <span class="material-icons text-sm">check_circle</span> }
+            {{ isSubmitting() ? 'Submitting...' : 'Submit New Report' }}
+          </button>
+        }
       </div>
     </div>
   </div>
@@ -266,9 +439,7 @@ export class PropertyInspectionsComponent implements OnInit {
     fireExtinguishers: [false],
     distanceFromFireStation: [null, [Validators.min(0)]],
     constructionRisk: [null, [Validators.min(0), Validators.max(1)]],
-    hazardRisk: [null, [Validators.min(0), Validators.max(1)]],
-    recommendedCoverage: [null, [Validators.min(0)]],
-    recommendedPremium: [null, [Validators.min(0)]]
+    hazardRisk: [null, [Validators.min(0), Validators.max(1)]]
   });
 
   ngOnInit(): void { this.loadInspections(); }
@@ -289,18 +460,51 @@ export class PropertyInspectionsComponent implements OnInit {
 
   openReportModal(inspection: PropertyInspection): void {
     this.selectedInspection.set(inspection);
-    this.reportForm.reset({
-      assessedRiskScore: null,
-      remarks: '',
-      fireSafetyAvailable: false,
-      sprinklerSystem: false,
-      fireExtinguishers: false,
-      distanceFromFireStation: null,
-      constructionRisk: null,
-      hazardRisk: null,
-      recommendedCoverage: null,
-      recommendedPremium: null
-    });
+
+    // Auto-populate form with existing data for duplicate properties
+    if (inspection.isDuplicateProperty && inspection.existingRiskData) {
+      this.reportForm.reset({
+        assessedRiskScore: inspection.existingRiskData.assessedRiskScore,
+        remarks: `Risk assessment applied from previous inspection #INS-${inspection.referenceInspectionId} of the same property. Original assessment: ${inspection.existingRiskData.assessedRiskScore}/10 risk score.`,
+        fireSafetyAvailable: inspection.existingRiskData.fireSafetyAvailable || false,
+        sprinklerSystem: inspection.existingRiskData.sprinklerSystem || false,
+        fireExtinguishers: inspection.existingRiskData.fireExtinguishers || false,
+        distanceFromFireStation: inspection.existingRiskData.distanceFromFireStation || null,
+        constructionRisk: inspection.existingRiskData.constructionRisk || null,
+        hazardRisk: inspection.existingRiskData.hazardRisk || null
+      });
+
+      // Disable form fields for duplicate properties (they can't edit the assessment)
+      this.reportForm.get('assessedRiskScore')?.disable();
+      this.reportForm.get('fireSafetyAvailable')?.disable();
+      this.reportForm.get('sprinklerSystem')?.disable();
+      this.reportForm.get('fireExtinguishers')?.disable();
+      this.reportForm.get('distanceFromFireStation')?.disable();
+      this.reportForm.get('constructionRisk')?.disable();
+      this.reportForm.get('hazardRisk')?.disable();
+    } else {
+      // Normal form reset for new inspections
+      this.reportForm.reset({
+        assessedRiskScore: null,
+        remarks: '',
+        fireSafetyAvailable: false,
+        sprinklerSystem: false,
+        fireExtinguishers: false,
+        distanceFromFireStation: null,
+        constructionRisk: null,
+        hazardRisk: null
+      });
+
+      // Ensure fields are enabled for new inspections
+      this.reportForm.get('assessedRiskScore')?.enable();
+      this.reportForm.get('fireSafetyAvailable')?.enable();
+      this.reportForm.get('sprinklerSystem')?.enable();
+      this.reportForm.get('fireExtinguishers')?.enable();
+      this.reportForm.get('distanceFromFireStation')?.enable();
+      this.reportForm.get('constructionRisk')?.enable();
+      this.reportForm.get('hazardRisk')?.enable();
+    }
+
     this.showReportModal.set(true);
     this.errorMessage.set('');
   }
@@ -308,20 +512,59 @@ export class PropertyInspectionsComponent implements OnInit {
   closeReportModal(): void { this.showReportModal.set(false); this.selectedInspection.set(null); this.reportForm.reset(); }
 
   submitReport(): void {
-    if (this.reportForm.invalid) { this.reportForm.markAllAsTouched(); return; }
     const insp = this.selectedInspection();
     if (!insp) return;
+
+    // For duplicate properties, temporarily enable fields for submission
+    const wasDuplicate = insp.isDuplicateProperty;
+    if (wasDuplicate) {
+      // Re-enable all form fields temporarily
+      Object.keys(this.reportForm.controls).forEach(key => {
+        this.reportForm.get(key)?.enable();
+      });
+    }
+
+    // Validate form (skip validation for duplicate properties since data is pre-populated)
+    if (!wasDuplicate && this.reportForm.invalid) {
+      this.reportForm.markAllAsTouched();
+      return;
+    }
+
     this.isSubmitting.set(true);
-    this.surveyorService.submitPropertyInspectionReport(insp.inspectionId, this.reportForm.value).subscribe({
+
+    const formData = this.reportForm.value;
+
+    this.surveyorService.submitPropertyInspectionReport(insp.inspectionId, formData).subscribe({
       next: (updated) => {
         this.inspections.set(this.inspections().map(i => i.inspectionId === updated.inspectionId ? updated : i));
         this.applyFilter(this.activeFilter());
         this.isSubmitting.set(false);
         this.closeReportModal();
-        this.successMessage.set('Inspection report submitted successfully!');
-        setTimeout(() => this.successMessage.set(''), 4000);
+
+        if (wasDuplicate) {
+          this.successMessage.set('Existing risk assessment applied successfully! No duplicate inspection required.');
+        } else {
+          this.successMessage.set('Inspection report submitted successfully!');
+        }
+
+        setTimeout(() => this.successMessage.set(''), 5000);
       },
-      error: (err) => { console.error(err); this.isSubmitting.set(false); this.errorMessage.set('Failed to submit report.'); }
+      error: (err) => {
+        console.error(err);
+        this.isSubmitting.set(false);
+        this.errorMessage.set('Failed to submit report.');
+
+        // Re-disable fields if it was a duplicate property
+        if (wasDuplicate && insp.existingRiskData) {
+          this.reportForm.get('assessedRiskScore')?.disable();
+          this.reportForm.get('fireSafetyAvailable')?.disable();
+          this.reportForm.get('sprinklerSystem')?.disable();
+          this.reportForm.get('fireExtinguishers')?.disable();
+          this.reportForm.get('distanceFromFireStation')?.disable();
+          this.reportForm.get('constructionRisk')?.disable();
+          this.reportForm.get('hazardRisk')?.disable();
+        }
+      }
     });
   }
 
@@ -371,6 +614,20 @@ export class PropertyInspectionsComponent implements OnInit {
         console.error('Failed to download customer document', err);
         this.errorMessage.set('Failed to download customer document.');
       }
+    });
+  }
+
+  /**
+   * Formats the policy coverage amount with proper currency formatting
+   * and handles multiple potential field names for robust mapping.
+   */
+  getPolicyCoverageAmount(amount: number | null | undefined): string {
+    if (!amount) return '—';
+
+    // Format in Indian currency style with proper separators
+    return amount.toLocaleString('en-IN', {
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0
     });
   }
 }

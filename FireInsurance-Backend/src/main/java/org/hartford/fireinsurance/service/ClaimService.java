@@ -1,17 +1,23 @@
+
 package org.hartford.fireinsurance.service;
 
 import org.hartford.fireinsurance.dto.CreateClaimRequest;
 import org.hartford.fireinsurance.model.Claim;
 import org.hartford.fireinsurance.model.Claim.ClaimStatus;
 import org.hartford.fireinsurance.model.ClaimInspection;
+import org.hartford.fireinsurance.model.RiskLevel;
+import org.hartford.fireinsurance.service.BlacklistService;
 import org.hartford.fireinsurance.model.Customer;
 import org.hartford.fireinsurance.model.Policy;
 import org.hartford.fireinsurance.model.PolicySubscription;
 import org.hartford.fireinsurance.model.Property;
+import org.hartford.fireinsurance.model.SiuInvestigator;
 import org.hartford.fireinsurance.model.Underwriter;
+import org.hartford.fireinsurance.model.RiskLevel;
 import org.hartford.fireinsurance.repository.ClaimRepository;
 import org.hartford.fireinsurance.repository.NotificationPreferenceRepository;
 import org.hartford.fireinsurance.repository.PolicySubscriptionRepository;
+import org.hartford.fireinsurance.repository.SiuInvestigatorRepository;
 import org.hartford.fireinsurance.repository.UnderwriterRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +32,15 @@ import java.util.Map;
 @Service
 @Transactional
 public class ClaimService {
+    // Helper to get any available underwriter (for SIU clear logic)
+    public Underwriter getAnyAvailableUnderwriter() {
+        return underwriterRepository.findAll().stream().findFirst().orElse(null);
+    }
+
+    // Helper to save claim (for SIU clear logic)
+    public Claim saveClaim(Claim claim) {
+        return claimRepository.save(claim);
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ClaimService.class);
 
@@ -41,23 +56,35 @@ public class ClaimService {
     private final CustomerService customerService;
     private final org.hartford.fireinsurance.repository.ClaimInspectionRepository claimInspectionRepository;
     private final UnderwriterRepository underwriterRepository;
+    private final SiuInvestigatorRepository siuInvestigatorRepository;
+
     private final EmailNotificationService emailNotificationService;
     private final NotificationPreferenceRepository notificationPreferenceRepository;
+
+    // Blacklist integration
+    private final BlacklistService blacklistService;
+
+    // Optional: block blacklisted users from claim creation
+    private static final boolean BLOCK_BLACKLISTED_USERS = false;
 
     public ClaimService(ClaimRepository claimRepository,
             PolicySubscriptionRepository subscriptionRepository,
             CustomerService customerService,
             org.hartford.fireinsurance.repository.ClaimInspectionRepository claimInspectionRepository,
             UnderwriterRepository underwriterRepository,
+            SiuInvestigatorRepository siuInvestigatorRepository,
             EmailNotificationService emailNotificationService,
-            NotificationPreferenceRepository notificationPreferenceRepository) {
+            NotificationPreferenceRepository notificationPreferenceRepository,
+            BlacklistService blacklistService) {
         this.claimRepository = claimRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.customerService = customerService;
         this.claimInspectionRepository = claimInspectionRepository;
         this.underwriterRepository = underwriterRepository;
+        this.siuInvestigatorRepository = siuInvestigatorRepository;
         this.emailNotificationService = emailNotificationService;
         this.notificationPreferenceRepository = notificationPreferenceRepository;
+        this.blacklistService = blacklistService;
     }
 
     /**
@@ -74,6 +101,17 @@ public class ClaimService {
             throw new RuntimeException("Unauthorized: Subscription does not belong to this customer");
         }
 
+        // Extract identifiers for blacklist check
+        String userUsername = subscription.getCustomer().getUser().getUsername();
+        String userEmail = subscription.getCustomer().getUser().getEmail();
+        String userPhone = subscription.getCustomer().getUser().getPhoneNumber();
+
+        // Blacklist check
+        boolean isBlacklisted = blacklistService.isBlacklisted(userUsername, userEmail, userPhone);
+        if (isBlacklisted && BLOCK_BLACKLISTED_USERS) {
+            throw new RuntimeException("Claim cannot be processed: user is blacklisted.");
+        }
+
         // Create claim
         Claim claim = new Claim();
         claim.setSubscription(subscription);
@@ -86,7 +124,21 @@ public class ClaimService {
         claim.setSalvageDetails(request.getSalvageDetails());
         claim.setStatus(ClaimStatus.SUBMITTED);
         claim.setCreatedAt(LocalDateTime.now());
-        claim.setFraudScore(0.0); // Default fraud score
+
+        // Default fraud score and risk
+        claim.setFraudScore(0.0);
+        claim.setRiskLevel(RiskLevel.LOW);
+
+        // Blacklist impact on fraud detection
+        if (isBlacklisted) {
+            claim.setFraudScore(100.0);
+            claim.setRiskLevel(RiskLevel.HIGH);
+            String details = claim.getAnalysisDetails() != null ? claim.getAnalysisDetails() : "";
+            details += (details.isEmpty() ? "" : "\n") + "User is blacklisted";
+            claim.setAnalysisDetails(details);
+            // SIU assignment logic (if present in your workflow)
+            claim.setSiuStatus("PENDING_ASSIGNMENT");
+        }
 
         return claimRepository.save(claim);
     }
@@ -391,15 +443,38 @@ public class ClaimService {
 
     public Claim assignUnderwriter(Long claimId, Long underwriterId) {
         Claim claim = claimRepository.findById(claimId)
-                .orElseThrow(() -> new RuntimeException("Claim not found with ID: " + claimId));
+            .orElseThrow(() -> new RuntimeException("Claim not found with ID: " + claimId));
+
+        // Enforce: Only SIU_CLEARED claims can be assigned to underwriter after SIU
+        if (claim.getStatus() != ClaimStatus.SIU_CLEARED) {
+            throw new IllegalStateException("Only SIU_CLEARED claims can be assigned to an underwriter after SIU clearance.");
+        }
 
         Underwriter underwriter = underwriterRepository.findById(underwriterId)
-                .orElseThrow(() -> new RuntimeException("Underwriter not found with ID: " + underwriterId));
+            .orElseThrow(() -> new RuntimeException("Underwriter not found with ID: " + underwriterId));
 
         claim.setUnderwriter(underwriter);
-        if (claim.getStatus() == ClaimStatus.SUBMITTED) {
+        // Set status to UNDER_REVIEW only if currently SIU_CLEARED
+        if (claim.getStatus() == ClaimStatus.SIU_CLEARED) {
             claim.setStatus(ClaimStatus.UNDER_REVIEW);
         }
+        return claimRepository.save(claim);
+    }
+
+    public Claim assignSiuInvestigator(Long claimId, Long investigatorId) {
+        Claim claim = claimRepository.findById(claimId)
+            .orElseThrow(() -> new RuntimeException("Claim not found with ID: " + claimId));
+
+        // Enforce: Only HIGH risk to SIU
+        if (claim.getRiskLevel() != RiskLevel.HIGH) {
+            throw new IllegalStateException("Only HIGH risk claims can be assigned to SIU.");
+        }
+
+        SiuInvestigator investigator = siuInvestigatorRepository.findById(investigatorId)
+            .orElseThrow(() -> new RuntimeException("SIU investigator not found with ID: " + investigatorId));
+
+        claim.setSiuInvestigator(investigator);
+        claim.setSiuStatus("UNDER_INVESTIGATION");
         return claimRepository.save(claim);
     }
 

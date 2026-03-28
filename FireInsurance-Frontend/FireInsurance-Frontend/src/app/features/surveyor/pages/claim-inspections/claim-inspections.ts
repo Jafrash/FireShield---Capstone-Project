@@ -38,7 +38,7 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
   <div class="flex flex-wrap gap-2 mb-6 bg-white rounded-xl p-2 shadow-sm border border-gray-200 w-fit">
     @for (filter of ['ALL', 'ASSIGNED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED']; track filter) {
       <button (click)="applyFilter(filter)" class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-        [class]="activeFilter() === filter ? 'bg-[#8B1E3F] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'">
+        [class]="activeFilter() === filter ? 'bg-[#C72B32] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'">
         {{ filter.replace('_', ' ') }}
       </button>
     }
@@ -46,7 +46,7 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
 
   @if (isLoading()) {
     <div class="flex items-center justify-center py-16">
-      <div class="w-10 h-10 border-4 border-gray-200 border-t-[#8B1E3F] rounded-full animate-spin"></div>
+      <div class="w-10 h-10 border-4 border-gray-200 border-t-[#C72B32] rounded-full animate-spin"></div>
       <p class="ml-3 text-gray-600">Loading claim inspections...</p>
     </div>
   }
@@ -67,6 +67,7 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Claim ID</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Requested Amount</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Policy & Coverage</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer Docs</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Inspection Date</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Estimated Loss</th>
@@ -77,7 +78,7 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
           <tbody class="divide-y divide-gray-100">
             @if (filteredInspections().length === 0) {
               <tr>
-                <td colspan="9" class="px-6 py-16 text-center">
+                <td colspan="10" class="px-6 py-16 text-center">
                   <span class="material-icons text-5xl text-gray-300 mb-3 block">assignment_turned_in</span>
                   <p class="text-gray-500 font-medium">No claim inspections found</p>
                 </td>
@@ -101,7 +102,16 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-700">
                   @if (ci.requestedClaimAmount != null) {
-                    <span class="font-semibold text-gray-900">₹{{ ci.requestedClaimAmount.toLocaleString() }}</span>
+                    <span class="font-semibold text-blue-700">₹{{ getPolicyCoverageAmount(ci.requestedClaimAmount) }}</span>
+                    <div class="text-xs text-blue-600 font-medium">Customer's Request</div>
+                  } @else {
+                    <span class="text-gray-400">—</span>
+                  }
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700">
+                  @if (ci.policyName && ci.maxCoverage != null) {
+                    <div class="font-semibold text-gray-900">{{ ci.policyName }}</div>
+                    <div class="text-xs text-green-700 font-medium">Max: ₹{{ getPolicyCoverageAmount(ci.maxCoverage) }}</div>
                   } @else {
                     <span class="text-gray-400">—</span>
                   }
@@ -166,25 +176,38 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
         </div>
       </div>
       <div class="p-6">
+        <!-- Policy & Claim Context Information -->
         <div class="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <h3 class="text-sm font-semibold text-gray-700 mb-3">Policy & Claim Context</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <div class="text-gray-500">Customer</div>
-              <div class="font-semibold text-gray-900">{{ selectedInspection()!.customerName || 'Unknown Customer' }}</div>
-              <div class="text-xs text-gray-600">{{ selectedInspection()!.customerEmail || 'No email' }}</div>
-              <div class="text-xs text-gray-600">{{ selectedInspection()!.customerPhone || 'No phone' }}</div>
+              <div class="text-gray-500 text-xs font-medium">Customer Information</div>
+              <div class="font-semibold text-gray-900">{{ selectedInspection()!.customerName || 'Customer Name Not Available' }}</div>
+              <div class="text-xs text-gray-600">{{ selectedInspection()!.customerEmail || 'No email provided' }}</div>
+              <div class="text-xs text-gray-600">{{ selectedInspection()!.customerPhone || 'No phone provided' }}</div>
             </div>
+            @if (selectedInspection()!.requestedClaimAmount != null) {
+              <div>
+                <div class="text-gray-500 text-xs font-medium">Customer's Claim Request</div>
+                <div class="font-semibold text-blue-700">₹{{ getPolicyCoverageAmount(selectedInspection()!.requestedClaimAmount!) }}</div>
+                <div class="text-xs text-blue-600 font-medium">Amount Requested by Customer</div>
+              </div>
+            }
             <div>
-              <div class="text-gray-500">Requested Claim Amount</div>
-              @if (selectedInspection()!.requestedClaimAmount != null) {
-                <div class="font-semibold text-gray-900">₹{{ selectedInspection()!.requestedClaimAmount!.toLocaleString() }}</div>
+              <div class="text-gray-500 text-xs font-medium">Policy & Maximum Coverage</div>
+              @if (selectedInspection()!.policyName && selectedInspection()!.maxCoverage != null) {
+                <div class="font-semibold text-gray-900">{{ selectedInspection()!.policyName }}</div>
+                <div class="text-xs text-green-700 font-medium">Max Coverage: ₹{{ getPolicyCoverageAmount(selectedInspection()!.maxCoverage!) }}</div>
               } @else {
-                <div class="text-gray-500">Not available</div>
-              }
-              @if (selectedInspection()!.claimDescription) {
-                <div class="text-xs text-gray-600 mt-1 line-clamp-2">{{ selectedInspection()!.claimDescription }}</div>
+                <div class="text-gray-500 italic">Policy details being processed</div>
               }
             </div>
+            @if (selectedInspection()!.claimDescription) {
+              <div>
+                <div class="text-gray-500 text-xs font-medium">Claim Description</div>
+                <div class="text-gray-700 text-sm">{{ selectedInspection()!.claimDescription }}</div>
+              </div>
+            }
           </div>
         </div>
 
@@ -341,6 +364,20 @@ export class ClaimInspectionsComponent implements OnInit {
         console.error('Failed to download customer document', err);
         this.errorMessage.set('Failed to download customer document.');
       }
+    });
+  }
+
+  /**
+   * Formats the policy coverage amount with proper currency formatting
+   * for display in the surveyor interface.
+   */
+  getPolicyCoverageAmount(amount: number | null | undefined): string {
+    if (!amount) return '—';
+
+    // Format in Indian currency style with proper separators
+    return amount.toLocaleString('en-IN', {
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0
     });
   }
 }

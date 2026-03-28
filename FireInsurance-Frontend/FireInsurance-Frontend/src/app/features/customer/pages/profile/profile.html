@@ -43,7 +43,7 @@
     <div class="flex items-center gap-6">
       <!-- Avatar -->
       <div class="w-24 h-24 rounded-2xl flex items-center justify-center text-[36px] font-bold text-white shadow-lg"
-        style="background: linear-gradient(135deg, #8B1538, #E91E63);">
+        style="background: linear-gradient(135deg, #C72B32, #FF6B35);">
         {{ customer()!.username.substring(0, 2).toUpperCase() }}
       </div>
 
@@ -55,7 +55,7 @@
         </h2>
         <p class="text-gray-600 text-[16px] mb-3">{{ customer()!.email }}</p>
         <div
-          class="inline-flex items-center gap-2 px-3 py-1.5 bg-claret/10 rounded-lg text-[13px] font-semibold text-claret">
+          class="inline-flex items-center gap-2 px-3 py-1.5 bg-fire-red/10 rounded-lg text-[13px] font-semibold text-fire-red">
           <span class="material-icons text-[16px]">badge</span>
           <span>Customer Account</span>
         </div>
@@ -236,7 +236,7 @@
   <div class="profile-card p-8">
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
-        <span class="material-icons text-claret text-[28px]">notifications</span>
+        <span class="material-icons text-fire-red text-[28px]">notifications</span>
         <h3 class="section-title m-0">Email Notification Preferences</h3>
       </div>
       @if (!isEditingNotifications() && notificationPreferences()) {

@@ -13,7 +13,7 @@ import { LoadingService } from '../../../../core/services/loading.service';
           <!-- Spinner -->
           <div class="relative w-16 h-16">
             <div class="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
-            <div class="absolute inset-0 border-4 border-[#8B1E3F] border-t-transparent rounded-full animate-spin"></div>
+            <div class="absolute inset-0 border-4 border-[#C72B32] border-t-transparent rounded-full animate-spin"></div>
           </div>
           
           <!-- Loading Text -->

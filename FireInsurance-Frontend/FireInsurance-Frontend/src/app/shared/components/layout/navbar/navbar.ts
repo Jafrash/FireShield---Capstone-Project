@@ -1,7 +1,7 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { TokenService, AuthService, NotificationService } from '../../../../core/services';
 import { AppNotification } from '../../../../core/models';
 
@@ -17,37 +17,34 @@ export class NavbarComponent implements OnInit {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
-  private notificationSubscription?: Subscription;
 
   username: string | null = null;
   email: string | null = null;
   role: string | null = null;
   showUserMenu = false;
   showNotifications = false;
-  notifications: AppNotification[] = [];
-  unreadCount = 0;
+
+  notifications$!: Observable<AppNotification[]>;
+  unreadCount$!: Observable<number>;
 
   ngOnInit(): void {
     this.loadUserInfo();
-    this.startNotificationPolling();
+    if (this.username) {
+      this.notifications$ = this.notificationService
+        .pollNotifications(20, 30000)
+        .pipe(map(items => this.notificationService.decorateWithReadStatus(this.username!, items)));
+      this.unreadCount$ = this.notifications$.pipe(
+        map(notifications => this.notificationService.getUnreadCount(notifications))
+      );
+    }
   }
 
-  ngOnDestroy(): void {
-    this.notificationSubscription?.unsubscribe();
-  }
-
-  /**
-   * Load user information from TokenService
-   */
   private loadUserInfo(): void {
     this.username = this.tokenService.getUsername();
     this.email = this.tokenService.getEmail();
     this.role = this.tokenService.getRole();
   }
 
-  /**
-   * Toggle user menu dropdown
-   */
   toggleUserMenu(): void {
     this.showUserMenu = !this.showUserMenu;
     if (this.showUserMenu) {
@@ -55,9 +52,6 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  /**
-   * Close user menu
-   */
   closeUserMenu(): void {
     this.showUserMenu = false;
   }
@@ -73,24 +67,17 @@ export class NavbarComponent implements OnInit {
     if (!this.username) {
       return;
     }
-
     this.notificationService.markAsRead(this.username, notification.id);
-    this.notifications = this.notificationService.decorateWithReadStatus(this.username, this.notifications);
-    this.unreadCount = this.notificationService.getUnreadCount(this.notifications);
-
     if (notification.actionUrl) {
       this.router.navigateByUrl(notification.actionUrl);
     }
   }
 
-  markAllNotificationsAsRead(): void {
+  markAllNotificationsAsRead(notifications: AppNotification[]): void {
     if (!this.username) {
       return;
     }
-
-    this.notificationService.markAllAsRead(this.username, this.notifications);
-    this.notifications = this.notificationService.decorateWithReadStatus(this.username, this.notifications);
-    this.unreadCount = 0;
+    this.notificationService.markAllAsRead(this.username, notifications);
   }
 
   getNotificationIcon(type: string): string {
@@ -109,12 +96,10 @@ export class NavbarComponent implements OnInit {
     if (!value) {
       return 'Just now';
     }
-
     const timestamp = new Date(value).getTime();
     if (Number.isNaN(timestamp)) {
       return 'Just now';
     }
-
     const diffMs = Date.now() - timestamp;
     const diffMins = Math.floor(diffMs / 60000);
     if (diffMins < 1) return 'Just now';
@@ -125,33 +110,14 @@ export class NavbarComponent implements OnInit {
     return `${diffDays}d ago`;
   }
 
-  private startNotificationPolling(): void {
-    if (!this.username) {
-      return;
-    }
-
-    this.notificationSubscription = this.notificationService.pollNotifications(20, 30000).subscribe({
-      next: (items) => {
-        this.notifications = this.notificationService.decorateWithReadStatus(this.username!, items);
-        this.unreadCount = this.notificationService.getUnreadCount(this.notifications);
-      },
-      error: () => {
-        this.notifications = [];
-        this.unreadCount = 0;
-      }
-    });
+  trackById(index: number, item: AppNotification) {
+    return item.id;
   }
 
-  /**
-   * Logout user
-   */
   logout(): void {
     this.authService.logout();
   }
 
-  /**
-   * Get user initials for avatar
-   */
   getUserInitials(): string {
     if (!this.username) return 'U';
     const parts = this.username.split(' ');

@@ -55,7 +55,7 @@
       @for (property of properties(); track property.propertyId) {
         <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
           <!-- Property Header with Gradient -->
-          <div class="bg-linear-to-br from-claret to-fuchsia p-6 text-white relative overflow-hidden">
+          <div class="bg-linear-to-br from-fire-red to-fire-orange p-6 text-white relative overflow-hidden">
             <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div class="relative flex items-start justify-between">
               <div class="flex-1">
@@ -163,7 +163,7 @@
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <div>
-        <h2 class="text-2xl font-bold bg-linear-to-r from-claret to-fuchsia bg-clip-text text-transparent">Add New Property</h2>
+        <h2 class="text-2xl font-bold bg-linear-to-r from-fire-red to-fire-orange bg-clip-text text-transparent">Add New Property</h2>
         <p class="text-sm text-gray-500 mt-1">Fill in the details to add a new property to your portfolio</p>
       </div>
       <button (click)="closeAddModal()" class="btn-close">&times;</button>
@@ -174,7 +174,7 @@
         <div class="form-group">
           <label for="propertyType">
             <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-claret">home_work</span>
+              <span class="material-icons text-sm text-fire-red">home_work</span>
               Property Type *
             </span>
           </label>
@@ -198,7 +198,7 @@
         <div class="form-group">
           <label for="constructionType">
             <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-claret">construction</span>
+              <span class="material-icons text-sm text-fire-red">construction</span>
               Construction Type *
             </span>
           </label>
@@ -222,7 +222,7 @@
         <div class="form-group full-width">
           <label for="address">
             <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-claret">location_on</span>
+              <span class="material-icons text-sm text-fire-red">location_on</span>
               Address *
             </span>
           </label>
@@ -243,7 +243,7 @@
         <div class="form-group">
           <label for="areaSqft">
             <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-claret">square_foot</span>
+              <span class="material-icons text-sm text-fire-red">square_foot</span>
               Area (sq ft) *
             </span>
           </label>
@@ -296,7 +296,7 @@
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <div>
-        <h2 class="text-2xl font-bold bg-linear-to-r from-claret to-fuchsia bg-clip-text text-transparent">Edit Property</h2>
+        <h2 class="text-2xl font-bold bg-linear-to-r from-fire-red to-fire-orange bg-clip-text text-transparent">Edit Property</h2>
         <p class="text-sm text-gray-500 mt-1">Update your property details</p>
       </div>
       <button (click)="closeEditModal()" class="btn-close">&times;</button>
@@ -307,7 +307,7 @@
         <div class="form-group">
           <label for="editPropertyType">
             <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-claret">home_work</span>
+              <span class="material-icons text-sm text-fire-red">home_work</span>
               Property Type *
             </span>
           </label>
@@ -331,7 +331,7 @@
         <div class="form-group">
           <label for="editConstructionType">
             <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-claret">construction</span>
+              <span class="material-icons text-sm text-fire-red">construction</span>
               Construction Type *
             </span>
           </label>
@@ -355,7 +355,7 @@
         <div class="form-group full-width">
           <label for="editAddress">
             <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-claret">location_on</span>
+              <span class="material-icons text-sm text-fire-red">location_on</span>
               Address *
             </span>
           </label>
@@ -376,7 +376,7 @@
         <div class="form-group">
           <label for="editAreaSqft">
             <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-claret">square_foot</span>
+              <span class="material-icons text-sm text-fire-red">square_foot</span>
               Area (sq ft) *
             </span>
           </label>

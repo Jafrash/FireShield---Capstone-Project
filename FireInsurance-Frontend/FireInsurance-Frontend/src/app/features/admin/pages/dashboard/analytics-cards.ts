@@ -11,14 +11,14 @@ export const ADVANCED_ANALYTICS: AnalyticsCard[] = [
     title: 'Claims Approval Rate',
     value: '--',
     icon: 'percent',
-    color: '#3b82f6',
+    color: '#C72B32',
     description: 'Percentage of claims approved out of total claims.'
   },
   {
     title: 'Average Claim Amount',
     value: '--',
     icon: 'payments',
-    color: '#8b5cf6',
+    color: '#E2725B',
     description: 'Mean value of all claims submitted.'
   },
   {
@@ -32,14 +32,7 @@ export const ADVANCED_ANALYTICS: AnalyticsCard[] = [
     title: 'Active Policy Ratio',
     value: '--',
     icon: 'pie_chart',
-    color: '#f59e0b',
+    color: '#FF6B35',
     description: 'Ratio of active policies to total policies.'
-  },
-  {
-    title: 'Pending Inspections',
-    value: '--',
-    icon: 'assignment_late',
-    color: '#ef4444',
-    description: 'Number of inspections pending completion.'
   }
 ];

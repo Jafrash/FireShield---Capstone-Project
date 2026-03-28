@@ -31,7 +31,7 @@
       <button (click)="applyFilter(filter)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
         [class]="activeFilter() === filter
-          ? 'bg-[#8B1E3F] text-white shadow-sm'
+          ? 'bg-[#C72B32] text-white shadow-sm'
           : 'text-gray-600 hover:bg-gray-100'">
         {{ filter === 'UNDER_REVIEW' ? 'UNDER REVIEW' : filter }}
       </button>
@@ -41,7 +41,7 @@
   <!-- Loading -->
   @if (isLoading()) {
     <div class="flex items-center justify-center py-16">
-      <div class="w-10 h-10 border-4 border-gray-200 border-t-[#8B1E3F] rounded-full animate-spin"></div>
+      <div class="w-10 h-10 border-4 border-gray-200 border-t-[#C72B32] rounded-full animate-spin"></div>
       <p class="ml-3 text-gray-600">Loading claim inspections...</p>
     </div>
   }

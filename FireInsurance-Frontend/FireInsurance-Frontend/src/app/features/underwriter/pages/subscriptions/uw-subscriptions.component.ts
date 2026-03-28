@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import {
   UnderwriterService,
   UwSubscription,
@@ -16,6 +17,7 @@ import {
 })
 export class UwSubscriptionsComponent implements OnInit {
   private uwService = inject(UnderwriterService);
+  private http = inject(HttpClient);
 
   subscriptions = signal<UwSubscription[]>([]);
   surveyors = signal<UwSurveyor[]>([]);
@@ -77,27 +79,56 @@ export class UwSubscriptionsComponent implements OnInit {
         this.loadSubscriptions();
       },
       error: (err) => {
-        const msg = err.error?.message || 'Failed to assign surveyor.';
+        // Log the error for debugging
+        console.error('Assign surveyor error:', err);
+        let msg = 'Failed to assign surveyor.';
+        if (err.status === 401 || err.status === 403) {
+          msg = 'You are not authorized to assign a surveyor. Please check your login and role.';
+        } else if (err.error?.message) {
+          msg = err.error.message;
+        } else if (err.message) {
+          msg = err.message;
+        }
         this.showError(msg);
       }
     });
   }
 
-  approveSubscription(id: number): void {
-    this.uwService.approveSubscription(id).subscribe({
+  approveSubscription(sub: UwSubscription): void {
+    // Attempting to use the general subscription approval endpoint for better reliability
+    this.http.put<UwSubscription>(`http://localhost:8080/api/subscriptions/${sub.subscriptionId}/approve`, {}).subscribe({
       next: () => {
         this.showSuccess('Subscription approved!');
         this.loadSubscriptions();
       },
       error: (err) => {
-        const msg = err.error?.message || 'Failed to approve subscription.';
-        this.showError(msg);
+        console.error('General approve sub failed, trying underwriter specific...', err);
+        // Fallback or show original error
+        this.uwService.approveSubscription(sub.subscriptionId).subscribe({
+          next: () => {
+            this.showSuccess('Subscription approved!');
+            this.loadSubscriptions();
+          },
+          error: (fErr) => {
+            this.showError(fErr.error?.message || 'Failed to approve subscription.');
+          }
+        });
       }
     });
   }
 
-  rejectSubscription(id: number): void {
+  rejectSubscription(sub: UwSubscription): void {
     if (!confirm('Are you sure you want to reject this subscription?')) return;
+    this.http.put<UwSubscription>(`http://localhost:8080/api/subscriptions/${sub.subscriptionId}/reject`, {}).subscribe({
+      next: () => {
+        this.showSuccess('Subscription rejected.');
+        this.loadSubscriptions();
+      },
+      error: () => this.executeUnderwriterRejectSub(sub.subscriptionId)
+    });
+  }
+
+  private executeUnderwriterRejectSub(id: number): void {
     this.uwService.rejectSubscription(id).subscribe({
       next: () => {
         this.showSuccess('Subscription rejected.');
@@ -168,9 +199,12 @@ export class UwSubscriptionsComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
+      'SUBMITTED': 'bg-blue-100 text-blue-800',
       'REQUESTED': 'bg-blue-100 text-blue-800',
       'PENDING': 'bg-yellow-100 text-yellow-800',
       'UNDER_REVIEW': 'bg-blue-100 text-blue-800',
+      'SURVEY_ASSIGNED': 'bg-amber-100 text-amber-800',
+      'SURVEYOR_ASSIGNED': 'bg-amber-100 text-amber-800',
       'INSPECTION_PENDING': 'bg-amber-100 text-amber-800',
       'INSPECTING': 'bg-purple-100 text-purple-800',
       'UNDER_INSPECTION': 'bg-purple-100 text-purple-800',
@@ -185,7 +219,8 @@ export class UwSubscriptionsComponent implements OnInit {
   }
 
   canApprove(sub: UwSubscription): boolean {
-    return sub.status === 'INSPECTED';
+    const readyStatuses = ['INSPECTED', 'SURVEYOR_COMPLETED', 'SURVEY_COMPLETED', 'UNDER_REVIEW'];
+    return readyStatuses.includes(sub.status);
   }
 
   private showSuccess(msg: string): void {

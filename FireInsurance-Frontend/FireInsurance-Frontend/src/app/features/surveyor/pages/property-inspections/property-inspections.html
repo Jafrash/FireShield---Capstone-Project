@@ -31,7 +31,7 @@
       <button (click)="applyFilter(filter)"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
         [class]="activeFilter() === filter
-          ? 'bg-[#8B1E3F] text-white shadow-sm'
+          ? 'bg-[#C72B32] text-white shadow-sm'
           : 'text-gray-600 hover:bg-gray-100'">
         {{ filter }}
       </button>
@@ -41,7 +41,7 @@
   <!-- Loading -->
   @if (isLoading()) {
     <div class="flex items-center justify-center py-16">
-      <div class="w-10 h-10 border-4 border-gray-200 border-t-[#8B1E3F] rounded-full animate-spin"></div>
+      <div class="w-10 h-10 border-4 border-gray-200 border-t-[#C72B32] rounded-full animate-spin"></div>
       <p class="ml-3 text-gray-600">Loading inspections...</p>
     </div>
   }
@@ -84,7 +84,7 @@
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-700">
                   <div class="flex items-center gap-2">
-                    <span class="material-icons text-blue-500 text-lg">home</span>
+                    <span class="material-icons text-fire-red text-lg">home</span>
                     #PROP-{{ insp.propertyId }}
                   </div>
                 </td>
@@ -108,7 +108,7 @@
                 <td class="px-6 py-4">
                   @if (insp.status === 'ASSIGNED') {
                     <button (click)="openReportModal(insp)"
-                      class="flex items-center gap-1.5 px-4 py-2 bg-[#8B1E3F] text-white text-sm rounded-lg hover:bg-[#6f1732] transition-colors font-medium">
+                      class="flex items-center gap-1.5 px-4 py-2 bg-[#C72B32] text-white text-sm rounded-lg hover:bg-[#A01E28] transition-colors font-medium">
                       <span class="material-icons text-sm">upload_file</span>
                       Submit Report
                     </button>
@@ -130,7 +130,7 @@
   <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" (click)="closeReportModal()">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
       <!-- Modal Header -->
-      <div class="bg-gradient-to-r from-[#8B1E3F] to-[#6f1732] px-6 py-4 rounded-t-xl">
+      <div class="bg-gradient-to-r from-[#C72B32] to-[#A01E28] px-6 py-4 rounded-t-xl">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="p-2 bg-white/20 rounded-lg">
@@ -157,7 +157,7 @@
               <span class="font-normal text-gray-500 ml-1">(0 = Lowest Risk, 10 = Highest Risk)</span>
             </label>
             <input type="number" formControlName="assessedRiskScore" step="0.1" min="0" max="10"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32] focus:bg-white transition-colors"
               placeholder="e.g. 3.5" />
             @if (reportForm.get('assessedRiskScore')?.touched && reportForm.get('assessedRiskScore')?.invalid) {
               <p class="text-red-500 text-xs mt-1">Risk score between 0 and 10 is required.</p>
@@ -170,7 +170,7 @@
               Inspection Remarks <span class="text-red-500">*</span>
             </label>
             <textarea formControlName="remarks" rows="5"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B1E3F] focus:bg-white transition-colors resize-none"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32] focus:bg-white transition-colors resize-none"
               placeholder="Describe the property condition, fire safety measures, risks observed, and your overall assessment..."></textarea>
             @if (reportForm.get('remarks')?.touched && reportForm.get('remarks')?.invalid) {
               <p class="text-red-500 text-xs mt-1">Remarks must be at least 20 characters.</p>
@@ -193,7 +193,7 @@
           Cancel
         </button>
         <button type="button" (click)="submitReport()" [disabled]="isSubmitting() || reportForm.invalid"
-          class="flex items-center gap-2 px-5 py-2.5 bg-[#8B1E3F] text-white font-medium rounded-lg hover:bg-[#6f1732] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          class="flex items-center gap-2 px-5 py-2.5 bg-[#C72B32] text-white font-medium rounded-lg hover:bg-[#A01E28] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           @if (isSubmitting()) {
             <span class="material-icons animate-spin text-sm">autorenew</span>
           } @else {
