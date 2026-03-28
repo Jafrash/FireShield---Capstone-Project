@@ -2,6 +2,22 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
 
+## Security & Environment Setup
+
+This project uses environment variables to store secrets like API keys. These are managed locally via a `.env` file and **never committed to Git**.
+
+1. **Create a `.env` file** in the root directory (one level above `src`).
+2. **Add your keys** (use `.env.example` as a template):
+   ```
+   GEMINI_API_KEY=your_gemini_key
+   GROQ_API_KEY=your_groq_key
+   ```
+3. **Run the start script**:
+   ```bash
+   npm start
+   ```
+   This will automatically populate `src/environments/environment.ts` with your local keys before starting the server.
+
 ## Development server
 
 To start a local development server, run:
