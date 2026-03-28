@@ -10,6 +10,7 @@ public class InspectionResponse {
     private LocalDateTime inspectionDate;
     private Double assessedRiskScore;
     private Inspection.InspectionStatus status;
+    private Double requestedSumInsured;
     private String customerName;
     private String customerEmail;
     private String customerPhone;
@@ -24,6 +25,13 @@ public class InspectionResponse {
     private Double hazardRisk;
     private Double recommendedCoverage;
     private Double recommendedPremium;
+    private String constructionType;
+    private String roofType;
+    private String occupancyType;
+    private String electricalAuditStatus;
+    private Boolean hazardousMaterialsPresent;
+    private Double adjacentBuildingDistance;
+    private String internalProtectionNotes;
     public InspectionResponse() {}
     public InspectionResponse(Long inspectionId, Long propertyId, String surveyorName,
                              LocalDateTime inspectionDate, Double assessedRiskScore,
@@ -76,4 +84,28 @@ public class InspectionResponse {
     public void setRecommendedCoverage(Double recommendedCoverage) { this.recommendedCoverage = recommendedCoverage; }
     public Double getRecommendedPremium() { return recommendedPremium; }
     public void setRecommendedPremium(Double recommendedPremium) { this.recommendedPremium = recommendedPremium; }
+
+    public String getConstructionType() { return constructionType; }
+    public void setConstructionType(String constructionType) { this.constructionType = constructionType; }
+
+    public String getRoofType() { return roofType; }
+    public void setRoofType(String roofType) { this.roofType = roofType; }
+
+    public String getOccupancyType() { return occupancyType; }
+    public void setOccupancyType(String occupancyType) { this.occupancyType = occupancyType; }
+
+    public String getElectricalAuditStatus() { return electricalAuditStatus; }
+    public void setElectricalAuditStatus(String electricalAuditStatus) { this.electricalAuditStatus = electricalAuditStatus; }
+
+    public Boolean getHazardousMaterialsPresent() { return hazardousMaterialsPresent; }
+    public void setHazardousMaterialsPresent(Boolean hazardousMaterialsPresent) { this.hazardousMaterialsPresent = hazardousMaterialsPresent; }
+
+    public Double getAdjacentBuildingDistance() { return adjacentBuildingDistance; }
+    public void setAdjacentBuildingDistance(Double adjacentBuildingDistance) { this.adjacentBuildingDistance = adjacentBuildingDistance; }
+
+    public String getInternalProtectionNotes() { return internalProtectionNotes; }
+    public void setInternalProtectionNotes(String internalProtectionNotes) { this.internalProtectionNotes = internalProtectionNotes; }
+
+    public Double getRequestedSumInsured() { return requestedSumInsured; }
+    public void setRequestedSumInsured(Double requestedSumInsured) { this.requestedSumInsured = requestedSumInsured; }
 }

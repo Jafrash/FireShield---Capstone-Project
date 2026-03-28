@@ -33,32 +33,32 @@ public class FraudAnalysisService {
      * Generate comprehensive fraud analysis for a claim
      */
     public FraudAnalysisResponse generateFraudAnalysis(Long claimId) {
-        log.info("Generating fraud analysis for claim ID: {}", claimId);
+        log.info("Generating dynamic fraud analysis for claim ID: {}", claimId);
 
         Claim claim = claimRepository.findById(claimId)
                 .orElseThrow(() -> new RuntimeException("Claim not found with ID: " + claimId));
 
-        // Calculate fraud score using existing logic or default
-        Double fraudScore = claim.getFraudScore() != null ? claim.getFraudScore() : calculateFraudScore(claim);
-
-        // Generate rule breakdown
+        // Generate rule breakdown (single source of truth for both display and score)
         List<FraudAnalysisResponse.FraudRule> ruleBreakdown = generateRuleBreakdown(claim);
 
-        // Determine risk level
-        RiskLevel riskLevel;
-        if (fraudScore >= 80) {
-            riskLevel = RiskLevel.HIGH;
-        } else if (fraudScore >= 50) {
-            riskLevel = RiskLevel.MEDIUM;
-        } else {
-            riskLevel = RiskLevel.LOW;
-        }
+        // Sum the weights of all TRIGGERED rules to get the aggregate score
+        Double fraudScore = ruleBreakdown.stream()
+                .filter(FraudAnalysisResponse.FraudRule::getTriggered)
+                .mapToDouble(FraudAnalysisResponse.FraudRule::getWeight)
+                .sum();
 
-        // Persist riskLevel in claim
+        // Cap score at 100%
+        fraudScore = Math.min(fraudScore, 100.0);
+
+        // Determine risk level
+        RiskLevel riskLevel = determineRiskLevelInternal(fraudScore);
+
+        // Update claim with calculated values
+        claim.setFraudScore(fraudScore);
         claim.setRiskLevel(riskLevel);
         claimRepository.save(claim);
 
-        // Generate overall assessment (pass as string for compatibility)
+        // Generate overall assessment
         String overallAssessment = generateOverallAssessment(claim, fraudScore, riskLevel.name());
 
         // Generate suspicious indicators
@@ -77,73 +77,17 @@ public class FraudAnalysisService {
                 confidenceScore
         );
 
-        log.info("Fraud analysis generated for claim {}: Score={}, Risk={}", claimId, fraudScore, riskLevel);
+        log.info("Fraud analysis generated for claim {}: Score={}%, Risk={}", claimId, fraudScore, riskLevel);
         return response;
     }
 
     /**
-     * Calculate fraud score based on multiple factors
+     * Determine risk level based on fraud score
      */
-    private Double calculateFraudScore(Claim claim) {
-        double score = 0.0;
-
-        try {
-            // High claim amount (20 points max)
-            if (claim.getClaimAmount() != null) {
-                if (claim.getClaimAmount() > 1000000) score += 20;
-                else if (claim.getClaimAmount() > 500000) score += 15;
-                else if (claim.getClaimAmount() > 200000) score += 10;
-                else if (claim.getClaimAmount() > 100000) score += 5;
-            }
-
-            // Recent policy inception (15 points max)
-            PolicySubscription subscription = claim.getSubscription();
-            if (subscription != null && subscription.getStartDate() != null) {
-                long daysSinceInception = ChronoUnit.DAYS.between(subscription.getStartDate().atStartOfDay(), LocalDateTime.now());
-                if (daysSinceInception < 30) score += 15;
-                else if (daysSinceInception < 90) score += 10;
-                else if (daysSinceInception < 180) score += 5;
-            }
-
-            // Multiple recent claims (25 points max)
-            if (subscription != null && subscription.getCustomer() != null) {
-                Customer customer = subscription.getCustomer();
-                List<Claim> customerClaims = claimService.getClaimsByUsername(customer.getUser().getUsername());
-
-                long recentClaims = customerClaims.stream()
-                        .filter(c -> c.getCreatedAt() != null &&
-                                   c.getCreatedAt().isAfter(LocalDateTime.now().minusMonths(12)))
-                        .count();
-
-                if (recentClaims >= 3) score += 25;
-                else if (recentClaims >= 2) score += 15;
-                else if (recentClaims > 1) score += 8;
-            }
-
-            // Suspicious timing (10 points)
-            if (claim.getCreatedAt() != null) {
-                int hour = claim.getCreatedAt().getHour();
-                if (hour < 6 || hour > 22) score += 10; // Claims filed at unusual hours
-            }
-
-            // High estimated loss relative to claim amount (15 points)
-            if (claim.getEstimatedLoss() != null && claim.getClaimAmount() != null) {
-                double ratio = claim.getEstimatedLoss() / claim.getClaimAmount();
-                if (ratio > 1.5) score += 15;
-                else if (ratio > 1.2) score += 10;
-                else if (ratio > 1.0) score += 5;
-            }
-
-            // Incomplete documentation (5 points)
-            if (claim.getDescription() == null || claim.getDescription().length() < 50) {
-                score += 5;
-            }
-
-        } catch (Exception e) {
-            log.error("Error calculating fraud score for claim {}: {}", claim.getClaimId(), e.getMessage());
-        }
-
-        return Math.min(score, 100.0); // Cap at 100%
+    private RiskLevel determineRiskLevelInternal(Double fraudScore) {
+        if (fraudScore >= 70) return RiskLevel.HIGH;
+        if (fraudScore >= 30) return RiskLevel.MEDIUM;
+        return RiskLevel.LOW;
     }
 
     /**
@@ -152,19 +96,26 @@ public class FraudAnalysisService {
     private List<FraudAnalysisResponse.FraudRule> generateRuleBreakdown(Claim claim) {
         List<FraudAnalysisResponse.FraudRule> rules = new ArrayList<>();
 
-        // Rule 1: High Claim Amount
-        boolean highAmountTriggered = claim.getClaimAmount() != null && claim.getClaimAmount() > 500000;
+        // Rule 1: High Claim Amount (+20 Max)
+        double amountWeight = 0;
+        String amountImpact = "LOW";
+        if (claim.getClaimAmount() != null) {
+            if (claim.getClaimAmount() > 1000000) { amountWeight = 20; amountImpact = "HIGH"; }
+            else if (claim.getClaimAmount() > 500000) { amountWeight = 15; amountImpact = "MEDIUM"; }
+            else if (claim.getClaimAmount() > 200000) { amountWeight = 10; amountImpact = "LOW"; }
+        }
         rules.add(new FraudAnalysisResponse.FraudRule(
                 "High Claim Amount",
                 "Claims exceeding ₹5,00,000 are considered high-risk",
-                20.0,
-                highAmountTriggered,
-                highAmountTriggered ? "HIGH" : "LOW",
-                highAmountTriggered ? String.format("Claim amount: ₹%,.0f", claim.getClaimAmount()) : "Amount within normal range"
+                amountWeight,
+                amountWeight > 0,
+                amountImpact,
+                amountWeight > 0 ? String.format("Claim amount: ₹%,.0f", claim.getClaimAmount()) : "Amount within normal range"
         ));
 
-        // Rule 2: Recent Policy Inception
-        boolean recentPolicyTriggered = false;
+        // Rule 2: Recent Policy Inception (+15 Max)
+        double inceptionWeight = 0;
+        String inceptionImpact = "LOW";
         String policyDetails = "Policy inception date not available";
         try {
             if (claim.getSubscription() != null && claim.getSubscription().getStartDate() != null) {
@@ -172,8 +123,11 @@ public class FraudAnalysisService {
                         claim.getSubscription().getStartDate().atStartOfDay(),
                         LocalDateTime.now()
                 );
-                recentPolicyTriggered = daysSinceInception < 90;
-                policyDetails = recentPolicyTriggered ?
+                if (daysSinceInception < 30) { inceptionWeight = 15; inceptionImpact = "HIGH"; }
+                else if (daysSinceInception < 90) { inceptionWeight = 10; inceptionImpact = "MEDIUM"; }
+                else if (daysSinceInception < 180) { inceptionWeight = 5; inceptionImpact = "LOW"; }
+                
+                policyDetails = inceptionWeight > 0 ?
                         String.format("Policy started %d days ago", daysSinceInception) :
                         "Policy inception date is acceptable";
             }
@@ -183,14 +137,15 @@ public class FraudAnalysisService {
         rules.add(new FraudAnalysisResponse.FraudRule(
                 "Recent Policy Inception",
                 "Claims filed within 90 days of policy inception are flagged",
-                15.0,
-                recentPolicyTriggered,
-                recentPolicyTriggered ? "MEDIUM" : "LOW",
+                inceptionWeight,
+                inceptionWeight > 0,
+                inceptionImpact,
                 policyDetails
         ));
 
-        // Rule 3: Multiple Claims Pattern
-        boolean multipleClaimsTriggered = false;
+        // Rule 3: Multiple Claims Pattern (+25 Max)
+        double multipleClaimsWeight = 0;
+        String claimsImpact = "LOW";
         String claimsDetails = "Customer claim history not available";
         try {
             if (claim.getSubscription() != null && claim.getSubscription().getCustomer() != null) {
@@ -202,8 +157,10 @@ public class FraudAnalysisService {
                                    c.getCreatedAt().isAfter(LocalDateTime.now().minusMonths(12)))
                         .count();
 
-                multipleClaimsTriggered = recentClaims >= 2;
-                claimsDetails = multipleClaimsTriggered ?
+                if (recentClaims >= 3) { multipleClaimsWeight = 25; claimsImpact = "HIGH"; }
+                else if (recentClaims >= 2) { multipleClaimsWeight = 15; claimsImpact = "MEDIUM"; }
+                
+                claimsDetails = multipleClaimsWeight > 0 ?
                         String.format("%d claims in past 12 months", recentClaims) :
                         "Normal claim frequency";
             }
@@ -213,17 +170,32 @@ public class FraudAnalysisService {
         rules.add(new FraudAnalysisResponse.FraudRule(
                 "Multiple Claims Pattern",
                 "Customers with multiple claims in short periods are flagged",
-                25.0,
-                multipleClaimsTriggered,
-                multipleClaimsTriggered ? "HIGH" : "LOW",
+                multipleClaimsWeight,
+                multipleClaimsWeight > 0,
+                claimsImpact,
                 claimsDetails
         ));
 
-        // Rule 4: Documentation Completeness
-        boolean incompleteDocsTriggered = claim.getDescription() == null || claim.getDescription().length() < 50;
+        // Rule 4: Suspicious Submission Timing (+10)
+        double timingWeight = 0;
+        if (claim.getCreatedAt() != null) {
+            int hour = claim.getCreatedAt().getHour();
+            if (hour < 6 || hour > 22) timingWeight = 10;
+        }
+        rules.add(new FraudAnalysisResponse.FraudRule(
+                "Suspicious Timing",
+                "Claims filed at unusual hours (10PM - 6AM) are flagged",
+                timingWeight,
+                timingWeight > 0,
+                "MEDIUM",
+                timingWeight > 0 ? "Claim filed during unusual hours" : "Standard filing time"
+        ));
+
+        // Rule 5: Documentation Completeness (+10)
+        boolean incompleteDocsTriggered = claim.getDescription() == null || claim.getDescription().length() < 100;
         rules.add(new FraudAnalysisResponse.FraudRule(
                 "Documentation Completeness",
-                "Claims with insufficient documentation are flagged",
+                "Claims with brief or vague documentation are flagged",
                 10.0,
                 incompleteDocsTriggered,
                 incompleteDocsTriggered ? "MEDIUM" : "LOW",
@@ -280,7 +252,7 @@ public class FraudAnalysisService {
                         claim.getSubscription().getStartDate().atStartOfDay(),
                         LocalDateTime.now()
                 );
-                if (daysSinceInception < 30) {
+                if (daysSinceInception < 90) {
                     indicators.add("Claim filed shortly after policy inception");
                 }
             }
@@ -288,7 +260,7 @@ public class FraudAnalysisService {
             log.warn("Error checking policy timing: {}", e.getMessage());
         }
 
-        if (claim.getDescription() == null || claim.getDescription().length() < 50) {
+        if (claim.getDescription() == null || claim.getDescription().length() < 100) {
             indicators.add("Insufficient claim documentation");
         }
 
@@ -298,6 +270,21 @@ public class FraudAnalysisService {
                 indicators.add("Claim filed during unusual hours");
             }
         }
+
+        // Check for multiple claims
+        try {
+            if (claim.getSubscription() != null && claim.getSubscription().getCustomer() != null) {
+                Customer customer = claim.getSubscription().getCustomer();
+                List<Claim> customerClaims = claimService.getClaimsByUsername(customer.getUser().getUsername());
+                long count = customerClaims.stream()
+                        .filter(c -> c.getCreatedAt() != null &&
+                                   c.getCreatedAt().isAfter(LocalDateTime.now().minusMonths(12)))
+                        .count();
+                if (count >= 2) {
+                    indicators.add("Frequent claim filing pattern detected");
+                }
+            }
+        } catch (Exception e) {}
 
         if (indicators.isEmpty()) {
             indicators.add("No significant suspicious indicators detected");

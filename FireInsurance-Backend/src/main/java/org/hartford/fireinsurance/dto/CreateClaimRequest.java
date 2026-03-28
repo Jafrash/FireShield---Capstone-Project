@@ -9,7 +9,13 @@ public class CreateClaimRequest {
     private String firNumber;
     private String fireBrigadeReportNumber;
     private String salvageDetails;
+    private String lossType;
+    private String policeStation;
+    private String contactPhoneNumber;
+    private String witnessDetails;
+
     public CreateClaimRequest() {}
+
     public Long getSubscriptionId() { return subscriptionId; }
     public void setSubscriptionId(Long subscriptionId) { this.subscriptionId = subscriptionId; }
     public String getDescription() { return description; }
@@ -26,4 +32,13 @@ public class CreateClaimRequest {
     public void setFireBrigadeReportNumber(String fireBrigadeReportNumber) { this.fireBrigadeReportNumber = fireBrigadeReportNumber; }
     public String getSalvageDetails() { return salvageDetails; }
     public void setSalvageDetails(String salvageDetails) { this.salvageDetails = salvageDetails; }
+
+    public String getLossType() { return lossType; }
+    public void setLossType(String lossType) { this.lossType = lossType; }
+    public String getPoliceStation() { return policeStation; }
+    public void setPoliceStation(String policeStation) { this.policeStation = policeStation; }
+    public String getContactPhoneNumber() { return contactPhoneNumber; }
+    public void setContactPhoneNumber(String contactPhoneNumber) { this.contactPhoneNumber = contactPhoneNumber; }
+    public String getWitnessDetails() { return witnessDetails; }
+    public void setWitnessDetails(String witnessDetails) { this.witnessDetails = witnessDetails; }
 }

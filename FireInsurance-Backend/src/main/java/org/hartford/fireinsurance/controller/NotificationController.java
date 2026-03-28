@@ -23,7 +23,7 @@ public class NotificationController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','CUSTOMER','SURVEYOR','UNDERWRITER')")
+    @PreAuthorize("hasAnyRole('ADMIN','CUSTOMER','SURVEYOR','UNDERWRITER','SIU_INVESTIGATOR')")
     public ResponseEntity<List<NotificationDTO>> getNotifications(
             Authentication authentication,
             @RequestParam(name = "limit", defaultValue = "20") int limit

@@ -15,6 +15,10 @@ import org.hartford.fireinsurance.model.User;
 import org.hartford.fireinsurance.repository.NotificationPreferenceRepository;
 import org.hartford.fireinsurance.repository.PolicySubscriptionRepository;
 import org.hartford.fireinsurance.repository.UnderwriterRepository;
+import org.hartford.fireinsurance.exception.InvalidRequestException;
+import org.hartford.fireinsurance.exception.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +39,8 @@ import java.util.Map;
 @Service
 @Transactional
 public class PolicySubscriptionService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PolicySubscriptionService.class);
 
     private final PolicySubscriptionRepository subscriptionRepository;
     private final CustomerService customerService;
@@ -111,30 +117,75 @@ public class PolicySubscriptionService {
         Double riskScore = subscription.getRiskScore() != null ? subscription.getRiskScore() : 5.0;
         double baseRiskMultiplier = round2(getRiskMultiplier(riskScore));
 
-        double hazardousGoodsLoadingFactor = hasText(subscription.getHazardousGoods()) ? 0.15 : 0.0;
-        double occupancyLoadingFactor = "INDUSTRIAL".equalsIgnoreCase(subscription.getOccupancyType()) ? 0.10 : 0.0;
-        double declinedInsuranceLoadingFactor = Boolean.TRUE.equals(subscription.getInsuranceDeclinedBefore()) ? 0.10 : 0.0;
-
+        // Retrieve inspection from subscription if not provided
         Inspection inspection = subscription.getPropertyInspection();
-        double fireSafetyDiscountFactor = inspection != null && Boolean.TRUE.equals(inspection.getFireSafetyAvailable()) ? -0.05 : 0.0;
-        double sprinklerDiscountFactor = inspection != null && Boolean.TRUE.equals(inspection.getSprinklerSystem()) ? -0.07 : 0.0;
-        double extinguishersDiscountFactor = inspection != null && Boolean.TRUE.equals(inspection.getFireExtinguishers()) ? -0.03 : 0.0;
-        double constructionRiskLoadingFactor = inspection != null && inspection.getConstructionRisk() != null ? inspection.getConstructionRisk() * 0.05 : 0.0;
-        double hazardRiskLoadingFactor = inspection != null && inspection.getHazardRisk() != null ? inspection.getHazardRisk() * 0.07 : 0.0;
 
-        double unclampedRiskFactor = baseRiskMultiplier
-            + hazardousGoodsLoadingFactor
-            + occupancyLoadingFactor
-            + declinedInsuranceLoadingFactor
-            + fireSafetyDiscountFactor
-            + sprinklerDiscountFactor
-            + extinguishersDiscountFactor
-            + constructionRiskLoadingFactor
-            + hazardRiskLoadingFactor;
+        // 2. Inspection-Verified COPE Factors (High Fidelity)
+        double constructionLoadingFactor = 0.0;
+        double roofLoadingFactor = 0.0;
+        double detailedOccupancyLoadingFactor = 0.0;
+        double electricalAuditAdjustmentFactor = 0.0;
+        double hazardousMaterialsLoadingFactor = 0.0;
+        double proximityAdjustmentFactor = 0.0;
 
-        double rawRiskFactor = round2(unclampedRiskFactor);
-        double finalRiskFactor = round2(computeRiskFactor(subscription, riskScore, inspection));
-        double clampAdjustmentFactor = round2(finalRiskFactor - rawRiskFactor);
+        if (inspection != null) {
+            // Construction Type
+            if (inspection.getConstructionType() != null) {
+                switch (inspection.getConstructionType().toUpperCase()) {
+                    case "FRAME" -> constructionLoadingFactor = 0.20;
+                    case "JOISTED_MASONRY" -> constructionLoadingFactor = 0.10;
+                    case "NON_COMBUSTIBLE" -> constructionLoadingFactor = -0.05;
+                    case "FIRE_RESISTIVE" -> constructionLoadingFactor = -0.15;
+                }
+            }
+
+            // Roofing
+            if (inspection.getRoofType() != null) {
+                switch (inspection.getRoofType().toUpperCase()) {
+                    case "WOOD" -> roofLoadingFactor = 0.15;
+                    case "ASPHALT" -> roofLoadingFactor = 0.05;
+                    case "CONCRETE" -> roofLoadingFactor = -0.05;
+                }
+            }
+
+            // Occupancy
+            if (inspection.getOccupancyType() != null) {
+                switch (inspection.getOccupancyType().toUpperCase()) {
+                    case "INDUSTRIAL" -> detailedOccupancyLoadingFactor = 0.25;
+                    case "WAREHOUSE" -> detailedOccupancyLoadingFactor = 0.15;
+                    case "COMMERCIAL" -> detailedOccupancyLoadingFactor = 0.10;
+                    case "RESIDENTIAL" -> detailedOccupancyLoadingFactor = 0.0;
+                }
+            } else if ("INDUSTRIAL".equalsIgnoreCase(subscription.getOccupancyType())) {
+                detailedOccupancyLoadingFactor = 0.15;
+            }
+
+            // Electrical & Hazards
+            if ("FAIL".equalsIgnoreCase(inspection.getElectricalAuditStatus())) {
+                electricalAuditAdjustmentFactor = 0.30;
+            } else if ("PASS".equalsIgnoreCase(inspection.getElectricalAuditStatus())) {
+                electricalAuditAdjustmentFactor = -0.05;
+            }
+
+            if (Boolean.TRUE.equals(inspection.getHazardousMaterialsPresent())) {
+                hazardousMaterialsLoadingFactor = 0.20;
+            }
+
+            // Exposure
+            if (inspection.getAdjacentBuildingDistance() != null) {
+                if (inspection.getAdjacentBuildingDistance() < 5) proximityAdjustmentFactor = 0.15;
+                else if (inspection.getAdjacentBuildingDistance() > 25) proximityAdjustmentFactor = -0.05;
+            }
+        }
+
+        double hazardousGoodsLoadingFactor = hasText(subscription.getHazardousGoods()) ? 0.15 : 0.0;
+        double declinedInsuranceLoadingFactor = Boolean.TRUE.equals(subscription.getInsuranceDeclinedBefore()) ? 0.15 : 0.0;
+        double fireSafetyDiscountFactor = (inspection != null && Boolean.TRUE.equals(inspection.getFireSafetyAvailable())) ? -0.05 : 0.0;
+        double sprinklerDiscountFactor = (inspection != null && Boolean.TRUE.equals(inspection.getSprinklerSystem())) ? -0.10 : 0.0;
+
+        // Calculate rawRiskFactor using premiumCalculationService
+        double rawRiskFactor = premiumCalculationService.computeRiskFactor(subscription, riskScore, inspection);
+        double finalRiskFactor = round2(rawRiskFactor);
 
         List<PremiumBreakdownLineItem> lineItems = new ArrayList<>();
         lineItems.add(new PremiumBreakdownLineItem(
@@ -143,22 +194,33 @@ public class PolicySubscriptionService {
                 round2(basePremiumForCoverage),
                 "BASE"
         ));
-        lineItems.add(new PremiumBreakdownLineItem(
-                "Risk score multiplier",
-                "Property risk score of " + round2(riskScore) + "/10 sets the starting multiplier.",
-                round2(basePremiumForCoverage * (baseRiskMultiplier - 1.0)),
-                "ADJUSTMENT"
-        ));
 
-        addLineItemIfNonZero(lineItems, "Hazardous goods loading", "Additional loading because hazardous goods were declared.", basePremiumForCoverage * hazardousGoodsLoadingFactor);
-        addLineItemIfNonZero(lineItems, "Industrial occupancy loading", "Additional loading because the occupancy type is industrial.", basePremiumForCoverage * occupancyLoadingFactor);
-        addLineItemIfNonZero(lineItems, "Previous insurer decline loading", "Additional loading because prior insurance was declined.", basePremiumForCoverage * declinedInsuranceLoadingFactor);
-        addLineItemIfNonZero(lineItems, "Fire safety discount", "Discount applied because fire safety measures are available.", basePremiumForCoverage * fireSafetyDiscountFactor);
-        addLineItemIfNonZero(lineItems, "Sprinkler system discount", "Discount applied because a sprinkler system is available.", basePremiumForCoverage * sprinklerDiscountFactor);
-        addLineItemIfNonZero(lineItems, "Fire extinguishers discount", "Discount applied because fire extinguishers are available.", basePremiumForCoverage * extinguishersDiscountFactor);
-        addLineItemIfNonZero(lineItems, "Construction risk loading", "Loading applied from construction risk findings in inspection.", basePremiumForCoverage * constructionRiskLoadingFactor);
-        addLineItemIfNonZero(lineItems, "Hazard risk loading", "Loading applied from hazard risk findings in inspection.", basePremiumForCoverage * hazardRiskLoadingFactor);
-        addLineItemIfNonZero(lineItems, "Factor clamp adjustment", "Adjustment applied to keep the final risk factor within the allowed range.", basePremiumForCoverage * clampAdjustmentFactor);
+        // Start adding adjustments
+        addLineItemIfNonZero(lineItems, "Risk score multiplier", "Property risk score of " + round2(riskScore) + "/10 sets the starting multiplier.", basePremiumForCoverage * (baseRiskMultiplier - 1.0));
+        
+        // COPE Breakdown
+        if (inspection != null) {
+            String cType = inspection.getConstructionType() != null ? inspection.getConstructionType() : "N/A";
+            addLineItemIfNonZero(lineItems, "Construction Type (" + cType + ")", "Adjustment based on structural fire resistance classes.", basePremiumForCoverage * constructionLoadingFactor);
+            
+            String rType = inspection.getRoofType() != null ? inspection.getRoofType() : "N/A";
+            addLineItemIfNonZero(lineItems, "Roofing Material (" + rType + ")", "Adjustment based on roof material combustibility.", basePremiumForCoverage * roofLoadingFactor);
+            
+            addLineItemIfNonZero(lineItems, "Occupancy Tier Loading", "Loading based on verified space usage and hazard levels.", basePremiumForCoverage * detailedOccupancyLoadingFactor);
+            
+            String eStatus = inspection.getElectricalAuditStatus() != null ? inspection.getElectricalAuditStatus() : "N/A";
+            addLineItemIfNonZero(lineItems, "Electrical Safety (" + eStatus + ")", "Adjustment based on internal electrical installation audit.", basePremiumForCoverage * electricalAuditAdjustmentFactor);
+            
+            addLineItemIfNonZero(lineItems, "Hazardous Materials Loading", "Loading for presence of verified high-risk combustible materials.", basePremiumForCoverage * hazardousMaterialsLoadingFactor);
+            
+            addLineItemIfNonZero(lineItems, "Environmental Exposure", "Adjustment based on proximity to adjacent buildings (Exposure).", basePremiumForCoverage * proximityAdjustmentFactor);
+        }
+
+        addLineItemIfNonZero(lineItems, "Proposals: Hazardous Goods", "Additional loading because hazardous goods were declared in proposal.", basePremiumForCoverage * hazardousGoodsLoadingFactor);
+        addLineItemIfNonZero(lineItems, "Proposals: Insurance History", "Additional loading because prior insurance was declined.", basePremiumForCoverage * declinedInsuranceLoadingFactor);
+        
+        addLineItemIfNonZero(lineItems, "Fire Safety Credit", "Discount applied because basic fire safety measures are verified.", basePremiumForCoverage * fireSafetyDiscountFactor);
+        addLineItemIfNonZero(lineItems, "Automatic Sprinkler Credit", "Discount applied because a sprinkler system is verified.", basePremiumForCoverage * sprinklerDiscountFactor);
 
         int installmentMonths = policy.getDurationMonths() != null && policy.getDurationMonths() > 0 ? policy.getDurationMonths() : 12;
         double monthlyPremium = round2(totalPremium / installmentMonths);
@@ -227,69 +289,98 @@ public class PolicySubscriptionService {
      * Customer submits policy proposal.
      */
     public PolicySubscription subscribe(String username, SubscribeRequest request) {
-        Customer customer = customerService.getCustomerByUsername(username);
-        Property property = propertyService.getPropertyById(request.getPropertyId());
-        Policy policy = policyService.getPolicyById(request.getPolicyId());
+        try {
+            logger.info("[SUB-START] Processing subscription for user: {}", username);
+            
+            if (request.getPropertyId() == null) throw new InvalidRequestException("propertyId", "Property ID is mandatory");
+            if (request.getPolicyId() == null) throw new InvalidRequestException("policyId", "Policy ID is mandatory");
+            
+            logger.debug("[SUB-FETCH] Fetching customer, property, and policy");
+            Customer customer = customerService.getCustomerByUsername(username);
+            Property property = propertyService.getPropertyById(request.getPropertyId());
+            Policy policy = policyService.getPolicyById(request.getPolicyId());
 
-        // Security check: property must belong to customer
-        if (!property.getCustomer().getUser().getUsername().equals(username)) {
-            throw new RuntimeException("Unauthorized: Property does not belong to this customer");
-        }
+            logger.debug("[SUB-VALIDATE] Validating ownership and duplicates");
+            // Security check: property must belong to customer
+            if (property.getCustomer() == null || property.getCustomer().getUser() == null || 
+                !property.getCustomer().getUser().getUsername().equals(username)) {
+                throw new RuntimeException("Unauthorized: Property ownership mismatch for " + username);
+            }
 
-        // Prevent duplicate subscriptions for the same property and policy
-        List<PolicySubscription> existingSubs = subscriptionRepository.findByProperty(property);
-        for (PolicySubscription sub : existingSubs) {
-            if (sub.getPolicy().getPolicyId().equals(policy.getPolicyId())) {
-                SubscriptionStatus s = sub.getStatus();
-                if (s == SubscriptionStatus.REQUESTED || s == SubscriptionStatus.SUBMITTED || s == SubscriptionStatus.PENDING ||
-                    s == SubscriptionStatus.INSPECTING || s == SubscriptionStatus.INSPECTED ||
-                    s == SubscriptionStatus.UNDER_REVIEW || s == SubscriptionStatus.INSPECTION_PENDING ||
-                    s == SubscriptionStatus.PAYMENT_PENDING ||
-                    s == SubscriptionStatus.ACTIVE) {
-                    throw new RuntimeException("An active or pending subscription already exists for this property and policy.");
+            // Prevent duplicate subscriptions: Handle existing apps gracefully
+            List<PolicySubscription> existingSubs = subscriptionRepository.findByProperty(property);
+            if (existingSubs != null) {
+                for (PolicySubscription sub : existingSubs) {
+                    if (sub.getPolicy() != null && sub.getPolicy().getPolicyId().equals(policy.getPolicyId())) {
+                        SubscriptionStatus s = sub.getStatus();
+                        if (s == SubscriptionStatus.ACTIVE || s == SubscriptionStatus.APPROVED || s == SubscriptionStatus.PAYMENT_PENDING) {
+                            logger.warn("[SUB-DUPE] Blocking: Active policy exists for property {} (Sub ID: {})", property.getPropertyId(), sub.getSubscriptionId());
+                            throw new org.hartford.fireinsurance.exception.DuplicateResourceException("An active or approved policy already exists for this property.");
+                        } else if (s == SubscriptionStatus.SUBMITTED || s == SubscriptionStatus.PENDING || s == SubscriptionStatus.REQUESTED || s == SubscriptionStatus.UNDER_REVIEW) {
+                            // If it's just a draft/submitted/pending from a previous session, we'll allow a re-submission by removing the "zombie" entry.
+                            logger.info("[SUB-CLEANUP] Removing previous pending application (ID: {}) to allow re-submission", sub.getSubscriptionId());
+                            subscriptionRepository.delete(sub);
+                        }
+                    }
                 }
             }
+
+            logger.debug("[SUB-CREATE] Mapping fields to entity");
+            PolicySubscription subscription = new PolicySubscription();
+            subscription.setCustomer(customer);
+            subscription.setProperty(property);
+            subscription.setPolicy(policy);
+            subscription.setStatus(SubscriptionStatus.SUBMITTED);
+            
+            subscription.setStartDate(LocalDate.now());
+            int duration = (policy.getDurationMonths() != null) ? policy.getDurationMonths() : 12;
+            subscription.setEndDate(LocalDate.now().plusMonths(duration));
+            
+            subscription.setBasePremiumAmount(policy.getBasePremium() != null ? policy.getBasePremium() : 0.0);
+            subscription.setRequestedCoverage(request.getRequestedCoverage());
+
+            // Underwriting fields
+            subscription.setConstructionType(request.getConstructionType());
+            subscription.setRoofType(request.getRoofType());
+            subscription.setNumberOfFloors(request.getNumberOfFloors() != null ? request.getNumberOfFloors() : 1);
+            subscription.setOccupancyType(request.getOccupancyType());
+            subscription.setManufacturingProcess(request.getManufacturingProcess());
+            subscription.setHazardousGoods(request.getHazardousGoods());
+            subscription.setPreviousLossHistory(request.getPreviousLossHistory());
+            subscription.setInsuranceDeclinedBefore(request.getInsuranceDeclinedBefore() != null ? request.getInsuranceDeclinedBefore() : false);
+            subscription.setPropertyValue(request.getPropertyValue() != null ? request.getPropertyValue() : 0.0);
+            subscription.setDeclarationAccepted(request.getDeclarationAccepted() != null ? request.getDeclarationAccepted() : true);
+            
+            subscription.setPremiumAmount(subscription.getBasePremiumAmount());
+            subscription.setPaymentReceived(false);
+            subscription.setRenewalEligible(false);
+            subscription.setRenewalCount(0);
+
+            System.err.println("[SUB-SAVE] Calling subscriptionRepository.save(subscription)");
+            PolicySubscription savedSubscription = subscriptionRepository.save(subscription);
+            System.err.println("[SUB-SUCCESS] Subscription created with ID: " + savedSubscription.getSubscriptionId());
+            logger.info("[SUB-SUCCESS] Subscription created with ID: {}", savedSubscription.getSubscriptionId());
+            logger.info("Successfully created subscription ID: {} for user: {}", savedSubscription.getSubscriptionId(), username);
+
+            // Optional: send email
+            try {
+                Map<String, String> vars = new HashMap<>();
+                vars.put("customerName", customer.getUser().getUsername());
+                vars.put("policyNumber", "SUB" + savedSubscription.getSubscriptionId());
+                vars.put("policyName", policy.getPolicyName() != null ? policy.getPolicyName() : "Policy");
+                sendPolicyEmailIfEnabled(savedSubscription, "POLICY_SUBMITTED", vars);
+            } catch (Exception emailEx) {
+                logger.error("Failed to process email for subscription {}: {}", savedSubscription.getSubscriptionId(), emailEx.getMessage());
+                // Don't fail the whole transaction for email issues
+            }
+
+            return savedSubscription;
+        } catch (Exception ex) {
+            System.err.println("[SUB-ERROR] Exception in subscribe for user " + username + ": " + ex.getMessage());
+            ex.printStackTrace();
+            logger.error("Error in subscribe operation for user {}: {}", username, ex.getMessage(), ex);
+            throw ex; // Re-throw to be handled by GlobalExceptionHandler
         }
-
-        // Create subscription with SUBMITTED status (new legal workflow)
-        PolicySubscription subscription = new PolicySubscription();
-        subscription.setCustomer(customer);
-        subscription.setProperty(property);
-        subscription.setPolicy(policy);
-        subscription.setStatus(SubscriptionStatus.SUBMITTED);
-        
-        // Store base premium (before risk adjustment)
-        subscription.setBasePremiumAmount(policy.getBasePremium());
-        
-        // Store requested coverage amount
-        subscription.setRequestedCoverage(request.getRequestedCoverage());
-
-        // Store proposal / underwriting details (optional and additive)
-        subscription.setConstructionType(request.getConstructionType());
-        subscription.setRoofType(request.getRoofType());
-        subscription.setNumberOfFloors(request.getNumberOfFloors());
-        subscription.setOccupancyType(request.getOccupancyType());
-        subscription.setManufacturingProcess(request.getManufacturingProcess());
-        subscription.setHazardousGoods(request.getHazardousGoods());
-        subscription.setPreviousLossHistory(request.getPreviousLossHistory());
-        subscription.setInsuranceDeclinedBefore(request.getInsuranceDeclinedBefore());
-        subscription.setPropertyValue(request.getPropertyValue());
-        
-        // Premium will be calculated after inspection
-        subscription.setPremiumAmount(null);
-        subscription.setRiskScore(null);
-        subscription.setRiskMultiplier(null);
-        subscription.setPaymentReceived(false);
-
-        PolicySubscription savedSubscription = subscriptionRepository.save(subscription);
-
-        Map<String, String> vars = new HashMap<>();
-        vars.put("customerName", customer.getUser().getUsername());
-        vars.put("policyNumber", "SUB" + savedSubscription.getSubscriptionId());
-        vars.put("policyName", policy.getPolicyName() != null ? policy.getPolicyName() : "Policy");
-        sendPolicyEmailIfEnabled(savedSubscription, "POLICY_SUBMITTED", vars);
-
-        return savedSubscription;
     }
 
     /**

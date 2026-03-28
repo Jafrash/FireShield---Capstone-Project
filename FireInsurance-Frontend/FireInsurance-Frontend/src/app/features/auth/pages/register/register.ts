@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { RegisterCustomerRequest, RegisterSurveyorRequest } from '../../../../core/models/user.model';
+import { RegisterCustomerRequest } from '../../../../core/models/user.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CustomValidators } from '../../../../shared/validators/custom-validators';
 import { ValidationMessages } from '../../../../shared/helpers/validation-messages';
@@ -24,7 +24,7 @@ export class RegisterComponent {
   errorMessage = signal('');
   successMessage = signal('');
   showPassword = signal(false);
-  roleSelection = signal<'CUSTOMER' | 'SURVEYOR'>('CUSTOMER');
+
 
   constructor() {
     this.registerForm = this.fb.group({
@@ -61,84 +61,28 @@ export class RegisterComponent {
         CustomValidators.phone()
       ]],
       
-      // Customer specific
-      address: [''],
-      city: [''],
-      state: [''],
-
-      // Surveyor specific
-      licenseNumber: [''],
-      experienceYears: [1],
-      assignedRegion: ['']
-    });
-
-    this.updateRoleValidators('CUSTOMER');
-  }
-
-  setRole(role: 'CUSTOMER' | 'SURVEYOR') {
-    this.roleSelection.set(role);
-    this.updateRoleValidators(role);
-  }
-
-  private updateRoleValidators(role: 'CUSTOMER' | 'SURVEYOR') {
-    const addressControl = this.registerForm.get('address');
-    const cityControl = this.registerForm.get('city');
-    const stateControl = this.registerForm.get('state');
-
-    const licenseControl = this.registerForm.get('licenseNumber');
-    const expControl = this.registerForm.get('experienceYears');
-    const regionControl = this.registerForm.get('assignedRegion');
-
-    if (role === 'CUSTOMER') {
-      addressControl?.setValidators([
+      // Customer fields
+      address: ['', [
         Validators.required,
         Validators.minLength(10),
         Validators.maxLength(200)
-      ]);
-      cityControl?.setValidators([
+      ]],
+      city: ['', [
         Validators.required,
         Validators.minLength(2),
         Validators.maxLength(50),
         CustomValidators.name()
-      ]);
-      stateControl?.setValidators([
+      ]],
+      state: ['', [
         Validators.required,
         Validators.minLength(2),
         Validators.maxLength(50),
         CustomValidators.name()
-      ]);
-      
-      licenseControl?.clearValidators();
-      expControl?.clearValidators();
-      regionControl?.clearValidators();
-    } else {
-      addressControl?.clearValidators();
-      cityControl?.clearValidators();
-      stateControl?.clearValidators();
-
-      licenseControl?.setValidators([
-        Validators.required,
-        Validators.maxLength(50)
-      ]);
-      expControl?.setValidators([
-        Validators.required,
-        Validators.min(0),
-        Validators.max(50)
-      ]);
-      regionControl?.setValidators([
-        Validators.required,
-        CustomValidators.name()
-      ]);
-    }
-
-    addressControl?.updateValueAndValidity();
-    cityControl?.updateValueAndValidity();
-    stateControl?.updateValueAndValidity();
-    
-    licenseControl?.updateValueAndValidity();
-    expControl?.updateValueAndValidity();
-    regionControl?.updateValueAndValidity();
+      ]]
+    });
   }
+
+
 
   togglePasswordVisibility(): void {
     this.showPassword.update(val => !val);
@@ -184,39 +128,22 @@ export class RegisterComponent {
 
     const formValue = this.registerForm.value;
 
-    if (this.roleSelection() === 'CUSTOMER') {
-      const request: RegisterCustomerRequest = {
-        username: formValue.username,
-        firstName: formValue.firstName,
-        lastName: formValue.lastName,
-        email: formValue.email,
-        password: formValue.password,
-        phoneNumber: formValue.phoneNumber,
-        address: formValue.address,
-        city: formValue.city,
-        state: formValue.state
-      };
-      
-      this.authService.registerCustomer(request).subscribe({
-        next: () => this.handleSuccess(),
-        error: (err: HttpErrorResponse) => this.handleError(err)
-      });
-    } else {
-      const request: RegisterSurveyorRequest = {
-        username: formValue.username,
-        email: formValue.email,
-        password: formValue.password,
-        phoneNumber: formValue.phoneNumber,
-        licenseNumber: formValue.licenseNumber,
-        experienceYears: formValue.experienceYears,
-        assignedRegion: formValue.assignedRegion
-      };
+    const request: RegisterCustomerRequest = {
+      username: formValue.username,
+      firstName: formValue.firstName,
+      lastName: formValue.lastName,
+      email: formValue.email,
+      password: formValue.password,
+      phoneNumber: formValue.phoneNumber,
+      address: formValue.address,
+      city: formValue.city,
+      state: formValue.state
+    };
 
-      this.authService.registerSurveyor(request).subscribe({
-        next: () => this.handleSuccess(),
-        error: (err: HttpErrorResponse) => this.handleError(err)
-      });
-    }
+    this.authService.registerCustomer(request).subscribe({
+      next: () => this.handleSuccess(),
+      error: (err: HttpErrorResponse) => this.handleError(err)
+    });
   }
 
   private handleSuccess(): void {

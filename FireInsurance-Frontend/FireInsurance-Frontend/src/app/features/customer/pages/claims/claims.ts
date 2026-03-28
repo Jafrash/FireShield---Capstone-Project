@@ -40,7 +40,7 @@ export class CustomerClaimsComponent implements OnInit {
     description: ['', [
       Validators.required,
       Validators.minLength(20),
-      Validators.maxLength(1000),
+      Validators.maxLength(2000),
       CustomValidators.noWhitespace()
     ]],
     claimAmount: [0, [
@@ -51,7 +51,14 @@ export class CustomerClaimsComponent implements OnInit {
     incidentDate: ['', [
       Validators.required,
       CustomValidators.noFutureDate()
-    ]]
+    ]],
+    causeOfFire: ['', [Validators.required]],
+    firNumber: ['', [Validators.required]],
+    fireBrigadeReportNumber: [''],
+    policeStation: ['', [Validators.required]],
+    lossType: ['BUILDING', [Validators.required]],
+    contactPhoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+    witnessDetails: ['']
   });
 
   ngOnInit(): void {
@@ -111,7 +118,14 @@ export class CustomerClaimsComponent implements OnInit {
       subscriptionId: 0,
       description: '',
       claimAmount: 0,
-      incidentDate: ''
+      incidentDate: '',
+      causeOfFire: '',
+      firNumber: '',
+      fireBrigadeReportNumber: '',
+      policeStation: '',
+      lossType: 'BUILDING',
+      contactPhoneNumber: '',
+      witnessDetails: ''
     });
     this.errorMessage.set('');
     this.successMessage.set('');
@@ -151,7 +165,14 @@ export class CustomerClaimsComponent implements OnInit {
       subscriptionId: Number(this.fileClaimForm.value.subscriptionId),
       description: this.fileClaimForm.value.description,
       claimAmount: Number(this.fileClaimForm.value.claimAmount),
-      incidentDate: this.fileClaimForm.value.incidentDate
+      incidentDate: this.fileClaimForm.value.incidentDate,
+      causeOfFire: this.fileClaimForm.value.causeOfFire,
+      firNumber: this.fileClaimForm.value.firNumber,
+      fireBrigadeReportNumber: this.fileClaimForm.value.fireBrigadeReportNumber,
+      policeStation: this.fileClaimForm.value.policeStation,
+      lossType: this.fileClaimForm.value.lossType,
+      contactPhoneNumber: this.fileClaimForm.value.contactPhoneNumber,
+      witnessDetails: this.fileClaimForm.value.witnessDetails
     };
 
     this.customerService.fileClaim(payload).subscribe({

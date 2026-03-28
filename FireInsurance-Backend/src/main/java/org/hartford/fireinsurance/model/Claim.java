@@ -89,6 +89,18 @@ public class Claim {
     @Column(name = "depreciation")
     private Double depreciation;
 
+    @Column(name = "loss_type")
+    private String lossType; // e.g., 'BUILDING', 'CONTENTS', 'BOTH'
+
+    @Column(name = "police_station")
+    private String policeStation;
+
+    @Column(name = "contact_phone_number")
+    private String contactPhoneNumber;
+
+    @Column(name = "witness_details", columnDefinition = "TEXT")
+    private String witnessDetails;
+
     // Constructors
     public Claim() {
     }
@@ -260,6 +272,38 @@ public class Claim {
 
     public void setDepreciation(Double depreciation) {
         this.depreciation = depreciation;
+    }
+
+    public String getLossType() {
+        return lossType;
+    }
+
+    public void setLossType(String lossType) {
+        this.lossType = lossType;
+    }
+
+    public String getPoliceStation() {
+        return policeStation;
+    }
+
+    public void setPoliceStation(String policeStation) {
+        this.policeStation = policeStation;
+    }
+
+    public String getContactPhoneNumber() {
+        return contactPhoneNumber;
+    }
+
+    public void setContactPhoneNumber(String contactPhoneNumber) {
+        this.contactPhoneNumber = contactPhoneNumber;
+    }
+
+    public String getWitnessDetails() {
+        return witnessDetails;
+    }
+
+    public void setWitnessDetails(String witnessDetails) {
+        this.witnessDetails = witnessDetails;
     }
 
     // ...existing code...

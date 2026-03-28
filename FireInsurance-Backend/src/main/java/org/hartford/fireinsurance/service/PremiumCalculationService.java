@@ -30,39 +30,88 @@ public class PremiumCalculationService {
     }
 
     public double computeRiskFactor(PolicySubscription subscription, Double riskScore, Inspection inspection) {
-        double score = riskScore != null ? riskScore : 5.0;
-        double factor = getRiskMultiplier(score);
+        double factor = 1.0; // Base baseline
 
-        if (subscription.getHazardousGoods() != null && !subscription.getHazardousGoods().isBlank()) {
-            factor += 0.15;
-        }
-        if ("INDUSTRIAL".equalsIgnoreCase(subscription.getOccupancyType())) {
-            factor += 0.10;
-        }
-        if (Boolean.TRUE.equals(subscription.getInsuranceDeclinedBefore())) {
-            factor += 0.10;
+        // 1. Initial manual score multiplier (optional weighting)
+        if (riskScore != null) {
+            factor = getRiskMultiplier(riskScore);
         }
 
+        // 2. Inspection-Verified COPE Factors (High Fidelity)
         if (inspection != null) {
+            // Construction Type Weighting
+            if (inspection.getConstructionType() != null) {
+                switch (inspection.getConstructionType().toUpperCase()) {
+                    case "FRAME" -> factor *= 1.20;
+                    case "JOISTED_MASONRY" -> factor *= 1.10;
+                    case "NON_COMBUSTIBLE" -> factor *= 0.95;
+                    case "FIRE_RESISTIVE" -> factor *= 0.85;
+                }
+            }
+
+            // Roofing Multiplier
+            if (inspection.getRoofType() != null) {
+                switch (inspection.getRoofType().toUpperCase()) {
+                    case "WOOD" -> factor *= 1.15;
+                    case "ASPHALT" -> factor *= 1.05;
+                    case "TILE" -> factor *= 0.98;
+                    case "CONCRETE" -> factor *= 0.95;
+                }
+            }
+
+            // Occupancy Verification
+            if (inspection.getOccupancyType() != null) {
+                switch (inspection.getOccupancyType().toUpperCase()) {
+                    case "INDUSTRIAL" -> factor *= 1.25;
+                    case "WAREHOUSE" -> factor *= 1.15;
+                    case "COMMERCIAL" -> factor *= 1.10;
+                    // Residential is default 1.0
+                }
+            }
+
+            // Protection & Hazards (Additive)
+            if ("FAIL".equalsIgnoreCase(inspection.getElectricalAuditStatus())) {
+                factor += 0.30; // Critical surcharge
+            } else if ("PASS".equalsIgnoreCase(inspection.getElectricalAuditStatus())) {
+                factor -= 0.05; // Safety discount
+            }
+
+            if (Boolean.TRUE.equals(inspection.getHazardousMaterialsPresent())) {
+                factor += 0.20;
+            }
+
+            if (Boolean.TRUE.equals(inspection.getSprinklerSystem())) {
+                factor -= 0.10;
+            }
+
             if (Boolean.TRUE.equals(inspection.getFireSafetyAvailable())) {
                 factor -= 0.05;
             }
-            if (Boolean.TRUE.equals(inspection.getSprinklerSystem())) {
-                factor -= 0.07;
+
+            // Exposure (Proximity)
+            if (inspection.getAdjacentBuildingDistance() != null) {
+                if (inspection.getAdjacentBuildingDistance() < 5) factor += 0.15;
+                else if (inspection.getAdjacentBuildingDistance() > 25) factor -= 0.05;
             }
-            if (Boolean.TRUE.equals(inspection.getFireExtinguishers())) {
-                factor -= 0.03;
+        } else {
+            // Fallback for missing inspection: basic subscription traits
+            if ("INDUSTRIAL".equalsIgnoreCase(subscription.getOccupancyType())) {
+                factor *= 1.15;
             }
-            if (inspection.getConstructionRisk() != null) {
-                factor += inspection.getConstructionRisk() * 0.05;
-            }
-            if (inspection.getHazardRisk() != null) {
-                factor += inspection.getHazardRisk() * 0.07;
+            if (subscription.getHazardousGoods() != null && !subscription.getHazardousGoods().isBlank()) {
+                factor += 0.15;
             }
         }
 
-        if (factor < 0.70) factor = 0.70;
-        if (factor > 3.00) factor = 3.00;
+        // 3. Historical Data Risk
+        if (Boolean.TRUE.equals(subscription.getInsuranceDeclinedBefore())) {
+            factor += 0.15;
+        }
+
+        // Technical Boundaries
+        if (factor < 0.60) factor = 0.60;
+        if (factor > 4.00) factor = 4.00;
+        
         return factor;
     }
 

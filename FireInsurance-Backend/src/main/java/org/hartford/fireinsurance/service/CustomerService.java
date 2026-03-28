@@ -6,6 +6,7 @@ import org.hartford.fireinsurance.dto.CustomerDTO;
 import org.hartford.fireinsurance.dto.CustomerRegistrationRequest;
 import org.hartford.fireinsurance.dto.CustomerRegistrationResponse;
 import org.hartford.fireinsurance.dto.UpdateCustomerRequest;
+import org.hartford.fireinsurance.exception.ResourceNotFoundException;
 import org.hartford.fireinsurance.model.Customer;
 import org.hartford.fireinsurance.model.Property;
 import org.hartford.fireinsurance.model.User;
@@ -90,14 +91,14 @@ public class CustomerService {
 
         return customerRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Customer not found with ID: " + id));
+                        new ResourceNotFoundException("Customer not found with ID: " + id));
     }
 
     public Customer getCustomerByUsername(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + username));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         return customerRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Customer not found for user: " + username));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found for user: " + username));
     }
 
     public List<Customer> getAllCustomers() {
@@ -152,7 +153,7 @@ public class CustomerService {
         String newPassword = request.getNewPassword().trim();
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Unable to reset password with the provided account details."));
+                .orElseThrow(() -> new ResourceNotFoundException("Unable to reset password with the provided account details."));
 
         if (!"CUSTOMER".equalsIgnoreCase(user.getRole())
                 || user.getEmail() == null

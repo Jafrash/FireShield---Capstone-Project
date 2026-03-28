@@ -56,6 +56,7 @@ public class NotificationService {
             case "UNDERWRITER" -> buildUnderwriterNotifications(username);
             case "SURVEYOR" -> buildSurveyorNotifications(username);
             case "ADMIN" -> buildAdminNotifications();
+            case "SIU_INVESTIGATOR" -> buildSiuNotifications(username);
             default -> new ArrayList<>();
         };
 
@@ -185,6 +186,26 @@ public class NotificationService {
                         safeStatus(user.getRole()),
                         "/admin/customers",
                         user.getCreatedAt()
+                ))
+                .collect(Collectors.toList()));
+
+        return notifications;
+    }
+
+    private List<NotificationDTO> buildSiuNotifications(String username) {
+        List<NotificationDTO> notifications = new ArrayList<>();
+
+        // SIU investigators care about high-risk claims
+        notifications.addAll(claimRepository.findAll().stream()
+                .filter(claim -> RiskLevel.HIGH.equals(claim.getRiskLevel()) || (claim.getFraudScore() != null && claim.getFraudScore() > 70))
+                .map(claim -> new NotificationDTO(
+                        "siu-risk-" + claim.getClaimId(),
+                        "High Risk Claim Detected",
+                        "Claim #" + claim.getClaimId() + " requires immediate SIU review (Score: " + (claim.getFraudScore() != null ? claim.getFraudScore() : "Pending") + ")",
+                        "CLAIM",
+                        "URGENT",
+                        "/siu/dashboard",
+                        claim.getCreatedAt()
                 ))
                 .collect(Collectors.toList()));
 

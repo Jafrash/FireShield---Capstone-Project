@@ -5,48 +5,31 @@ public class CreatePropertyRequest {
     private String address;
     private Double areaSqft;
     private String constructionType;
+    private Double latitude;
+    private Double longitude;
+    private String zipCode;
 
-    public CreatePropertyRequest() {
-    }
+    public CreatePropertyRequest() {}
 
-    public CreatePropertyRequest(String propertyType, String address,
-                                Double areaSqft, String constructionType) {
-        this.propertyType = propertyType;
-        this.address = address;
-        this.areaSqft = areaSqft;
-        this.constructionType = constructionType;
-    }
+    public String getPropertyType() { return propertyType; }
+    public void setPropertyType(String propertyType) { this.propertyType = propertyType; }
 
-    public String getPropertyType() {
-        return propertyType;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public void setPropertyType(String propertyType) {
-        this.propertyType = propertyType;
-    }
+    public Double getAreaSqft() { return areaSqft; }
+    public void setAreaSqft(Double areaSqft) { this.areaSqft = areaSqft; }
 
-    public String getAddress() {
-        return address;
-    }
+    public String getConstructionType() { return constructionType; }
+    public void setConstructionType(String constructionType) { this.constructionType = constructionType; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
 
-    public Double getAreaSqft() {
-        return areaSqft;
-    }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
 
-    public void setAreaSqft(Double areaSqft) {
-        this.areaSqft = areaSqft;
-    }
-
-    public String getConstructionType() {
-        return constructionType;
-    }
-
-    public void setConstructionType(String constructionType) {
-        this.constructionType = constructionType;
-    }
+    public String getZipCode() { return zipCode; }
+    public void setZipCode(String zipCode) { this.zipCode = zipCode; }
 }
 

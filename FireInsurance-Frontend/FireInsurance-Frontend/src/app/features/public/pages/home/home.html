@@ -1,4 +1,4 @@
-<div class="flex flex-col min-h-screen bg-gray-50 text-gray-900 font-sans">
+<div class="flex flex-col min-h-screen bg-white text-gray-900 font-sans">
   <app-public-navbar></app-public-navbar>
 
   <main class="grow">
@@ -9,151 +9,153 @@
     <app-services id="services"></app-services>
 
     <!-- How It Works Section -->
-    <section class="section-lg bg-white relative overflow-hidden" id="how-it-works">
+    <section class="section relative bg-gray-50/50 py-32 overflow-hidden border-t border-gray-100" id="how-it-works">
       <div class="container-custom relative z-10">
+        
         <!-- Section Header -->
-        <div class="text-center mb-20 animate-fade-in-down">
-          <span class="inline-block px-4 py-2 bg-gradient-to-r from-fire-red/10 to-fire-orange/10 rounded-full text-fire-red text-sm font-bold tracking-wider uppercase mb-4 border border-fire-red/20">
-            ⚙️ Simple Process
+        <div class="text-center mb-24 animate-fade-in-down">
+          <span class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-fire-red/10 to-fire-orange/10 rounded-full text-fire-red text-sm font-bold tracking-widest uppercase mb-6 border border-fire-red/20 shadow-sm">
+            <span class="material-icons text-[18px]">settings</span> Seamless Process
           </span>
-          <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-            How It Works
+          <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight mb-6">
+            Protection in <span class="text-transparent bg-clip-text bg-gradient-to-r from-fire-red to-fire-orange">Three</span> Steps
           </h2>
-          <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Get protected in three simple steps. Our streamlined process makes insurance easy and efficient.
+          <p class="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
+            We've removed the friction from traditional insurance. Get fully secured and covered faster than ever before.
           </p>
         </div>
 
         <!-- Steps Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 relative">
-          <!-- Connecting Lines (Desktop) -->
-          <div class="hidden md:block absolute top-16 left-0 right-0 h-1 bg-gradient-to-r from-fire-red via-fire-orange to-fire-red mx-[10%]"></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 relative lg:px-12">
+          
+          <!-- Connecting Line (Desktop) -->
+          <div class="hidden md:block absolute top-[10%] left-[15%] right-[15%] h-1 bg-gradient-to-r from-fire-red via-fire-orange to-fire-red opacity-20 rounded-full z-0"></div>
 
           <!-- Step 1 -->
-          <div class="relative animate-fade-in-up text-center group">
-            <div class="relative inline-block mb-6">
-              <div class="step-indicator w-16 h-16 text-2xl relative z-10 group-hover:scale-110 transition-transform duration-300">
+          <div class="relative z-10 animate-fade-in-up md:px-4">
+            <div class="relative bg-white rounded-[2rem] p-10 shadow-[0_4px_30px_rgba(0,0,0,0.03)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgba(255,107,53,0.15)] hover:-translate-y-2 hover:border-fire-red/20 transition-all duration-500 text-center group">
+              
+              <!-- Number Indicator -->
+              <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-fire-red to-fire-orange rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(255,107,53,0.4)] border-4 border-white z-20 group-hover:scale-110 transition-transform duration-300 text-white font-extrabold text-lg">
                 1
               </div>
-              <div class="absolute inset-0 bg-gradient-to-br from-fire-red to-fire-orange rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-            </div>
-            <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-fire-red/20 transition-all duration-500 hover:-translate-y-2">
-              <div class="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-fire-red/10 to-fire-orange/10 rounded-2xl flex items-center justify-center icon-float">
-                <span class="material-icons text-4xl text-fire-red">app_registration</span>
+
+              <div class="w-20 h-20 mx-auto mt-4 mb-8 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-fire-red/5 transition-colors border border-gray-100 group-hover:border-fire-red/20">
+                <span class="material-icons text-[40px] text-gray-400 group-hover:text-fire-red transition-colors duration-500">app_registration</span>
               </div>
-              <h3 class="text-2xl font-bold text-gray-900 mb-4">Sign Up</h3>
-              <p class="text-gray-600 leading-relaxed">
-                Create your account in minutes. Provide basic details and choose between customer or surveyor roles.
+              
+              <h3 class="text-2xl font-extrabold text-gray-900 mb-4 tracking-tight">Rapid Sign Up</h3>
+              <p class="text-gray-500 leading-relaxed font-medium">
+                Create a secure account in less than two minutes. Verify your basic details electronically without piles of paperwork.
               </p>
             </div>
           </div>
 
           <!-- Step 2 -->
-          <div class="relative animate-fade-in-up delay-100 text-center group">
-            <div class="relative inline-block mb-6">
-              <div class="step-indicator w-16 h-16 text-2xl relative z-10 group-hover:scale-110 transition-transform duration-300">
+          <div class="relative z-10 animate-fade-in-up delay-100 md:px-4">
+            <div class="relative bg-white rounded-[2rem] p-10 shadow-[0_4px_30px_rgba(0,0,0,0.03)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgba(255,107,53,0.15)] hover:-translate-y-2 hover:border-fire-orange/20 transition-all duration-500 text-center group">
+              
+              <!-- Number Indicator -->
+              <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-fire-orange to-[#ff8f5d] rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(255,107,53,0.4)] border-4 border-white z-20 group-hover:scale-110 transition-transform duration-300 text-white font-extrabold text-lg">
                 2
               </div>
-              <div class="absolute inset-0 bg-gradient-to-br from-fire-red to-fire-orange rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-            </div>
-            <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-fire-red/20 transition-all duration-500 hover:-translate-y-2">
-              <div class="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-fire-red/10 to-fire-orange/10 rounded-2xl flex items-center justify-center icon-float">
-                <span class="material-icons text-4xl text-fire-red">description</span>
+
+              <div class="w-20 h-20 mx-auto mt-4 mb-8 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-fire-orange/5 transition-colors border border-gray-100 group-hover:border-fire-orange/20">
+                <span class="material-icons text-[40px] text-gray-400 group-hover:text-fire-orange transition-colors duration-500">description</span>
               </div>
-              <h3 class="text-2xl font-bold text-gray-900 mb-4">Choose Plan</h3>
-              <p class="text-gray-600 leading-relaxed">
-                Select the perfect coverage plan that fits your property and budget. Flexible options available.
+              
+              <h3 class="text-2xl font-extrabold text-gray-900 mb-4 tracking-tight">Select Plan</h3>
+              <p class="text-gray-500 leading-relaxed font-medium">
+                Browse our streamlined premium tiers. Every plan is dynamically built to secure exactly what you declare.
               </p>
             </div>
           </div>
 
           <!-- Step 3 -->
-          <div class="relative animate-fade-in-up delay-200 text-center group">
-            <div class="relative inline-block mb-6">
-              <div class="step-indicator w-16 h-16 text-2xl relative z-10 group-hover:scale-110 transition-transform duration-300">
+          <div class="relative z-10 animate-fade-in-up delay-200 md:px-4">
+            <div class="relative bg-white rounded-[2rem] p-10 shadow-[0_4px_30px_rgba(0,0,0,0.03)] border border-gray-100/50 hover:shadow-[0_20px_50px_rgba(255,107,53,0.15)] hover:-translate-y-2 hover:border-fire-yellow/40 transition-all duration-500 text-center group">
+              
+              <!-- Number Indicator -->
+              <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-[#ff8f5d] to-fire-yellow rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(255,221,68,0.4)] border-4 border-white z-20 group-hover:scale-110 transition-transform duration-300 text-white font-extrabold text-lg">
                 3
               </div>
-              <div class="absolute inset-0 bg-gradient-to-br from-fire-red to-fire-orange rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-            </div>
-            <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-fire-red/20 transition-all duration-500 hover:-translate-y-2">
-              <div class="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-fire-red/10 to-fire-orange/10 rounded-2xl flex items-center justify-center icon-float">
-                <span class="material-icons text-4xl text-fire-red">verified</span>
+
+              <div class="w-20 h-20 mx-auto mt-4 mb-8 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-fire-yellow/10 transition-colors border border-gray-100 group-hover:border-fire-yellow/30">
+                <span class="material-icons text-[40px] text-gray-400 group-hover:text-fire-yellow transition-colors duration-500">verified</span>
               </div>
-              <h3 class="text-2xl font-bold text-gray-900 mb-4">Get Protected</h3>
-              <p class="text-gray-600 leading-relaxed">
-                Complete a quick property inspection. Once approved, you're fully protected with 24/7 claim support.
+              
+              <h3 class="text-2xl font-extrabold text-gray-900 mb-4 tracking-tight">Get Protected</h3>
+              <p class="text-gray-500 leading-relaxed font-medium">
+                Our certified surveyors instantly inspect, and upon one-click approval, your asset is fully protected against all specified hazards.
               </p>
             </div>
           </div>
+
         </div>
 
         <!-- CTA -->
-        <div class="text-center mt-16 animate-fade-in-up delay-300">
+        <div class="text-center mt-20 animate-fade-in-up delay-300">
           <a
             routerLink="/auth/register"
-            class="btn btn-lg bg-gradient-to-r from-fire-red to-fire-orange text-white shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 group inline-flex cursor-pointer"
+            class="inline-flex items-center justify-center gap-3 px-10 py-5 rounded-xl font-extrabold text-lg text-white bg-gradient-to-r from-fire-red hover:from-fire-red to-fire-orange hover:to-[#ff7f4d] shadow-[0_8px_24px_rgba(255,107,53,0.3)] hover:shadow-[0_12px_32px_rgba(255,107,53,0.4)] focus:ring-4 focus:ring-fire-orange/30 transition-all transform hover:-translate-y-1 active:scale-[0.98] group cursor-pointer"
           >
-            <span class="material-icons group-hover:rotate-12 transition-transform">rocket_launch</span>
-            Start Your Protection Journey
-            <span class="material-icons group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            <span class="material-icons text-[24px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            <span>Join FireShield Today</span>
           </a>
         </div>
       </div>
-
-      <!-- Decorative Elements -->
-      <div class="absolute top-1/4 right-0 w-96 h-96 bg-gradient-to-br from-fire-orange/5 to-transparent rounded-full blur-3xl animate-pulse delay-100"></div>
-      <div class="absolute bottom-1/4 left-0 w-96 h-96 bg-gradient-to-br from-fire-orange/5 to-transparent rounded-full blur-3xl animate-pulse delay-300"></div>
     </section>
 
     <!-- Coverage Section -->
     <app-coverage id="coverage"></app-coverage>
 
-    <!-- Existing Customer CTA Section -->
-    <section class="section bg-gradient-to-br from-gray-900 via-fire-red to-fire-orange relative overflow-hidden">
-      <!-- Decorative Pattern -->
-      <div class="absolute inset-0 opacity-10">
-        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+    <!-- Existing Customer CTA Section - Elevated Design -->
+    <section class="relative bg-gradient-to-br from-[#1a1c23] via-fire-charcoal to-[#3a1a1c] overflow-hidden py-32">
+      <!-- Glow Effects -->
+      <div class="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-fire-orange/30 rounded-full blur-[120px] animate-[pulse_10s_ease-in-out_infinite]"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-fire-red/20 rounded-full blur-[100px] animate-[pulse_8s_ease-in-out_infinite_2s]"></div>
       </div>
 
-      <div class="container-narrow relative z-10">
-        <div class="text-center animate-fade-in-up">
-          <!-- Icon -->
-          <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-md rounded-full mb-6 border border-white/30 shadow-2xl animate-float">
-            <span class="material-icons text-4xl text-white">person</span>
+      <div class="container-custom relative z-10">
+        <div class="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-12 md:p-20 text-center max-w-5xl mx-auto shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] animate-fade-in-up">
+          
+          <div class="inline-flex items-center justify-center w-24 h-24 bg-white/10 border border-white/20 rounded-3xl mb-10 shadow-[0_8px_32px_0_rgba(255,107,53,0.2)] animate-[float_4s_ease-in-out_infinite]">
+            <span class="material-icons text-[48px] text-transparent bg-clip-text bg-gradient-to-br from-fire-yellow to-fire-orange">fingerprint</span>
           </div>
 
-          <!-- Heading -->
-          <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">
-            Already a Customer?
+          <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight">
+            Already Protected?
           </h2>
 
-          <!-- Description -->
-          <p class="text-lg md:text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Sign in securely to manage your policies, file claims, and access your dashboard. Google sign-in available for customers.
+          <p class="text-lg md:text-xl text-gray-300 font-medium mb-12 max-w-2xl mx-auto leading-relaxed">
+            Access your secure dashboard to manage your policies, instantly file claims, and connect with 24/7 dedicated support teams.
           </p>
 
-          <!-- CTA Button -->
           <a
             routerLink="/auth/login"
-            class="btn btn-lg bg-white text-fire-red hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 group inline-flex cursor-pointer"
-            aria-label="Go to customer login"
+            class="inline-flex items-center justify-center gap-3 px-10 py-5 rounded-xl font-bold text-lg text-[#1a1c23] bg-white hover:bg-gray-50 shadow-[0_8px_24px_rgba(255,255,255,0.2)] hover:shadow-[0_12px_32px_rgba(255,255,255,0.3)] transition-all transform hover:-translate-y-1 active:scale-[0.98] group cursor-pointer"
           >
-            <span class="material-icons group-hover:translate-x-1 transition-transform">login</span>
-            Go to Customer Login
-            <span class="material-icons group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            <span>Enter Customer Portal</span>
+            <span class="material-icons text-[24px] group-hover:translate-x-1 transition-transform text-fire-orange">login</span>
           </a>
 
-          <!-- Additional Info -->
-          <div class="mt-8 flex items-center justify-center gap-2 text-white/80 text-sm">
-            <span class="material-icons text-base">lock</span>
-            <span>Secure authentication with end-to-end encryption</span>
+          <div class="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-center gap-6 text-gray-400 font-medium text-sm w-full">
+            <div class="flex items-center gap-2">
+              <span class="material-icons text-green-400 text-[18px]">verified</span> Encrypted Sessions
+            </div>
+            <div class="hidden md:block w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+            <div class="flex items-center gap-2">
+              <span class="material-icons text-fire-orange text-[18px]">bolt</span> Instant Actions
+            </div>
+            <div class="hidden md:block w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+            <div class="flex items-center gap-2">
+              <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google" class="w-4 h-4" /> 
+              Google Auth Built-in
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- Ambient Glow Effects -->
-      <div class="absolute top-1/2 left-1/4 w-96 h-96 bg-fire-orange/20 rounded-full blur-3xl animate-pulse"></div>
-      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-fire-orange/20 rounded-full blur-3xl animate-pulse delay-200"></div>
     </section>
   </main>
 

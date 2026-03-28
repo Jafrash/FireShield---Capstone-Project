@@ -36,6 +36,12 @@ export class CustomerPoliciesComponent implements OnInit {
   isUploadStep = signal(false);
   newSubscriptionId = signal<number | null>(null);
   propertyIdForUpload = signal<number | null>(null);
+
+  // 3-step wizard state
+  currentStep = signal<1 | 2 | 3>(1);
+  hasLossHistory = signal(false);
+  hasDeclinedBefore = signal(false);
+  declarationAccepted = signal(false);
   
   errorMessage = signal('');
   successMessage = signal('');
@@ -44,23 +50,28 @@ export class CustomerPoliciesComponent implements OnInit {
   applicationForm: FormGroup = this.fb.group({
     propertyId: [null, [Validators.required, CustomValidators.positiveNumber()]],
     requestedCoverage: [null, [Validators.required, Validators.min(1), CustomValidators.positiveNumber()]],
-    constructionType: [''],
-    roofType: [''],
-    numberOfFloors: [null, [Validators.min(1)]],
-    occupancyType: [''],
+    constructionType: ['', Validators.required],
+    roofType: ['', Validators.required],
+    numberOfFloors: [null, [Validators.required, Validators.min(1)]],
+    occupancyType: ['', Validators.required],
     manufacturingProcess: [''],
     hazardousGoods: [''],
     previousLossHistory: [''],
     insuranceDeclinedBefore: [false],
-    propertyValue: [null, [Validators.min(1)]]
+    propertyValue: [null, [Validators.required, Validators.min(1)]]
   });
 
-  // Computed signal to check if policy is already subscribed
+  // Computed signals
   getSubscriptionStatus = computed(() => {
     const subs = this.subscriptions();
     return (policyId: number) => {
       return subs.find(sub => sub.policyId === policyId);
     };
+  });
+
+  isIndustrialOrCommercial = computed(() => {
+    const occ = this.applicationForm.get('occupancyType')?.value;
+    return occ === 'COMMERCIAL' || occ === 'INDUSTRIAL';
   });
 
   ngOnInit(): void {
@@ -144,7 +155,11 @@ export class CustomerPoliciesComponent implements OnInit {
     this.selectedPolicy.set(policy);
     this.showApplyModal.set(true);
     this.applicationForm.reset();
-    
+    this.currentStep.set(1);
+    this.hasLossHistory.set(false);
+    this.hasDeclinedBefore.set(false);
+    this.declarationAccepted.set(false);
+
     // Set max coverage validation
     this.applicationForm.get('requestedCoverage')?.setValidators([
       Validators.required,
@@ -162,6 +177,44 @@ export class CustomerPoliciesComponent implements OnInit {
     this.newSubscriptionId.set(null);
     this.propertyIdForUpload.set(null);
     this.successMessage.set('');
+    this.currentStep.set(1);
+    this.hasLossHistory.set(false);
+    this.hasDeclinedBefore.set(false);
+    this.declarationAccepted.set(false);
+  }
+
+  nextStep(): void {
+    if (this.currentStep() === 1) {
+      const s1Controls = ['propertyId', 'requestedCoverage'];
+      s1Controls.forEach(c => this.applicationForm.get(c)?.markAsTouched());
+      const step1Valid = s1Controls.every(c => this.applicationForm.get(c)?.valid);
+      if (step1Valid) this.currentStep.set(2);
+    } else if (this.currentStep() === 2) {
+      const s2Controls = ['constructionType', 'roofType', 'numberOfFloors', 'occupancyType', 'propertyValue'];
+      s2Controls.forEach(c => this.applicationForm.get(c)?.markAsTouched());
+      const step2Valid = s2Controls.every(c => this.applicationForm.get(c)?.valid);
+      if (step2Valid) this.currentStep.set(3);
+    }
+  }
+
+  prevStep(): void {
+    if (this.currentStep() > 1) {
+      this.currentStep.set((this.currentStep() - 1) as 1 | 2 | 3);
+    }
+  }
+
+  setLossHistory(val: boolean): void {
+    this.hasLossHistory.set(val);
+    if (!val) this.applicationForm.get('previousLossHistory')?.setValue('');
+  }
+
+  setDeclinedBefore(val: boolean): void {
+    this.hasDeclinedBefore.set(val);
+    this.applicationForm.get('insuranceDeclinedBefore')?.setValue(val);
+  }
+
+  setCoverage(amount: number): void {
+    this.applicationForm.get('requestedCoverage')?.setValue(amount);
   }
 
   submitApplication(): void {
@@ -186,9 +239,10 @@ export class CustomerPoliciesComponent implements OnInit {
       occupancyType: this.applicationForm.value.occupancyType || null,
       manufacturingProcess: this.applicationForm.value.manufacturingProcess || null,
       hazardousGoods: this.applicationForm.value.hazardousGoods || null,
-      previousLossHistory: this.applicationForm.value.previousLossHistory || null,
-      insuranceDeclinedBefore: !!this.applicationForm.value.insuranceDeclinedBefore,
-      propertyValue: this.applicationForm.value.propertyValue || null
+      previousLossHistory: this.hasLossHistory() ? (this.applicationForm.value.previousLossHistory || null) : null,
+      insuranceDeclinedBefore: this.hasDeclinedBefore(),
+      propertyValue: this.applicationForm.value.propertyValue || null,
+      declarationAccepted: true
     };
 
     this.customerService.subscribeToPolicy(request).subscribe({

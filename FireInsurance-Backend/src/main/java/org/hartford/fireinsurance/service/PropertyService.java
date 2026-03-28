@@ -3,6 +3,7 @@ package org.hartford.fireinsurance.service;
 
 import org.hartford.fireinsurance.dto.CreatePropertyRequest;
 import org.hartford.fireinsurance.dto.UpdatePropertyRequest;
+import org.hartford.fireinsurance.exception.ResourceNotFoundException;
 import org.hartford.fireinsurance.model.Customer;
 import org.hartford.fireinsurance.model.Property;
 import org.hartford.fireinsurance.repository.CustomerRepository;
@@ -40,6 +41,9 @@ public class PropertyService {
         property.setAddress(request.getAddress());
         property.setAreaSqft(request.getAreaSqft());
         property.setConstructionType(request.getConstructionType());
+        property.setLatitude(request.getLatitude());
+        property.setLongitude(request.getLongitude());
+        property.setZipCode(request.getZipCode());
         property.setRiskScore(0.0); // default risk score
 
         return propertyRepository.save(property);
@@ -80,6 +84,15 @@ public class PropertyService {
         if (request.getRiskScore() != null) {
             property.setRiskScore(request.getRiskScore());
         }
+        if (request.getLatitude() != null) {
+            property.setLatitude(request.getLatitude());
+        }
+        if (request.getLongitude() != null) {
+            property.setLongitude(request.getLongitude());
+        }
+        if (request.getZipCode() != null) {
+            property.setZipCode(request.getZipCode());
+        }
 
         return propertyRepository.save(property);
     }
@@ -110,7 +123,7 @@ public class PropertyService {
      */
     public Property getPropertyById(Long id) {
         return propertyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Property not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Property not found with ID: " + id));
     }
 
     // ========== OLD METHODS (for backward compatibility) ==========
@@ -127,7 +140,7 @@ public class PropertyService {
 
     public Property addProperty(Long customerId, Property property) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
         property.setCustomer(customer);
         return propertyRepository.save(property);
     }

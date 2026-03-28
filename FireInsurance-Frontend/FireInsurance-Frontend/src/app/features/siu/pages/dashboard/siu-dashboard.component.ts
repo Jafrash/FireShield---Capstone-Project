@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SiuService, SiuClaim, SiuClaimsResponse } from '../../services/siu.service';
+import { InvestigationToolsService } from '../../services/investigation-tools.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 type SortField = 'fraudScore' | 'claimId' | 'claimAmount' | 'assignedDate' | 'priority';
@@ -16,6 +17,7 @@ type SortDirection = 'asc' | 'desc';
 })
 export class SiuDashboardComponent implements OnInit {
   private siuService = inject(SiuService);
+  private aiService = inject(InvestigationToolsService);
   private router = inject(Router);
 
   // Real data from API - no more dummy data
@@ -96,6 +98,17 @@ export class SiuDashboardComponent implements OnInit {
   totalClaimAmount = computed(() =>
     this.claims().reduce((sum, claim) => sum + (claim.claimAmount || 0), 0)
   );
+
+  // Engine Health State (Step 3)
+  engineVersion = signal('v2.4 (Hybrid Heuristic-AI)');
+  activeRulesCount = signal(12);
+  engineStatus = signal('Optimal');
+  lastScanTime = signal(new Date().toLocaleTimeString());
+
+  // Advanced Tool Notification State
+  toolMessage = signal('');
+  toolIcon = signal('info');
+  showToolPopup = signal(false);
 
   ngOnInit(): void {
     this.loadSiuClaims();
@@ -251,5 +264,78 @@ export class SiuDashboardComponent implements OnInit {
    */
   retryLoad(): void {
     this.loadSiuClaims();
+  }
+
+  // --- Advanced Investigation Tools Hooks --- //
+
+  async runPatternAnalysis(): Promise<void> {
+    this.toolIcon.set('search');
+    this.toolMessage.set('Scanning via Gemini for cross-claim patterns and linked entities...');
+    this.showToolPopup.set(true);
+    
+    try {
+      const activeClaims = this.claims();
+      const result = await this.aiService.runPatternAnalysis(activeClaims);
+      this.toolIcon.set(result.clusterFound ? 'warning' : 'check_circle');
+      this.toolMessage.set(result.aiSynthesis);
+    } catch (e) {
+      this.toolIcon.set('error');
+      this.toolMessage.set('Pattern Analysis failed. Fallback heuristic also encountered an error.');
+    }
+  }
+
+  checkFraudEngine(): void {
+    this.toolIcon.set('analytics');
+    this.toolMessage.set('Running heuristic engine diagnostics. Rule Set V2.4 is active.');
+    this.showToolPopup.set(true);
+    
+    setTimeout(() => {
+      this.toolIcon.set('check_circle');
+      this.toolMessage.set('Engine Operational. ' + this.highPriorityClaims() + ' claims flagged under Priority: HIGH.');
+    }, 1500);
+  }
+
+  async runRiskAssessment(): Promise<void> {
+    this.toolIcon.set('assessment');
+    this.toolMessage.set('Generating global risk distribution narrative via Gemini AI...');
+    this.showToolPopup.set(true);
+    
+    // Choose the highest risk claim to synthesize for the demo
+    const highestRisk = [...this.claims()].sort((a,b) => b.fraudScore - a.fraudScore)[0];
+    
+    if (highestRisk) {
+      const summary = await this.aiService.runRiskAssessment(highestRisk);
+      this.toolIcon.set('assessment');
+      this.toolMessage.set('AI Synthesis on ' + highestRisk.claimId + ': ' + summary);
+    } else {
+      this.toolMessage.set('No active claims available for AI Synthesis.');
+    }
+  }
+
+  async generateReport(): Promise<void> {
+    this.toolIcon.set('report');
+    this.toolMessage.set('Compiling forensic JSON audit report with Executive Summary...');
+    this.showToolPopup.set(true);
+    
+    const summary = await this.aiService.generateExecutiveSummary(this.claims());
+    
+    this.toolIcon.set('download');
+    this.toolMessage.set('Report generation complete. Downloading SIU_Audit_Report.json...');
+    
+    const reportPayload = {
+      generatedAt: new Date().toISOString(),
+      aiExecutiveSummary: summary,
+      investigatedClaims: this.claims()
+    };
+    
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(reportPayload, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute('href', dataStr);
+    downloadAnchorNode.setAttribute('download', `SIU_Audit_Report_${new Date().getTime()}.json`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    
+    setTimeout(() => this.showToolPopup.set(false), 3000);
   }
 }

@@ -122,6 +122,10 @@ public class ClaimService {
         claim.setFirNumber(request.getFirNumber());
         claim.setFireBrigadeReportNumber(request.getFireBrigadeReportNumber());
         claim.setSalvageDetails(request.getSalvageDetails());
+        claim.setLossType(request.getLossType());
+        claim.setPoliceStation(request.getPoliceStation());
+        claim.setContactPhoneNumber(request.getContactPhoneNumber());
+        claim.setWitnessDetails(request.getWitnessDetails());
         claim.setStatus(ClaimStatus.SUBMITTED);
         claim.setCreatedAt(LocalDateTime.now());
 
@@ -445,19 +449,20 @@ public class ClaimService {
         Claim claim = claimRepository.findById(claimId)
             .orElseThrow(() -> new RuntimeException("Claim not found with ID: " + claimId));
 
-        // Enforce: Only SIU_CLEARED claims can be assigned to underwriter after SIU
-        if (claim.getStatus() != ClaimStatus.SIU_CLEARED) {
-            throw new IllegalStateException("Only SIU_CLEARED claims can be assigned to an underwriter after SIU clearance.");
+        // Enforce: If risk is HIGH, it MUST be SIU_CLEARED first.
+        // For LOW/MEDIUM risk, we allow assignment directly from SUBMITTED or regular review statuses.
+        if (claim.getRiskLevel() == RiskLevel.HIGH && claim.getStatus() != ClaimStatus.SIU_CLEARED) {
+            throw new IllegalStateException("HIGH risk claims must be cleared by SIU (Status: SIU_CLEARED) before underwriter assignment.");
         }
 
         Underwriter underwriter = underwriterRepository.findById(underwriterId)
             .orElseThrow(() -> new RuntimeException("Underwriter not found with ID: " + underwriterId));
 
         claim.setUnderwriter(underwriter);
-        // Set status to UNDER_REVIEW only if currently SIU_CLEARED
-        if (claim.getStatus() == ClaimStatus.SIU_CLEARED) {
-            claim.setStatus(ClaimStatus.UNDER_REVIEW);
-        }
+        
+        // Transition status to UNDER_REVIEW once assigned
+        claim.setStatus(ClaimStatus.UNDER_REVIEW);
+        
         return claimRepository.save(claim);
     }
 

@@ -28,6 +28,16 @@ export const underwriterRoutes: Routes = [
         path: 'claims',
         loadComponent: () =>
           import('./pages/claims/uw-claims.component').then(m => m.UwClaimsComponent)
+      },
+      {
+        path: 'property-inspections',
+        loadComponent: () =>
+          import('./pages/property-inspections/uw-property-inspections').then(m => m.UwPropertyInspectionsComponent)
+      },
+      {
+        path: 'claim-inspections',
+        loadComponent: () =>
+          import('./pages/claim-inspections/uw-claim-inspections').then(m => m.UwClaimInspectionsComponent)
       }
     ]
   }

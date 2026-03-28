@@ -3,6 +3,7 @@ package org.hartford.fireinsurance.service;
 
 import org.hartford.fireinsurance.dto.CreatePolicyRequest;
 import org.hartford.fireinsurance.dto.UpdatePolicyRequest;
+import org.hartford.fireinsurance.exception.ResourceNotFoundException;
 import org.hartford.fireinsurance.model.Policy;
 import org.hartford.fireinsurance.repository.PolicyRepository;
 import org.springframework.stereotype.Service;
@@ -82,7 +83,7 @@ public class PolicyService {
      */
     public Policy getPolicyById(Long id) {
         return policyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Policy not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Policy not found with ID: " + id));
     }
 
     // ========== OLD METHODS (for backward compatibility) ==========

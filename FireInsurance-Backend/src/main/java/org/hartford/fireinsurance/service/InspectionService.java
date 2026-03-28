@@ -114,6 +114,16 @@ public class InspectionService {
         inspection.setConstructionRisk(request.getConstructionRisk());
         inspection.setHazardRisk(request.getHazardRisk());
         inspection.setRecommendedPremium(request.getRecommendedPremium());
+        
+        // Expanded COPE fields
+        inspection.setConstructionType(request.getConstructionType());
+        inspection.setRoofType(request.getRoofType());
+        inspection.setOccupancyType(request.getOccupancyType());
+        inspection.setElectricalAuditStatus(request.getElectricalAuditStatus());
+        inspection.setHazardousMaterialsPresent(request.getHazardousMaterialsPresent());
+        inspection.setAdjacentBuildingDistance(request.getAdjacentBuildingDistance());
+        inspection.setInternalProtectionNotes(request.getInternalProtectionNotes());
+
         inspection.setInspectionDate(LocalDateTime.now());
         inspection.setStatus(InspectionStatus.COMPLETED);
 

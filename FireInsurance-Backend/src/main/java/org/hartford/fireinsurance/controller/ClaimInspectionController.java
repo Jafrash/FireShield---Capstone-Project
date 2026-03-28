@@ -44,16 +44,38 @@ public class ClaimInspectionController {
         List<ClaimInspectionResponse> response = claimInspectionService.getBySurveyor(username).stream().map(this::mapToResponse).toList();
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('ADMIN', 'UNDERWRITER')")
+    public ResponseEntity<?> getAll(
+            Authentication authentication) {
+        try {
+            List<ClaimInspectionResponse> response = claimInspectionService.getAll()
+                    .stream()
+                    .map(this::mapToResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching claim inspections: " + e.getMessage());
+        }
+    }
+
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<ClaimInspectionResponse>> getAll() {
-        List<ClaimInspectionResponse> response = claimInspectionService.getAll().stream().map(this::mapToResponse).toList();
-        return ResponseEntity.ok(response);
+    @PreAuthorize("hasAnyRole('ADMIN', 'UNDERWRITER')")
+    public ResponseEntity<?> getAllWithFilter(
+            Authentication authentication,
+            @RequestParam(required = false) String status) {
+        return getAll(authentication);
     }
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SURVEYOR','ADMIN')")
+    @PreAuthorize("hasAnyRole('SURVEYOR','ADMIN', 'UNDERWRITER')")
     public ResponseEntity<ClaimInspectionResponse> getById(@PathVariable Long id) {
         ClaimInspection inspection = claimInspectionService.getById(id);
+        return ResponseEntity.ok(mapToResponse(inspection));
+    }
+    @GetMapping("/claim/{claimId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'UNDERWRITER', 'SURVEYOR')")
+    public ResponseEntity<ClaimInspectionResponse> getByClaimId(@PathVariable Long claimId) {
+        ClaimInspection inspection = claimInspectionService.getByClaim(claimId);
         return ResponseEntity.ok(mapToResponse(inspection));
     }
     private ClaimInspectionResponse mapToResponse(ClaimInspection inspection) {
@@ -62,7 +84,7 @@ public class ClaimInspectionController {
         ClaimInspectionResponse response = new ClaimInspectionResponse(
                 inspection.getClaimInspectionId(),
             claim != null ? claim.getClaimId() : null,
-                inspection.getSurveyor() != null ? inspection.getSurveyor().getUser().getUsername() : null,
+                inspection.getSurveyor() != null && inspection.getSurveyor().getUser() != null ? inspection.getSurveyor().getUser().getUsername() : "Unknown",
                 inspection.getInspectionDate(),
                 inspection.getEstimatedLoss(),
                 inspection.getStatus());

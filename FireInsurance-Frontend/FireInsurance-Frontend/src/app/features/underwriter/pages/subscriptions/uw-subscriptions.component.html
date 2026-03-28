@@ -107,15 +107,15 @@
 
                     <!-- Assign Surveyor -->
                     <td class="px-5 py-4">
-                      @if (sub.status === 'SUBMITTED' || sub.status === 'UNDER_REVIEW' || sub.status === 'PENDING' || sub.status === 'REQUESTED' || sub.status === 'SURVEYOR_ASSIGNED' || sub.status === 'SURVEY_ASSIGNED' || sub.status === 'INSPECTION_PENDING') {
+                      @if (sub.status === 'SUBMITTED' || sub.status === 'UNDER_REVIEW' || sub.status === 'PENDING' || sub.status === 'REQUESTED') {
                         <div class="flex items-center gap-2">
                           <select (change)="onSurveyorSelect(sub.subscriptionId, $event)"
                                   class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:ring-1 focus:ring-fire-red focus:border-fire-red outline-none">
                             <option value="">Select…</option>
                             @for (sv of surveyors(); track sv.surveyorId) {
-                              <option [value]="sv.surveyorId">
-                                {{ sv.firstName || sv.username }} {{ sv.lastName || '' }}
-                              </option>
+                               <option [value]="sv.surveyorId">
+                                 {{ sv.firstName || sv.username }} {{ sv.lastName || '' }}
+                               </option>
                             }
                           </select>
                           <button (click)="assignSurveyor(sub)"
@@ -129,7 +129,7 @@
                           <span class="material-icons text-sm">check_circle</span>
                           Completed
                         </div>
-                      } @else if (sub.status === 'INSPECTION_PENDING' || sub.status === 'INSPECTING' || sub.status === 'UNDER_INSPECTION') {
+                      } @else if (sub.status === 'INSPECTION_PENDING' || sub.status === 'INSPECTING' || sub.status === 'UNDER_INSPECTION' || sub.status === 'SURVEYOR_ASSIGNED' || sub.status === 'SURVEY_ASSIGNED') {
                         <div class="flex items-center gap-1 text-fire-red font-medium italic">
                           <span class="material-icons text-sm">check_circle</span>
                           Assigned
@@ -150,7 +150,8 @@
                             Approve
                           </button>
                           <button (click)="rejectSubscription(sub)"
-                                   class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 transition-colors flex items-center gap-1">
+                                   [disabled]="!canApprove(sub)"
+                                   class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1">
                             <span class="material-icons text-sm">cancel</span>
                             Reject
                           </button>

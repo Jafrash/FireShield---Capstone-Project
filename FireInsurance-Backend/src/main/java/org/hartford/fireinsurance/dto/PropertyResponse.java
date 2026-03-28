@@ -7,12 +7,12 @@ public class PropertyResponse {
     private Double areaSqft;
     private String constructionType;
     private Double riskScore;
+    private Double latitude;
+    private Double longitude;
+    private String zipCode;
 
-    public PropertyResponse() {
-    }
-
-    public PropertyResponse(Long propertyId, String propertyType, String address,
-                           Double areaSqft, String constructionType, Double riskScore) {
+    // Added constructor to match usage in PropertyController
+    public PropertyResponse(Long propertyId, String propertyType, String address, Double areaSqft, String constructionType, Double riskScore) {
         this.propertyId = propertyId;
         this.propertyType = propertyType;
         this.address = address;
@@ -21,52 +21,32 @@ public class PropertyResponse {
         this.riskScore = riskScore;
     }
 
-    public Long getPropertyId() {
-        return propertyId;
-    }
+    public PropertyResponse() {}
 
-    public void setPropertyId(Long propertyId) {
-        this.propertyId = propertyId;
-    }
+    public Long getPropertyId() { return propertyId; }
+    public void setPropertyId(Long propertyId) { this.propertyId = propertyId; }
 
-    public String getPropertyType() {
-        return propertyType;
-    }
+    public String getPropertyType() { return propertyType; }
+    public void setPropertyType(String propertyType) { this.propertyType = propertyType; }
 
-    public void setPropertyType(String propertyType) {
-        this.propertyType = propertyType;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public String getAddress() {
-        return address;
-    }
+    public Double getAreaSqft() { return areaSqft; }
+    public void setAreaSqft(Double areaSqft) { this.areaSqft = areaSqft; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    public String getConstructionType() { return constructionType; }
+    public void setConstructionType(String constructionType) { this.constructionType = constructionType; }
 
-    public Double getAreaSqft() {
-        return areaSqft;
-    }
+    public Double getRiskScore() { return riskScore; }
+    public void setRiskScore(Double riskScore) { this.riskScore = riskScore; }
 
-    public void setAreaSqft(Double areaSqft) {
-        this.areaSqft = areaSqft;
-    }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
 
-    public String getConstructionType() {
-        return constructionType;
-    }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
 
-    public void setConstructionType(String constructionType) {
-        this.constructionType = constructionType;
-    }
-
-    public Double getRiskScore() {
-        return riskScore;
-    }
-
-    public void setRiskScore(Double riskScore) {
-        this.riskScore = riskScore;
-    }
+    public String getZipCode() { return zipCode; }
+    public void setZipCode(String zipCode) { this.zipCode = zipCode; }
 }
-

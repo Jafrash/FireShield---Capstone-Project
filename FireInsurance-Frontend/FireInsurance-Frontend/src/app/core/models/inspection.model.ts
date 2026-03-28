@@ -33,6 +33,13 @@ export interface PropertyInspection {
   hazardRisk?: number | null;
   recommendedCoverage?: number | null;
   recommendedPremium?: number | null;
+  constructionType?: string | null;
+  roofType?: string | null;
+  occupancyType?: string | null;
+  electricalAuditStatus?: string | null;
+  hazardousMaterialsPresent?: boolean;
+  adjacentBuildingDistance?: number | null;
+  internalProtectionNotes?: string | null;
   // Duplicate property detection fields
   isDuplicateProperty?: boolean; // True if this property has already been inspected
   existingRiskScore?: number | null; // Risk score from the completed inspection
@@ -59,6 +66,13 @@ export interface SubmitInspectionReportRequest {
   hazardRisk?: number;
   recommendedCoverage?: number;
   recommendedPremium?: number;
+  constructionType?: string;
+  roofType?: string;
+  occupancyType?: string;
+  electricalAuditStatus?: string;
+  hazardousMaterialsPresent?: boolean;
+  adjacentBuildingDistance?: number;
+  internalProtectionNotes?: string;
 }
 
 // Matches backend ClaimInspectionResponse DTO
@@ -72,15 +86,28 @@ export interface ClaimInspectionItem {
   customerName?: string | null;
   customerEmail?: string | null;
   customerPhone?: string | null;
-  policyName?: string | null; // Policy that covers this claim
-  maxCoverage?: number | null; // Maximum coverage limit of the policy
-  premiumAmount?: number | null; // Premium amount of the policy
-  requestedClaimAmount?: number | null; // Amount customer requested in claim
+  policyName?: string | null;
+  maxCoverage?: number | null;
+  premiumAmount?: number | null;
+  requestedClaimAmount?: number | null;
   claimDescription?: string | null;
   customerDocuments?: InspectionDocumentSummary[];
+  // Professional fields
+  causeOfFire?: string | null;
+  salvageValue?: number | null;
+  fireBrigadeExpenses?: number | null;
+  otherInsuranceDetails?: string | null;
+  underInsuranceDetected?: boolean | null;
+  recommendedSettlement?: number | null;
 }
 
 export interface SubmitClaimInspectionReportRequest {
   estimatedLoss: number;
   damageReport: string;
+  causeOfFire?: string;
+  salvageValue?: number;
+  fireBrigadeExpenses?: number;
+  otherInsuranceDetails?: string;
+  underInsuranceDetected?: boolean;
+  recommendedSettlement?: number;
 }

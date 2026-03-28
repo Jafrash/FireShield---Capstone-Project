@@ -32,6 +32,13 @@ public class Property {
 
     private Double riskScore;
 
+    private Double latitude;
+
+    private Double longitude;
+
+    @Column(name = "zip_code")
+    private String zipCode;
+
     private Integer propertyAge = 0;
 
     @OneToMany(mappedBy = "property")
@@ -125,4 +132,13 @@ public class Property {
     public void setPropertyAge(Integer propertyAge) {
         this.propertyAge = propertyAge;
     }
+
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public String getZipCode() { return zipCode; }
+    public void setZipCode(String zipCode) { this.zipCode = zipCode; }
 }

@@ -38,6 +38,7 @@ public class Inspection {
     @Enumerated(EnumType.STRING)
     private InspectionStatus status;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_id")
     private PolicySubscription subscription;
@@ -71,6 +72,28 @@ public class Inspection {
 
     @Column(name = "recommended_premium")
     private Double recommendedPremium;
+
+    // Detailed Risk Assessment (COPE - Construction, Occupancy, Protection, Exposure)
+    @Column(name = "construction_type")
+    private String constructionType;
+
+    @Column(name = "roof_type")
+    private String roofType;
+
+    @Column(name = "occupancy_type")
+    private String occupancyType;
+
+    @Column(name = "electrical_audit_status")
+    private String electricalAuditStatus;
+
+    @Column(name = "hazardous_materials_present")
+    private Boolean hazardousMaterialsPresent;
+
+    @Column(name = "adjacent_building_distance")
+    private Double adjacentBuildingDistance;
+
+    @Column(name = "internal_protection_notes", columnDefinition = "TEXT")
+    private String internalProtectionNotes;
 
     // Constructors
     public Inspection() {
@@ -224,4 +247,26 @@ public class Inspection {
     public void setRecommendedPremium(Double recommendedPremium) {
         this.recommendedPremium = recommendedPremium;
     }
+
+    // New Handlers
+    public String getConstructionType() { return constructionType; }
+    public void setConstructionType(String constructionType) { this.constructionType = constructionType; }
+
+    public String getRoofType() { return roofType; }
+    public void setRoofType(String roofType) { this.roofType = roofType; }
+
+    public String getOccupancyType() { return occupancyType; }
+    public void setOccupancyType(String occupancyType) { this.occupancyType = occupancyType; }
+
+    public String getElectricalAuditStatus() { return electricalAuditStatus; }
+    public void setElectricalAuditStatus(String electricalAuditStatus) { this.electricalAuditStatus = electricalAuditStatus; }
+
+    public Boolean getHazardousMaterialsPresent() { return hazardousMaterialsPresent; }
+    public void setHazardousMaterialsPresent(Boolean hazardousMaterialsPresent) { this.hazardousMaterialsPresent = hazardousMaterialsPresent; }
+
+    public Double getAdjacentBuildingDistance() { return adjacentBuildingDistance; }
+    public void setAdjacentBuildingDistance(Double adjacentBuildingDistance) { this.adjacentBuildingDistance = adjacentBuildingDistance; }
+
+    public String getInternalProtectionNotes() { return internalProtectionNotes; }
+    public void setInternalProtectionNotes(String internalProtectionNotes) { this.internalProtectionNotes = internalProtectionNotes; }
 }

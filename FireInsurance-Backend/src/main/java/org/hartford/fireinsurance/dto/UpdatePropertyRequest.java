@@ -6,6 +6,9 @@ public class UpdatePropertyRequest {
     private Double areaSqft;
     private String constructionType;
     private Double riskScore;
+    private Double latitude;
+    private Double longitude;
+    private String zipCode;
 
     public UpdatePropertyRequest() {
     }
@@ -51,12 +54,16 @@ public class UpdatePropertyRequest {
         this.constructionType = constructionType;
     }
 
-    public Double getRiskScore() {
-        return riskScore;
-    }
+    public Double getRiskScore() { return riskScore; }
+    public void setRiskScore(Double riskScore) { this.riskScore = riskScore; }
 
-    public void setRiskScore(Double riskScore) {
-        this.riskScore = riskScore;
-    }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public String getZipCode() { return zipCode; }
+    public void setZipCode(String zipCode) { this.zipCode = zipCode; }
 }
 

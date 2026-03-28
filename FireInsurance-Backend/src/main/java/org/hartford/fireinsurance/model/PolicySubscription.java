@@ -71,6 +71,7 @@ public class PolicySubscription {
     @Column(name = "risk_multiplier")
     private Double riskMultiplier;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prop_inspection_id")
     private Inspection propertyInspection;
@@ -133,6 +134,9 @@ public class PolicySubscription {
 
     @Column(name = "property_value")
     private Double propertyValue;
+
+    @Column(name = "declaration_accepted")
+    private Boolean declarationAccepted = false;
 
     @Column(name = "payment_received")
     private Boolean paymentReceived = false;
@@ -458,6 +462,9 @@ public class PolicySubscription {
     public void setPropertyValue(Double propertyValue) {
         this.propertyValue = propertyValue;
     }
+
+    public Boolean getDeclarationAccepted() { return declarationAccepted; }
+    public void setDeclarationAccepted(Boolean declarationAccepted) { this.declarationAccepted = declarationAccepted; }
 
     public Boolean getPaymentReceived() {
         return paymentReceived;

@@ -139,4 +139,12 @@ export class UnderwriterService {
   getSurveyors(): Observable<UwSurveyor[]> {
     return this.http.get<UwSurveyor[]>(`${this.apiUrl}/surveyors`);
   }
+
+  getAllPropertyInspections(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/inspections/all`);
+  }
+
+  getAllClaimInspections(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/claim-inspections/all`);
+  }
 }

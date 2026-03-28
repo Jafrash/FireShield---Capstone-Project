@@ -25,7 +25,9 @@ public class PolicySubscriptionController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<SubscriptionResponse> subscribe(Authentication authentication, @RequestBody SubscribeRequest request) {
         String username = authentication.getName();
+        System.err.println("[SUB-API] Received subscription request for user: " + username + " on property ID: " + request.getPropertyId());
         PolicySubscription subscription = subscriptionService.subscribe(username, request);
+        System.err.println("[SUB-API] Subscription successfully created, mapping to response...");
         return ResponseEntity.ok(mapToResponse(subscription));
     }
     

@@ -1,52 +1,62 @@
-<nav class="bg-white shadow-md fixed w-full z-50">
+<nav class="fixed w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-[0_4px_30px_rgba(0,0,0,0.03)]">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between h-16">
-      <div class="flex items-center">
-        <a routerLink="/" class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
-          <span class="material-icons text-fire-red text-3xl">local_fire_department</span>
-          <span class="font-bold text-xl tracking-tight text-gray-900">FireShield</span>
-        </a>
-        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-          <a routerLink="/" fragment="hero" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-            Home
-          </a>
-          <a routerLink="/" fragment="services" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-            Services
-          </a>
-          <a routerLink="/" fragment="coverage" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-            Coverage Options
-          </a>
+    <div class="flex justify-between items-center h-20">
+      
+      <!-- Brand -->
+      <a routerLink="/" class="flex-shrink-0 flex items-center gap-3 cursor-pointer group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-fire-red to-fire-orange flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
+          <span class="material-icons text-white text-[24px]">local_fire_department</span>
         </div>
-      </div>
-      <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
-        <a routerLink="/auth/login" class="text-gray-700 hover:text-fire-red font-medium text-sm transition-colors cursor-pointer">
-          Login
+        <span class="font-extrabold text-2xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-fire-charcoal to-gray-800">
+          FireShield
+        </span>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <div class="hidden md:flex items-center space-x-1">
+        <a routerLink="/" fragment="hero" class="px-5 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-fire-orange hover:bg-fire-orange/5 transition-all">
+          Home
         </a>
-        <a routerLink="/auth/register" class="bg-fire-red text-white hover:bg-fire-red/90 px-4 py-2 rounded-md font-medium text-sm transition-colors cursor-pointer shadow-sm">
-          Register
+        <a routerLink="/" fragment="services" class="px-5 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-fire-orange hover:bg-fire-orange/5 transition-all">
+          Services
+        </a>
+        <a routerLink="/" fragment="coverage" class="px-5 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-fire-orange hover:bg-fire-orange/5 transition-all">
+          Coverage Options
         </a>
       </div>
-      <div class="-mr-2 flex items-center sm:hidden">
-        <!-- Mobile menu button -->
-        <button type="button" (click)="toggleMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-fire-red" aria-expanded="false">
+
+      <!-- Auth Buttons -->
+      <div class="hidden md:flex items-center space-x-3">
+        <a routerLink="/auth/login" class="px-5 py-2.5 rounded-xl font-bold text-sm text-gray-600 hover:text-fire-charcoal hover:bg-gray-100 transition-all cursor-pointer">
+          Sign In
+        </a>
+        <a routerLink="/auth/register" class="px-6 py-2.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-fire-red to-fire-orange shadow-[0_4px_12px_rgba(255,107,53,0.3)] hover:shadow-[0_6px_16px_rgba(255,107,53,0.4)] hover:-translate-y-0.5 transition-all cursor-pointer">
+          Get Started
+        </a>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <div class="flex items-center md:hidden">
+        <button type="button" (click)="toggleMenu()" class="inline-flex items-center justify-center p-2 rounded-xl text-gray-500 hover:text-fire-red hover:bg-fire-red/5 focus:outline-none transition-colors" aria-expanded="false">
           <span class="sr-only">Open main menu</span>
-          <span class="material-icons">{{ isMenuOpen ? 'close' : 'menu' }}</span>
+          <span class="material-icons text-[28px]">{{ isMenuOpen ? 'close' : 'menu' }}</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Mobile menu -->
-  <div class="sm:hidden" [class.block]="isMenuOpen" [class.hidden]="!isMenuOpen">
-    <div class="pt-2 pb-3 space-y-1">
-      <a routerLink="/" fragment="hero" class="bg-fire-red/10 border-fire-red text-fire-red block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Home</a>
-      <a routerLink="/" fragment="services" class="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Services</a>
-      <a routerLink="/" fragment="coverage" class="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Coverage Options</a>
-    </div>
-    <div class="pt-4 pb-3 border-t border-gray-200">
-      <div class="mt-3 space-y-1">
-        <a routerLink="/auth/login" class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">Login</a>
-        <a routerLink="/auth/register" class="block px-4 py-2 text-base font-medium text-fire-red hover:text-fire-red/80 hover:bg-gray-100">Register</a>
+  <!-- Mobile menu dropdown -->
+  <div class="md:hidden transition-all duration-300" [class.block]="isMenuOpen" [class.hidden]="!isMenuOpen">
+    <div class="px-4 pt-2 pb-6 space-y-2 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-2xl">
+      <a routerLink="/" fragment="hero" class="block px-4 py-3 rounded-xl text-base font-bold text-gray-800 hover:bg-fire-orange/10 hover:text-fire-orange">Home</a>
+      <a routerLink="/" fragment="services" class="block px-4 py-3 rounded-xl text-base font-bold text-gray-600 hover:bg-gray-50 hover:text-gray-900">Services</a>
+      <a routerLink="/" fragment="coverage" class="block px-4 py-3 rounded-xl text-base font-bold text-gray-600 hover:bg-gray-50 hover:text-gray-900">Coverage Options</a>
+      
+      <div class="pt-6 pb-2 border-t border-gray-100/80">
+        <div class="flex flex-col gap-3">
+          <a routerLink="/auth/login" class="block text-center px-4 py-3 rounded-xl text-base font-bold text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100">Sign In</a>
+          <a routerLink="/auth/register" class="block text-center px-4 py-3 rounded-xl text-base font-bold text-white bg-gradient-to-r from-fire-red to-fire-orange shadow-md">Get Started</a>
+        </div>
       </div>
     </div>
   </div>

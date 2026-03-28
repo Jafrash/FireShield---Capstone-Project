@@ -80,17 +80,6 @@ export class AdminDashboardComponent implements OnInit {
     const avgClaimAmount = claims.length > 0 ?
       (claims.reduce((sum, c) => sum + (c.claimAmount || 0), 0) / claims.length).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : '--';
 
-    // Average Settlement Time (days between createdAt and updatedAt for APPROVED/SETTLED claims)
-    const settledClaims = claims.filter(c => c.status === 'APPROVED' || c.status === 'SETTLED');
-    let avgSettlementTime = '--';
-    if (settledClaims.length > 0) {
-      const totalDays = settledClaims.reduce((sum, c) => {
-        const start = new Date(c.createdAt).getTime();
-        const end = new Date(c.updatedAt).getTime();
-        return sum + Math.max(0, Math.round((end - start) / (1000 * 60 * 60 * 24)));
-      }, 0);
-      avgSettlementTime = (totalDays / settledClaims.length).toFixed(1) + ' days';
-    }
 
     // Active Policy Ratio
     const activePolicies = subs.filter(s => s.status === 'ACTIVE').length;
@@ -112,13 +101,6 @@ export class AdminDashboardComponent implements OnInit {
         icon: 'payments',
         color: '#E2725B',
         description: 'Mean value of all claims submitted.'
-      },
-      {
-        title: 'Average Settlement Time',
-        value: avgSettlementTime,
-        icon: 'schedule',
-        color: '#10b981',
-        description: 'Average days taken to settle a claim.'
       },
       {
         title: 'Active Policy Ratio',
@@ -170,9 +152,10 @@ export class AdminDashboardComponent implements OnInit {
 
     this.adminService.getAllSubscriptions().subscribe({
       next: (subs) => {
+        const isPending = (s: PolicySubscription) => ['PENDING', 'SUBMITTED', 'REQUESTED', 'INSPECTING', 'INSPECTED', 'INSPECTION_PENDING', 'UNDER_REVIEW', 'PAYMENT_PENDING'].includes(s.status);
         activePolicies = subs?.filter((s: PolicySubscription) => s.status === 'ACTIVE').length || 0;
-        pendingSubs = subs?.filter((s: PolicySubscription) => s.status === 'PENDING').length || 0;
-        this.pendingSubscriptions.set(subs?.filter((s: PolicySubscription) => s.status === 'PENDING').slice(0, 5) || []);
+        pendingSubs = subs?.filter(isPending).length || 0;
+        this.pendingSubscriptions.set(subs?.filter(isPending).slice(0, 5) || []);
         this.updateCards(customersCount, totalClaims, activePolicies, pendingSubs, totalPolicies, totalUnderwriters);
       },
       error: (err: Error) => {
@@ -193,12 +176,12 @@ export class AdminDashboardComponent implements OnInit {
 
   private updateCards(customers: number, claims: number, active: number, pending: number, policies: number, underwriters: number): void {
     this.dashboardCards.set([
-      { title: 'Total Customers', value: customers, icon: 'people', color: '#C72B32', route: '/admin/customers' },
-      { title: 'Underwriters', value: underwriters, icon: 'manage_accounts', color: '#8b5cf6', route: '/admin/underwriters' },
-      { title: 'Total Policies', value: policies, icon: 'description', color: '#D41F59', route: '/admin/policies' },
-      { title: 'Active Subscriptions', value: active, icon: 'verified', color: '#10b981', route: '/admin/subscriptions' },
-      { title: 'Pending Approvals', value: pending, icon: 'pending_actions', color: '#f59e0b', route: '/admin/subscriptions' },
-      { title: 'Total Claims', value: claims, icon: 'assignment', color: '#C72B32', route: '/admin/claims' }
+      { title: 'Total Customers', value: customers, icon: 'people', color: '#C72B32', route: '/admin-dashboard/customers' },
+      { title: 'Underwriters', value: underwriters, icon: 'manage_accounts', color: '#8b5cf6', route: '/admin-dashboard/underwriters' },
+      { title: 'Total Policies', value: policies, icon: 'description', color: '#D41F59', route: '/admin-dashboard/policies' },
+      { title: 'Active Subscriptions', value: active, icon: 'verified', color: '#10b981', route: '/admin-dashboard/subscriptions' },
+      { title: 'Pending Approvals', value: pending, icon: 'pending_actions', color: '#f59e0b', route: '/admin-dashboard/subscriptions' },
+      { title: 'Total Claims', value: claims, icon: 'assignment', color: '#C72B32', route: '/admin-dashboard/claims' }
     ]);
   }
 
@@ -217,7 +200,10 @@ export class AdminDashboardComponent implements OnInit {
       'REJECTED': 'bg-red-100 text-red-800',
       'PENDING': 'bg-yellow-100 text-yellow-800',
       'ACTIVE': 'bg-green-100 text-green-800',
-      'REQUESTED': 'bg-blue-100 text-blue-800'
+      'REQUESTED': 'bg-blue-100 text-blue-800',
+      'INSPECTION_PENDING': 'bg-orange-100 text-orange-800',
+      'UNDER_REVIEW': 'bg-indigo-100 text-indigo-800',
+      'PAYMENT_PENDING': 'bg-emerald-100 text-emerald-800'
     };
     return statusMap[status] || 'bg-gray-100 text-gray-800';
   }
@@ -235,7 +221,11 @@ export class AdminDashboardComponent implements OnInit {
       'REJECTED': '#C72B32',
       'SETTLED': '#C72B32',
       'PENDING': '#FF6B35',
-      'ACTIVE': '#10b981'
+      'ACTIVE': '#10b981',
+      'INSPECTION_PENDING': '#f59e0b',
+      'UNDER_REVIEW': '#6366f1',
+      'PAYMENT_PENDING': '#10b981',
+      'REQUESTED': '#3b82f6'
     };
     return colorMap[status] || '#cbd5e1';
   }

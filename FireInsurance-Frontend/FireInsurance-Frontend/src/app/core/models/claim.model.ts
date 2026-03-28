@@ -18,6 +18,13 @@ export interface Claim {
   siuStatus?: string; // 'UNDER_INVESTIGATION' | 'CLEARED' | 'FRAUD_CONFIRMED' | null
   fraudScore?: number; // 0-100 fraud risk score
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  causeOfFire?: string;
+  firNumber?: string;
+  fireBrigadeReportNumber?: string;
+  lossType?: string;
+  policeStation?: string;
+  contactPhoneNumber?: string;
+  witnessDetails?: string;
 }
 
 export interface ClaimInspection {

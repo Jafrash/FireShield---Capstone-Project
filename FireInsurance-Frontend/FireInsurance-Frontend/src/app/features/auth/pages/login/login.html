@@ -1,42 +1,100 @@
-<div class="min-h-screen hero-gradient flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
-  <!-- Animated Background Elements -->
-  <div class="absolute inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute w-96 h-96 bg-white/10 rounded-full blur-3xl -top-20 -left-20 animate-pulse"></div>
-    <div class="absolute w-96 h-96 bg-white/10 rounded-full blur-3xl -bottom-20 -right-20 animate-pulse delay-200"></div>
-    <div class="absolute w-64 h-64 bg-fire-orange/10 rounded-full blur-3xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse delay-100"></div>
+<div class="min-h-screen flex w-full bg-white font-sans overflow-hidden">
+  
+  <!-- Left Side: Branding / Visual (Hidden on mobile, 50% on Desktop) -->
+  <div class="hidden lg:flex w-1/2 relative bg-fire-charcoal items-center justify-center p-12 overflow-hidden shadow-2xl">
+    <!-- Abstract background elements -->
+    <div class="absolute inset-0 z-0">
+      <div class="absolute inset-0 bg-gradient-to-br from-fire-charcoal via-[#1a1c23] to-[#3a1a1c]"></div>
+      <!-- Glowing Orbs -->
+      <div class="absolute w-[600px] h-[600px] bg-fire-orange/20 rounded-full blur-[100px] -top-32 -left-32 animate-[pulse_6s_ease-in-out_infinite]"></div>
+      <div class="absolute w-[500px] h-[500px] bg-fire-red/20 rounded-full blur-[100px] bottom-[-10%] right-[-10%] animate-[pulse_8s_ease-in-out_infinite_1s]"></div>
+      <!-- Grid overlay -->
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')] opacity-50"></div>
+    </div>
+    
+    <!-- Branding Content -->
+    <div class="relative z-10 w-full max-w-xl text-white">
+      <!-- Floating Glass Icon -->
+      <div class="inline-flex p-5 rounded-2xl bg-white/5 backdrop-blur-xl mb-12 border border-white/10 shadow-[0_8px_32px_0_rgba(255,107,53,0.3)] animate-[bounce-in_1s_ease-out]">
+        <span class="material-icons text-[40px] bg-gradient-to-br from-fire-yellow to-fire-orange bg-clip-text text-transparent transform scale-110">local_fire_department</span>
+      </div>
+      
+      <h1 class="text-5xl xl:text-6xl font-extrabold mb-6 tracking-tight leading-[1.15]">
+        Protecting what matters most with
+        <span class="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-fire-yellow via-fire-orange to-fire-red pb-2">
+          FireShield
+        </span>
+      </h1>
+      
+      <p class="text-lg xl:text-xl text-gray-300 font-medium leading-relaxed mb-16 max-w-lg">
+        Experience the future of insurance management. Fast, secure, and tailored to provide peace of mind in unpredictable times.
+      </p>
+      
+      <!-- Trust badges -->
+      <div class="flex gap-10 items-center border-t border-white/10 pt-10">
+        <div class="flex items-center gap-4 group">
+          <div class="w-12 h-12 rounded-full bg-fire-orange/10 flex items-center justify-center text-fire-orange border border-fire-orange/20 group-hover:scale-110 transition-transform">
+            <span class="material-icons">security</span>
+          </div>
+          <div>
+            <p class="font-bold text-white text-sm">Bank-grade</p>
+            <p class="text-xs text-gray-400 font-medium tracking-wide">SECURITY</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 group">
+          <div class="w-12 h-12 rounded-full bg-fire-red/10 flex items-center justify-center text-fire-red border border-fire-red/20 group-hover:scale-110 transition-transform">
+            <span class="material-icons">speed</span>
+          </div>
+          <div>
+            <p class="font-bold text-white text-sm">Lightning fast</p>
+            <p class="text-xs text-gray-400 font-medium tracking-wide">PROCESSING</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Login Card -->
-  <div class="w-full max-w-md relative z-10 animate-scale-in">
-    <div class="glass-card p-8 sm:p-10 lg:p-12 shadow-2xl">
-      <!-- Header -->
-      <div class="text-center mb-8 animate-fade-in-down">
-        <div class="inline-flex p-5 bg-gradient-to-br from-fire-red via-fire-orange to-fire-red rounded-2xl mb-6 shadow-2xl hover:scale-110 transition-transform duration-500 animate-glow">
-          <span class="material-icons text-5xl text-white">local_fire_department</span>
+  <!-- Right Side: Login Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative bg-gray-50/50">
+    
+    <!-- Mobile background styling ONLY -->
+    <div class="absolute inset-0 lg:hidden bg-gradient-to-br from-fire-cream/40 via-white to-fire-cream/40 z-0"></div>
+    <div class="absolute top-0 w-full h-1.5 lg:hidden bg-gradient-to-r from-fire-red via-fire-orange to-fire-yellow z-10 shadow-sm"></div>
+
+    <div class="w-full max-w-[440px] relative z-10 bg-white rounded-[2rem] shadow-[0_0_50px_-12px_rgba(0,0,0,0.08)] border border-gray-100 p-8 sm:p-12">
+      
+      <!-- Mobile Logo Header -->
+      <div class="lg:hidden text-center mb-10">
+        <div class="inline-flex justify-center items-center w-16 h-16 rounded-2xl bg-gradient-to-br from-fire-red to-fire-orange shadow-[0_8px_16px_rgba(255,107,53,0.3)] mb-5">
+          <span class="material-icons text-3xl text-white">local_fire_department</span>
         </div>
-        <h1 class="text-4xl md:text-5xl font-extrabold text-gradient-premium mb-3 tracking-tight">
-          FireShield
-        </h1>
-        <p class="text-gray-600 font-semibold text-lg">Insurance Management System</p>
+        <h2 class="text-2xl font-extrabold text-fire-charcoal tracking-tight">FireShield</h2>
       </div>
 
-      <!-- Login Form -->
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Header -->
+      <div class="mb-10 text-center lg:text-left">
+        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">Welcome back</h2>
+        <p class="text-gray-500 font-medium text-[15px]">Please enter your details to sign in.</p>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
+        
         <!-- Error Alert -->
         @if (errorMessage()) {
-          <div class="alert alert-error animate-fade-in-down">
-            <span class="material-icons text-xl">error</span>
-            <span class="font-semibold">{{ errorMessage() }}</span>
+          <div class="bg-red-50 border border-red-100 text-red-700 px-4 py-3.5 rounded-xl flex items-start gap-3 text-sm animate-[fadeIn_0.3s_ease-out]">
+            <span class="material-icons text-red-500 flex-shrink-0 text-[20px]">error_outline</span>
+            <span class="font-semibold leading-tight">{{ errorMessage() }}</span>
           </div>
         }
 
         <!-- Form Validation Summary -->
         @if (loginForm.invalid && loginForm.touched) {
-          <div class="alert alert-error animate-fade-in-down">
-            <span class="material-icons text-xl">error</span>
+          <div class="bg-red-50 border border-red-100 text-red-700 px-4 py-3.5 rounded-xl flex items-start gap-3 text-sm animate-[fadeIn_0.3s_ease-out]">
+            <span class="material-icons text-red-500 flex-shrink-0 text-[20px]">error_outline</span>
             <div class="flex-1">
-              <div class="font-bold text-sm mb-2">Please fix the following errors:</div>
-              <ul class="text-xs space-y-1 list-disc list-inside">
+              <div class="font-bold mb-1">Please fix the following errors:</div>
+              <ul class="list-disc list-inside space-y-1 text-[13px] font-medium">
                 @if (loginForm.get('username')?.errors) {
                   <li>{{ getErrorMessage('username') }}</li>
                 }
@@ -48,168 +106,123 @@
           </div>
         }
 
-        <!-- Username Field -->
-        <div class="form-group animate-fade-in-up">
-          <label for="username" class="flex items-center gap-2"
-                 [class.text-red-600]="isFieldInvalid('username')"
-                 [class.text-green-600]="isFieldValid('username')"
-                 [class.text-gray-700]="!isFieldInvalid('username') && !isFieldValid('username')">
-            <span class="material-icons text-lg">person</span>
-            <span>Username <span class="text-red-500">*</span></span>
-          </label>
-          <input
-            type="text"
-            id="username"
-            formControlName="username"
-            placeholder="Enter your username"
-            class="w-full px-4 py-4 border-2 rounded-xl focus:outline-none transition-all bg-white shadow-sm hover:shadow-md"
-            [class.border-gray-200]="!isFieldInvalid('username') && !isFieldValid('username')"
-            [class.focus:border-fire-orange]="!isFieldInvalid('username') && !isFieldValid('username')"
-            [class.focus:ring-fire-orange/30]="! isFieldInvalid('username') && !isFieldValid('username')"
-            [class.input-glow]="!isFieldInvalid('username') && !isFieldValid('username')"
-          />
-          @if (isFieldInvalid('username')) {
-            <div class="error-message animate-fade-in-down">
-              <span class="material-icons text-sm">error</span>
-              <span>{{ getErrorMessage('username') }}</span>
+        <!-- Username -->
+        <div class="space-y-1.5 relative group">
+          <label for="username" class="text-[13px] font-bold text-gray-700 ml-1 uppercase tracking-wide">Username</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+              <span class="material-icons text-[20px]">person_outline</span>
             </div>
+            <input type="text" id="username" formControlName="username" placeholder="Enter your username" 
+              class="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm"
+              [class.!border-red-300]="isFieldInvalid('username')"
+              [class.focus:!border-red-500]="isFieldInvalid('username')"
+              [class.focus:!ring-red-500/10]="isFieldInvalid('username')"
+            />
+          </div>
+          @if (isFieldInvalid('username')) {
+            <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1">
+              <span class="material-icons text-[14px]">close</span> {{ getErrorMessage('username') }}
+            </p>
           }
         </div>
 
-        <!-- Password Field -->
-        <div class="form-group animate-fade-in-up delay-100">
-          <label for="password" class="flex items-center gap-2"
-                 [class.text-red-600]="isFieldInvalid('password')"
-                 [class.text-green-600]="isFieldValid('password')"
-                 [class.text-gray-700]="!isFieldInvalid('password') && !isFieldValid('password')">
-            <span class="material-icons text-lg">lock</span>
-            <span>Password <span class="text-red-500">*</span></span>
-          </label>
+        <!-- Password -->
+        <div class="space-y-1.5 relative group">
+          <label for="password" class="text-[13px] font-bold text-gray-700 ml-1 uppercase tracking-wide">Password</label>
           <div class="relative">
-            <input
-              [type]="showPassword() ? 'text' : 'password'"
-              id="password"
-              formControlName="password"
-              placeholder="Enter your password"
-              class="w-full px-4 py-4 pr-14 border-2 rounded-xl focus:outline-none transition-all bg-white shadow-sm hover:shadow-md"
-              [class.border-gray-200]="!isFieldInvalid('password') && !isFieldValid('password')"
-              [class.focus:border-fire-orange]="!isFieldInvalid('password') && !isFieldValid('password')"
-              [class.focus:ring-fire-orange/30]="!isFieldInvalid('password') && !isFieldValid('password')"
-              [class.input-glow]="!isFieldInvalid('password') && !isFieldValid('password')"
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+              <span class="material-icons text-[20px]">lock_outline</span>
+            </div>
+            <input [type]="showPassword() ? 'text' : 'password'" id="password" formControlName="password" placeholder="••••••••" 
+              class="w-full pl-11 pr-12 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm tracking-widest placeholder:tracking-normal"
+              [class.!border-red-300]="isFieldInvalid('password')"
+              [class.focus:!border-red-500]="isFieldInvalid('password')"
+              [class.focus:!ring-red-500/10]="isFieldInvalid('password')"
             />
-            <button
-              type="button"
-              (click)="togglePasswordVisibility()"
-              class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-fire-red rounded-lg hover:bg-fire-red/10 transition-all hover:scale-110"
-              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
-            >
-              <span class="material-icons text-xl">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+            <button type="button" (click)="togglePasswordVisibility()" tabindex="-1"
+              class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-700 transition-colors p-2">
+              <span class="material-icons text-[20px]">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
             </button>
           </div>
           @if (isFieldInvalid('password')) {
-            <div class="error-message animate-fade-in-down">
-              <span class="material-icons text-sm">error</span>
-              <span>{{ getErrorMessage('password') }}</span>
-            </div>
+            <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1">
+              <span class="material-icons text-[14px]">close</span> {{ getErrorMessage('password') }}
+            </p>
           }
         </div>
 
-        <!-- Forgot Password Link -->
-        <div class="flex justify-end animate-fade-in-up delay-200">
-          <a
-            routerLink="/auth/forgot-password"
-            class="text-sm font-bold text-fire-red hover:text-fire-orange transition-colors hover:scale-105 inline-flex items-center gap-1 group"
-          >
-            <span>Forgot password?</span>
-            <span class="material-icons text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        <!-- Options row -->
+        <div class="flex items-center justify-between pt-1 pb-1">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="remember" class="w-4 h-4 rounded border-gray-300 text-fire-orange focus:ring-fire-orange/50 transition-all cursor-pointer">
+            <label for="remember" class="text-sm font-medium text-gray-600 cursor-pointer select-none">Remember me</label>
+          </div>
+          <a routerLink="/auth/forgot-password" class="text-sm font-bold text-fire-orange hover:text-fire-red transition-colors">
+            Forgot password?
           </a>
         </div>
 
-        <!-- Sign In Button -->
-        <button
-          type="submit"
-          [disabled]="isSubmitting() || loginForm.invalid"
-          class="btn btn-lg w-full bg-gradient-to-r from-fire-red to-fire-orange text-white shadow-lg hover:shadow-2xl animate-fade-in-up delay-300"
-        >
-          @if (!isSubmitting()) {
-            <span class="material-icons">login</span>
-            <span>Sign In</span>
-            <span class="material-icons">arrow_forward</span>
-          }
+        <!-- Submit Button -->
+        <button type="submit" [disabled]="isSubmitting() || loginForm.invalid"
+          class="w-full py-4 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-fire-red hover:from-fire-red to-fire-orange hover:to-[#ff7f4d] shadow-[0_8px_16px_rgba(255,107,53,0.25)] hover:shadow-[0_12px_20px_rgba(255,107,53,0.35)] focus:ring-4 focus:ring-fire-orange/30 transition-all transform active:scale-[0.98] mt-4 flex items-center justify-center gap-2 group disabled:opacity-60 disabled:shadow-none disabled:transform-none disabled:cursor-not-allowed">
           @if (isSubmitting()) {
-            <span class="material-icons animate-spin">refresh</span>
+            <span class="material-icons animate-spin text-[20px]">refresh</span>
             <span>Signing in...</span>
+          } @else {
+            <span class="text-[15px] tracking-wide">Sign In</span>
+            <span class="material-icons text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
           }
         </button>
 
-        <!-- Google Sign In -->
+        <!-- Google OAuth -->
         @if (googleLoginEnabled) {
-          <div class="relative py-2 animate-fade-in-up delay-400">
-            <div class="divider-gradient"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <span class="bg-white px-4 text-xs uppercase tracking-wider text-gray-500 font-bold">
-                or continue with
-              </span>
+          <div class="relative py-5">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-200/80"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-4 bg-white text-gray-400 font-bold tracking-wider text-[11px] uppercase">Or continue with</span>
             </div>
           </div>
 
-          <div class="space-y-3 animate-fade-in-up delay-500">
-            <div class="flex justify-center" id="google-signin-button"></div>
+          <div class="flex flex-col items-center space-y-3">
+             <div id="google-signin-button" class="w-full flex justify-center hover:scale-[1.02] transition-transform"></div>
 
-            @if (isGoogleSubmitting()) {
-              <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
-                <span class="material-icons animate-spin text-fire-red">refresh</span>
-                <span class="font-semibold">Signing in with Google...</span>
-              </div>
-            }
+             @if (isGoogleSubmitting()) {
+               <div class="flex items-center justify-center gap-2 text-sm text-gray-700 bg-gray-50/80 w-full py-2.5 rounded-xl font-medium">
+                 <span class="material-icons animate-spin text-fire-red text-[18px]">refresh</span>
+                 <span>Signing in with Google...</span>
+               </div>
+             }
 
-            @if (!isGoogleScriptReady()) {
-              <div class="flex items-center justify-center gap-2 text-xs text-gray-500">
-                <span class="material-icons animate-pulse text-fire-red text-sm">cloud_sync</span>
-                <span>Loading Google sign-in...</span>
-              </div>
-            }
+             @if (!isGoogleScriptReady()) {
+               <div class="flex items-center justify-center gap-2 text-xs font-medium text-gray-500 w-full py-2">
+                 <span class="material-icons animate-pulse text-fire-orange text-[16px]">cloud_sync</span>
+                 <span>Loading Google sign-in...</span>
+               </div>
+             }
 
-            <div class="flex items-center justify-center gap-2 text-xs text-gray-600 bg-fire-cream border border-fire-orange/20 rounded-lg px-4 py-3">
-              <span class="material-icons text-fire-red text-sm">info</span>
-              <span>Google sign-in is available for customer accounts only</span>
-            </div>
+             <div class="flex items-start gap-2 text-xs font-medium text-gray-600 bg-fire-cream/50 border border-fire-orange/10 rounded-xl px-4 py-3 w-full leading-relaxed">
+               <span class="material-icons text-fire-red text-[16px] mt-0.5">info_outline</span>
+               <span>Google login is intended for customer accounts only. Employees should use email.</span>
+             </div>
           </div>
         }
       </form>
 
-      <!-- Register Link -->
-      <div class="mt-8 text-center animate-fade-in-up delay-600">
-        <p class="text-sm text-gray-600 font-medium">
-          Don't have an account?
-          <a
-            routerLink="/auth/register"
-            class="font-bold text-fire-red hover:text-fire-orange transition-colors hover:scale-105 inline-flex items-center gap-1 ml-1 group"
-          >
-            <span>Sign up now</span>
-            <span class="material-icons text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-          </a>
-        </p>
-      </div>
+      <p class="text-center text-[15px] font-medium text-gray-500 mt-10">
+        Don't have an account? 
+        <a routerLink="/auth/register" class="text-fire-orange font-bold hover:text-fire-red transition-colors ml-1">
+          Sign up now
+        </a>
+      </p>
 
-      <!-- Footer -->
-      <div class="mt-8 pt-6 border-t border-gray-200 text-center animate-fade-in-up delay-700">
-        <p class="text-xs text-gray-500 flex items-center justify-center gap-2">
-          <span class="material-icons text-sm text-fire-red">local_fire_department</span>
-          <span>&copy; 2026 FireShield Insurance. All rights reserved.</span>
-        </p>
-      </div>
     </div>
 
-    <!-- Back to Home Link -->
-    <div class="text-center mt-6 animate-fade-in-up delay-800">
-      <a
-        routerLink="/"
-        class="inline-flex items-center gap-2 text-white hover:text-white/80 transition-colors font-semibold text-sm group"
-      >
-        <span class="material-icons group-hover:-translate-x-1 transition-transform">arrow_back</span>
-        <span>Back to Home</span>
-      </a>
-    </div>
+    <!-- Back to Home -->
+    <a routerLink="/" class="absolute top-6 left-6 lg:top-10 lg:left-10 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-gray-900 hover:border-gray-300 hover:shadow-md transition-all z-20 group" aria-label="Back to Home">
+      <span class="material-icons text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+    </a>
   </div>
 </div>

@@ -362,70 +362,106 @@
         </div>
         }
 
-        <!-- Investigation Tools -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <span class="material-icons text-red-600">build</span>
+        <!-- Step 1: Investigation Tools (High-Fidelity UI) -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
+            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
+              <span class="material-icons text-red-600 bg-red-50 p-2 rounded-lg">construction</span>
               Investigation Tools
             </h3>
           </div>
-          <div class="p-4 space-y-3">
-            <button
-              class="w-full flex items-center gap-3 p-3 text-left bg-gray-50 hover:bg-red-50 hover:border-red-200 border border-gray-200 rounded-lg transition-colors">
-              <span class="material-icons text-red-600">search</span>
-              <span class="text-sm font-medium text-gray-900">Pattern Analysis</span>
+          <div class="p-5 space-y-4">
+            <!-- Pattern Analysis -->
+            <button (click)="runPatternAnalysis()" class="w-full flex items-center gap-4 p-4 text-left bg-red-50 hover:bg-red-100 border border-red-200 rounded-2xl transition-all group shadow-sm">
+              <div class="w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow-sm border border-red-100">
+                <span class="material-icons text-red-600 group-hover:rotate-12 transition-transform">search</span>
+              </div>
+              <span class="text-base font-bold text-gray-900">Pattern Analysis</span>
             </button>
-            <button
-              class="w-full flex items-center gap-3 p-3 text-left bg-gray-50 hover:bg-red-50 hover:border-red-200 border border-gray-200 rounded-lg transition-colors">
-              <span class="material-icons text-red-600">analytics</span>
-              <span class="text-sm font-medium text-gray-900">Fraud Detection Engine</span>
+
+            <!-- Fraud Detection Engine -->
+            <button (click)="checkFraudEngine()" class="w-full flex items-center gap-4 p-4 text-left bg-white hover:bg-gray-50 border border-gray-200 rounded-2xl transition-all group">
+              <div class="w-11 h-11 bg-gray-50 rounded-xl flex items-center justify-center">
+                <span class="material-icons text-red-600 group-hover:scale-110 transition-transform">analytics</span>
+              </div>
+              <span class="text-base font-bold text-gray-900">Fraud Detection Engine</span>
             </button>
-            <button
-              class="w-full flex items-center gap-3 p-3 text-left bg-gray-50 hover:bg-red-50 hover:border-red-200 border border-gray-200 rounded-lg transition-colors">
-              <span class="material-icons text-red-600">assessment</span>
-              <span class="text-sm font-medium text-gray-900">Risk Assessment</span>
+
+            <!-- Risk Assessment -->
+            <button (click)="runRiskAssessment()" class="w-full flex items-center gap-4 p-4 text-left bg-white hover:bg-gray-50 border border-gray-200 rounded-2xl transition-all group">
+              <div class="w-11 h-11 bg-gray-50 rounded-xl flex items-center justify-center">
+                <span class="material-icons text-red-600 group-hover:scale-110 transition-transform">assessment</span>
+              </div>
+              <span class="text-base font-bold text-gray-900">Risk Assessment</span>
             </button>
-            <button
-              class="w-full flex items-center gap-3 p-3 text-left bg-gray-50 hover:bg-red-50 hover:border-red-200 border border-gray-200 rounded-lg transition-colors">
-              <span class="material-icons text-red-600">report</span>
-              <span class="text-sm font-medium text-gray-900">Generate Report</span>
+
+            <!-- Generate Report -->
+            <button (click)="generateReport()" class="w-full flex items-center gap-4 p-4 text-left bg-white hover:bg-gray-50 border border-gray-200 rounded-2xl transition-all group">
+              <div class="w-11 h-11 bg-gray-50 rounded-xl flex items-center justify-center">
+                <span class="material-icons text-red-600 group-hover:animate-pulse transition-all">warning</span>
+              </div>
+              <span class="text-base font-bold text-gray-900">Generate Report</span>
             </button>
           </div>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Recent Investigation Activity</h3>
+        <!-- Step 3: Engine Health & Analytics Hub -->
+        <div class="bg-gray-900 rounded-xl shadow-xl overflow-hidden border border-gray-800">
+          <div class="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+            <h3 class="text-lg font-mono text-gray-100 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              Engine Analytics Hub
+            </h3>
+            <span class="text-xs font-mono text-gray-400">STATUS: {{ engineStatus() | uppercase }}</span>
           </div>
-          <div class="p-4 space-y-3">
-            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-              <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <span class="material-icons text-green-600 text-sm">check_circle</span>
+          
+          <div class="p-6 space-y-6">
+            <!-- Version Info -->
+            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+              <div>
+                <p class="text-xs text-gray-500 font-mono mb-1">CORE LOGIC VERSION</p>
+                <p class="text-sm font-bold text-gray-100 font-mono">{{ engineVersion() }}</p>
               </div>
-              <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Case CLM-2024-004 closed as legitimate</p>
-                <p class="text-xs text-gray-500">2 hours ago</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-              <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                <span class="material-icons text-red-600 text-sm">flag</span>
-              </div>
-              <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Fraud confirmed in CLM-2024-007</p>
-                <p class="text-xs text-gray-500">4 hours ago</p>
+              <div class="text-right">
+                <p class="text-xs text-gray-500 font-mono mb-1">ACTIVE RULESETS</p>
+                <p class="text-sm font-bold text-red-400 font-mono">{{ activeRulesCount() }} HEURISTICS</p>
               </div>
             </div>
-            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span class="material-icons text-blue-600 text-sm">assignment</span>
+
+            <!-- Pipeline Status -->
+            <div class="space-y-3">
+              <p class="text-xs text-gray-500 font-mono">PIPELINE DIAGNOSTICS</p>
+              
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-400 flex items-center gap-2">
+                  <span class="material-icons text-[16px] text-green-500">check_circle</span>
+                  Identity Verification
+                </span>
+                <span class="text-green-500 font-mono text-xs">ONLINE</span>
               </div>
-              <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">New case CLM-2024-009 assigned</p>
-                <p class="text-xs text-gray-500">6 hours ago</p>
+              
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-400 flex items-center gap-2">
+                  <span class="material-icons text-[16px] text-green-500">check_circle</span>
+                  Evidence Heuristics
+                </span>
+                <span class="text-green-500 font-mono text-xs">ONLINE</span>
               </div>
+              
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-400 flex items-center gap-2">
+                  <span class="material-icons text-[16px] text-blue-400">auto_awesome</span>
+                  Gemini Flash 1.5
+                </span>
+                <span class="text-blue-400 font-mono text-xs">IDLE</span>
+              </div>
+            </div>
+
+            <!-- Last Scan -->
+            <div class="bg-gray-800/50 rounded-lg p-3 border border-gray-800 mt-4">
+              <p class="text-xs text-gray-400 text-center font-mono">
+                LAST FULL POOL SCAN: <span class="text-gray-200">{{ lastScanTime() }}</span>
+              </p>
             </div>
           </div>
         </div>
@@ -433,4 +469,22 @@
     </div>
     }
   </div>
+
+  <!-- Step 1: Tool Notification Toast Popup -->
+  @if (showToolPopup()) {
+    <div class="fixed bottom-8 right-8 z-[100] animate-bounce-in">
+      <div class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-gray-700 max-w-md">
+        <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center shrink-0">
+          <span class="material-icons text-white text-xl">{{ toolIcon() }}</span>
+        </div>
+        <div>
+          <p class="font-bold text-sm">SIU Intelligence Action</p>
+          <p class="text-xs text-gray-400 leading-relaxed">{{ toolMessage() }}</p>
+        </div>
+        <button (click)="showToolPopup.set(false)" class="ml-2 text-gray-500 hover:text-white transition-colors">
+          <span class="material-icons text-sm">close</span>
+        </button>
+      </div>
+    </div>
+  }
 </div>

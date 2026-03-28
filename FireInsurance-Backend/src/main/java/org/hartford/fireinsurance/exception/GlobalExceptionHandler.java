@@ -130,6 +130,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles DataIntegrityViolationException (400 BAD REQUEST)
+     * Thrown when a database constraint is violated
+     */
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", HttpStatus.BAD_REQUEST.value());
+        error.put("error", "Database Design/Constraint Error");
+        error.put("message", "A database error occurred. This might be due to missing columns or constraint violations. Details: " + ex.getRootCause().getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
      * Handles generic RuntimeException (500 INTERNAL SERVER ERROR)
      * Catches any unhandled runtime exceptions
      */
@@ -139,7 +153,7 @@ public class GlobalExceptionHandler {
         error.put("timestamp", LocalDateTime.now());
         error.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         error.put("error", "Internal Server Error");
-        error.put("message", ex.getMessage());
+        error.put("message", ex.getMessage() != null ? ex.getMessage() : "Null runtime exception occurred");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
@@ -153,7 +167,20 @@ public class GlobalExceptionHandler {
         error.put("timestamp", LocalDateTime.now());
         error.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         error.put("error", "Internal Server Error");
-        error.put("message", "An unexpected error occurred");
+        error.put("message", "An unexpected error occurred: " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    /**
+     * Handles any Throwable to catch Errors like StackOverflowError
+     */
+    @ExceptionHandler(Throwable.class)
+    public ResponseEntity<Map<String, Object>> handleThrowable(Throwable t) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        error.put("error", "Critical System Error");
+        error.put("message", "A critical error occurred: " + t.getClass().getSimpleName() + " - " + t.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }

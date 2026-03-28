@@ -65,7 +65,7 @@
               <span class="material-icons text-fire-red">assignment_late</span>
               Recent Claims
             </h2>
-            <a routerLink="/admin/claims" class="text-fire-red hover:text-fire-orange text-sm font-bold flex items-center transition-colors">
+            <a routerLink="/admin-dashboard/claims" class="text-fire-red hover:text-fire-orange text-sm font-bold flex items-center transition-colors">
               VIEW Triage <span class="material-icons text-sm ml-1">arrow_forward</span>
             </a>
           </div>
@@ -105,7 +105,7 @@
               <span class="material-icons text-orange-500">pending_actions</span>
               Pending Approvals
             </h2>
-            <a routerLink="/admin/subscriptions" class="text-fire-red hover:text-fire-orange text-sm font-bold flex items-center transition-colors">
+            <a routerLink="/admin-dashboard/subscriptions" class="text-fire-red hover:text-fire-orange text-sm font-bold flex items-center transition-colors">
               EXECUTE ALL <span class="material-icons text-sm ml-1">flash_on</span>
             </a>
           </div>
@@ -123,8 +123,8 @@
                 <div class="border border-gray-200 rounded-lg p-4 hover:border-yellow-300 transition-colors">
                   <div class="flex items-center justify-between mb-2">
                     <span class="text-sm font-semibold text-gray-700">Subscription #{{ subscription.id }}</span>
-                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-                      PENDING
+                    <span class="px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-tighter shadow-sm" [ngClass]="getStatusClass(subscription.status)">
+                      {{ getStatusLabel(subscription.status) }}
                     </span>
                   </div>
                   <p class="text-sm text-gray-600 mb-1">Policy: {{ subscription.policyName || subscription.requestedPolicyType || 'N/A' }}</p>
@@ -143,7 +143,7 @@
       <div class="mt-12 glass-card p-10 bg-gradient-to-br from-white to-gray-50">
         <h2 class="text-2xl font-black text-gray-900 mb-8 tracking-tight">System Operations</h2>
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-          <button routerLink="/admin/policies"
+          <button routerLink="/admin-dashboard/policies"
                   class="flex flex-col items-center p-8 rounded-3xl border-2 border-gray-100 hover:border-fire-red hover:bg-white hover:shadow-2xl hover:shadow-fire-red/10 transition-all group">
             <div class="w-16 h-16 rounded-2xl bg-fire-red/5 text-fire-red flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <span class="material-icons text-4xl">add_moderator</span>
@@ -151,7 +151,7 @@
             <span class="text-sm font-black text-gray-900 uppercase tracking-widest">New Policy</span>
           </button>
 
-          <button routerLink="/admin/subscriptions"
+          <button routerLink="/admin-dashboard/subscriptions"
                   class="flex flex-col items-center p-8 rounded-3xl border-2 border-gray-100 hover:border-green-500 hover:bg-white hover:shadow-2xl hover:shadow-green-500/10 transition-all group">
             <div class="w-16 h-16 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <span class="material-icons text-4xl">how_to_reg</span>
@@ -159,7 +159,7 @@
             <span class="text-sm font-black text-gray-900 uppercase tracking-widest">Onboarding</span>
           </button>
 
-          <button routerLink="/admin/claims"
+          <button routerLink="/admin-dashboard/claims"
                   class="flex flex-col items-center p-8 rounded-3xl border-2 border-gray-100 hover:border-fire-orange hover:bg-white hover:shadow-2xl hover:shadow-fire-orange/10 transition-all group">
             <div class="w-16 h-16 rounded-2xl bg-fire-orange/5 text-fire-orange flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <span class="material-icons text-4xl">gavel</span>

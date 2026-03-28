@@ -153,5 +153,27 @@
       "uploadedBy": 2,
       "uploadedAt": "2024-02-20T00:00:00.000Z"
     }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "title": "Claim Status Updated",
+      "message": "Your claim CLM-2024-001 is now under review.",
+      "type": "CLAIM",
+      "status": "UNREAD",
+      "actionUrl": "/customer/claims/1",
+      "createdAt": "2024-03-20T10:00:00Z",
+      "isRead": false
+    },
+    {
+      "id": 2,
+      "title": "Inspection Scheduled",
+      "message": "A property inspection has been scheduled for Feb 28.",
+      "type": "PROPERTY_INSPECTION",
+      "status": "READ",
+      "actionUrl": "/customer/inspections/1",
+      "createdAt": "2024-03-19T14:30:00Z",
+      "isRead": true
+    }
   ]
 }

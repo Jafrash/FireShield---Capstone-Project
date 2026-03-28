@@ -79,12 +79,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => new Error('Token expired'));
       }
 
-      clonedRequest = req.clone({
-        setHeaders: { 
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const headers: any = {
+        Authorization: `Bearer ${token}`
+      };
+
+      // Only add Content-Type for requests that might have a body
+      if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+        headers['Content-Type'] = 'application/json';
+      }
+
+      clonedRequest = req.clone({ setHeaders: headers });
       requestWasAuthenticated = true;
     }
   }

@@ -40,11 +40,11 @@ export class SidebarComponent implements OnInit {
       case 'ADMIN':
         this.navLinks = [
           { label: 'Dashboard', path: '/admin-dashboard/dashboard', icon: 'dashboard' },
-          { label: 'Fraud Monitoring', path: '/admin-dashboard/fraud-monitoring', icon: 'security' },
+          { label: 'SIU Dashboard', path: '/admin-dashboard/fraud-monitoring', icon: 'security' },
           { label: 'Customers', path: '/admin-dashboard/customers', icon: 'people' },
           { label: 'Surveyors', path: '/admin-dashboard/surveyors', icon: 'badge' },
           { label: 'Underwriters', path: '/admin-dashboard/underwriters', icon: 'manage_accounts' },
-          { label: 'SIU Investigators', path: '/admin-dashboard/siu-investigators', icon: 'investigation' },
+          { label: 'SIU Investigators', path: '/admin-dashboard/siu-investigators', icon: 'gavel' },
           { label: 'Blacklist Management', path: '/admin-dashboard/blacklist', icon: 'block' },
           { label: 'Policies', path: '/admin-dashboard/policies', icon: 'description' },
           { label: 'Subscriptions', path: '/admin-dashboard/subscriptions', icon: 'card_membership' },

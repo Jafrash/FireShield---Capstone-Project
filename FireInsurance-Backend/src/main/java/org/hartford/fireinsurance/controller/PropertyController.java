@@ -123,15 +123,16 @@ public class PropertyController {
     // Mapper
     // =============================
     private PropertyResponse mapToResponse(Property property) {
-
-        return new PropertyResponse(
-                property.getPropertyId(),
-                property.getPropertyType(),
-                property.getAddress(),
-                property.getAreaSqft(),
-                property.getConstructionType(),
-                property.getRiskScore()
-        );
+        PropertyResponse response = new PropertyResponse();
+        response.setPropertyId(property.getPropertyId());
+        response.setPropertyType(property.getPropertyType());
+        response.setAddress(property.getAddress());
+        response.setAreaSqft(property.getAreaSqft());
+        response.setConstructionType(property.getConstructionType());
+        response.setRiskScore(property.getRiskScore());
+        response.setLatitude(property.getLatitude());
+        response.setLongitude(property.getLongitude());
+        response.setZipCode(property.getZipCode());
+        return response;
     }
 }
-

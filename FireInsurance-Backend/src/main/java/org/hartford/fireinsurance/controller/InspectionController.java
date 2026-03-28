@@ -44,14 +44,30 @@ public class InspectionController {
         List<InspectionResponse> response = inspectionService.getBySurveyor(username).stream().map(this::mapToResponse).toList();
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('ADMIN', 'UNDERWRITER')")
+    public ResponseEntity<?> getAll(
+            Authentication authentication) {
+        try {
+            List<InspectionResponse> response = inspectionService.getAll()
+                    .stream()
+                    .map(this::mapToResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching inspections: " + e.getMessage());
+        }
+    }
+
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<InspectionResponse>> getAll() {
-        List<InspectionResponse> response = inspectionService.getAll().stream().map(this::mapToResponse).toList();
-        return ResponseEntity.ok(response);
+    @PreAuthorize("hasAnyRole('ADMIN', 'UNDERWRITER')")
+    public ResponseEntity<?> getAllWithFilter(
+            Authentication authentication,
+            @RequestParam(required = false) String status) {
+        return getAll(authentication);
     }
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SURVEYOR','ADMIN')")
+    @PreAuthorize("hasAnyRole('SURVEYOR','ADMIN', 'UNDERWRITER')")
     public ResponseEntity<InspectionResponse> getById(@PathVariable Long id) {
         Inspection inspection = inspectionService.getById(id);
         return ResponseEntity.ok(mapToResponse(inspection));
@@ -62,7 +78,7 @@ public class InspectionController {
         InspectionResponse response = new InspectionResponse(
                 inspection.getInspectionId(),
             property != null ? property.getPropertyId() : null,
-                inspection.getSurveyor() != null ? inspection.getSurveyor().getUser().getUsername() : null,
+                inspection.getSurveyor() != null && inspection.getSurveyor().getUser() != null ? inspection.getSurveyor().getUser().getUsername() : "Unknown",
                 inspection.getInspectionDate(),
                 inspection.getAssessedRiskScore(),
                 inspection.getStatus());
@@ -91,6 +107,21 @@ public class InspectionController {
         response.setHazardRisk(inspection.getHazardRisk());
         response.setRecommendedCoverage(inspection.getRecommendedCoverage());
         response.setRecommendedPremium(inspection.getRecommendedPremium());
+
+        // Map Expanded COPE fields
+        response.setConstructionType(inspection.getConstructionType());
+        response.setRoofType(inspection.getRoofType());
+        response.setOccupancyType(inspection.getOccupancyType());
+        response.setElectricalAuditStatus(inspection.getElectricalAuditStatus());
+        response.setHazardousMaterialsPresent(inspection.getHazardousMaterialsPresent());
+        response.setAdjacentBuildingDistance(inspection.getAdjacentBuildingDistance());
+        response.setInternalProtectionNotes(inspection.getInternalProtectionNotes());
+        
+        // Link to requested sum insured from related subscription
+        if (inspection.getSubscription() != null) {
+            response.setRequestedSumInsured(inspection.getSubscription().getRequestedCoverage());
+        }
+        
         return response;
     }
 

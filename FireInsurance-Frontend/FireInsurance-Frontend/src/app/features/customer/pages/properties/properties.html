@@ -104,23 +104,18 @@
               <span class="text-sm font-bold text-gray-900">{{ property.constructionType }}</span>
             </div>
 
-            <div class="flex items-center justify-between py-3 border-b border-gray-100">
-              <div class="flex items-center gap-3">
-                <span class="material-icons text-gray-400">health_and_safety</span>
-                <span class="text-sm font-medium text-gray-600">Risk Score</span>
+            <!-- Coordinates if available -->
+            @if (property.latitude && property.longitude) {
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                  <span class="material-icons text-gray-400">location_on</span>
+                  <span class="text-sm font-medium text-gray-600">GPS Verified</span>
+                </div>
+                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full flex items-center gap-1">
+                  <span class="material-icons text-[12px]">verified</span> Verified
+                </span>
               </div>
-              <span class="text-sm font-bold text-gray-900">
-                @if (property.riskScore != null) {
-                  <span [ngClass]="{
-                    'text-green-600': property.riskScore < 30,
-                    'text-yellow-600': property.riskScore >= 30 && property.riskScore < 70,
-                    'text-red-600': property.riskScore >= 70
-                  }">{{ property.riskScore }}/100</span>
-                } @else {
-                  <span class="text-gray-400">Pending</span>
-                }
-              </span>
-            </div>
+            }
             
             <div class="flex items-center justify-between py-3">
               <div class="flex items-center gap-3">
@@ -160,110 +155,226 @@
 <!-- Add Property Modal -->
 @if (showAddModal()) {
   <div class="modal-overlay" (click)="closeAddModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
       <div>
         <h2 class="text-2xl font-bold bg-linear-to-r from-fire-red to-fire-orange bg-clip-text text-transparent">Add New Property</h2>
-        <p class="text-sm text-gray-500 mt-1">Fill in the details to add a new property to your portfolio</p>
+        <p class="text-sm text-gray-500 mt-0.5">Pin your property on the map, then complete the details below</p>
       </div>
       <button (click)="closeAddModal()" class="btn-close">&times;</button>
     </div>
 
-    <form [formGroup]="addPropertyForm" (ngSubmit)="addProperty()" class="p-6">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="propertyType">
-            <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-fire-red">home_work</span>
-              Property Type *
+    <form [formGroup]="addPropertyForm" (ngSubmit)="addProperty()" class="p-6 space-y-6">
+      
+      <!-- Step 1: Map Location -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-gradient-to-br from-fire-red to-fire-orange flex items-center justify-center text-white text-xs font-bold shrink-0">1</div>
+          <h3 class="font-bold text-gray-800 text-base">Pin Your Property Location</h3>
+          @if (addPropertyForm.get('latitude')?.value) {
+            <span class="ml-auto flex items-center gap-1 text-green-600 font-semibold text-xs bg-green-50 px-2 py-1 rounded-full border border-green-200">
+              <span class="material-icons text-[14px]">check_circle</span> Location Locked
             </span>
-          </label>
-          <select 
-            id="propertyType"
-            formControlName="propertyType"
-            [class.error]="addPropertyForm.get('propertyType')?.invalid && addPropertyForm.get('propertyType')?.touched">
-            <option value="">Select type</option>
-            @for (type of propertyTypes; track type) {
-              <option [value]="type">{{ type }}</option>
-            }
-          </select>
-          @if (addPropertyForm.get('propertyType')?.invalid && addPropertyForm.get('propertyType')?.touched) {
-            <span class="error-message">
-              <span class="material-icons text-sm">error</span>
-              {{ getFieldError('propertyType') }}
+          } @else {
+            <span class="ml-auto flex items-center gap-1 text-amber-600 font-semibold text-xs bg-amber-50 px-2 py-1 rounded-full border border-amber-200">
+              <span class="material-icons text-[14px]">touch_app</span> Click map to drop pin
             </span>
           }
         </div>
-
-        <div class="form-group">
-          <label for="constructionType">
-            <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-fire-red">construction</span>
-              Construction Type *
-            </span>
-          </label>
-          <select 
-            id="constructionType"
-            formControlName="constructionType"
-            [class.error]="addPropertyForm.get('constructionType')?.invalid && addPropertyForm.get('constructionType')?.touched">
-            <option value="">Select type</option>
-            @for (type of constructionTypes; track type) {
-              <option [value]="type">{{ type }}</option>
+        
+        <!-- Address Search Bar -->
+        <div class="relative">
+          <div class="flex items-center gap-2 bg-white border-2 rounded-xl px-3 py-2.5 transition-colors"
+               [class]="showSearchDropdown() ? 'border-fire-red shadow-md' : 'border-gray-200'">
+            <span class="material-icons text-gray-400 text-[22px]">search</span>
+            <input
+              type="text"
+              [value]="searchQuery()"
+              (input)="searchQuery.set($any($event.target).value); searchAddress($any($event.target).value)"
+              (keyup.enter)="selectFirstResult()"
+              (blur)="closeSearchDropdown()"
+              placeholder="Search for an address (e.g. 42 Baker Street, London)..."
+              class="flex-1 border-none outline-none text-sm text-gray-800 placeholder-gray-400 bg-transparent"
+              style="box-shadow: none !important; padding: 0 !important;">
+            @if (isSearchLoading()) {
+              <div class="w-4 h-4 border-2 border-fire-red border-t-transparent rounded-full animate-spin shrink-0"></div>
+            } @else if (searchQuery()) {
+              <button type="button" (click)="searchQuery.set(''); searchResults.set([]); showSearchDropdown.set(false)"
+                class="text-gray-400 hover:text-gray-600 transition-colors shrink-0">
+                <span class="material-icons text-[18px]">close</span>
+              </button>
             }
-          </select>
-          @if (addPropertyForm.get('constructionType')?.invalid && addPropertyForm.get('constructionType')?.touched) {
-            <span class="error-message">
-              <span class="material-icons text-sm">error</span>
-              {{ getFieldError('constructionType') }}
-            </span>
+          </div>
+
+          <!-- Search Dropdown -->
+          @if (showSearchDropdown() && searchResults().length > 0) {
+            <div class="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-gray-200 shadow-xl z-[1000] overflow-hidden">
+              @for (result of searchResults(); track result.place_id) {
+                <button
+                  type="button"
+                  (mousedown)="selectSearchResult(result)"
+                  class="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 text-left transition-colors border-b border-gray-100 last:border-none group">
+                  <span class="material-icons text-fire-red text-[18px] mt-0.5 shrink-0">location_on</span>
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-gray-800 truncate group-hover:text-fire-red transition-colors">{{ result.display_name.split(',')[0] }}</p>
+                    <p class="text-xs text-gray-400 truncate">{{ result.display_name }}</p>
+                  </div>
+                </button>
+              }
+            </div>
           }
         </div>
 
-        <div class="form-group full-width">
+        <!-- Map Container -->
+        <div class="relative rounded-xl overflow-hidden border-2 transition-colors"
+             [class]="addPropertyForm.get('latitude')?.value ? 'border-green-400' : 'border-gray-200'">
+          <div id="propertyMap" class="w-full h-64"></div>
+          
+          <!-- Map hint overlay (before pin is placed) -->
+          @if (!addPropertyForm.get('latitude')?.value) {
+            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md flex items-center gap-2 text-xs font-medium text-gray-600 pointer-events-none">
+              <span class="material-icons text-fire-orange text-[16px]">touch_app</span>
+              Or click anywhere on the map to drop a pin
+            </div>
+          }
+
+          <!-- Geocoding Loading Overlay -->
+          @if (isMapLoading()) {
+            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md flex items-center gap-2 text-sm font-medium text-gray-700">
+              <div class="w-4 h-4 border-2 border-fire-red border-t-transparent rounded-full animate-spin"></div>
+              Fetching address...
+            </div>
+          }
+        </div>
+
+        <!-- Auto-filled Address Display -->
+        <div class="form-group">
           <label for="address">
             <span class="flex items-center gap-2">
               <span class="material-icons text-sm text-fire-red">location_on</span>
-              Address *
+              Verified Address <span class="text-red-500">*</span>
             </span>
           </label>
-          <input 
-            id="address"
-            type="text" 
-            formControlName="address"
-            placeholder="123 Main St, City, State"
-            [class.error]="addPropertyForm.get('address')?.invalid && addPropertyForm.get('address')?.touched">
-          @if (addPropertyForm.get('address')?.invalid && addPropertyForm.get('address')?.touched) {
-            <span class="error-message">
-              <span class="material-icons text-sm">error</span>
-              {{ getFieldError('address') }}
-            </span>
+          <div class="relative">
+            <input 
+              id="address"
+              type="text" 
+              formControlName="address"
+              placeholder="Drop a pin on the map above to auto-fill this field"
+              readonly
+              class="bg-gray-50 cursor-default pr-10"
+              [class.error]="addPropertyForm.get('address')?.invalid && addPropertyForm.get('address')?.touched">
+            @if (addPropertyForm.get('latitude')?.value) {
+              <span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-[20px]">verified</span>
+            } @else {
+              <span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 text-[20px]">pin_drop</span>
+            }
+          </div>
+          <!-- Hidden lat/lng note -->
+          @if (addPropertyForm.get('latitude')?.value) {
+            <p class="text-xs text-gray-400 mt-1">
+              📍 Coordinates: {{ addPropertyForm.get('latitude')?.value | number:'1.4-4' }}, {{ addPropertyForm.get('longitude')?.value | number:'1.4-4' }}
+              @if (addPropertyForm.get('zipCode')?.value) {
+                &nbsp;· ZIP: {{ addPropertyForm.get('zipCode')?.value }}
+              }
+            </p>
           }
         </div>
-
-        <div class="form-group">
-          <label for="areaSqft">
-            <span class="flex items-center gap-2">
-              <span class="material-icons text-sm text-fire-red">square_foot</span>
-              Area (sq ft) *
-            </span>
-          </label>
-          <input 
-            id="areaSqft"
-            type="number" 
-            formControlName="areaSqft"
-            placeholder="1000"
-            [class.error]="addPropertyForm.get('areaSqft')?.invalid && addPropertyForm.get('areaSqft')?.touched">
-          @if (addPropertyForm.get('areaSqft')?.invalid && addPropertyForm.get('areaSqft')?.touched) {
-            <span class="error-message">
-              <span class="material-icons text-sm">error</span>
-              {{ getFieldError('areaSqft') }}
-            </span>
-          }
-        </div>
-
       </div>
 
-      <div class="modal-footer">
+      <!-- Step 2: Property Details -->
+      <div class="space-y-4 pt-2 border-t border-gray-100">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+               [class]="addPropertyForm.get('latitude')?.value ? 'bg-gradient-to-br from-fire-red to-fire-orange text-white' : 'bg-gray-200 text-gray-400'">2</div>
+          <h3 class="font-bold text-base"
+              [class]="addPropertyForm.get('latitude')?.value ? 'text-gray-800' : 'text-gray-400'">Property Details</h3>
+        </div>
+        
+        <div class="form-grid" [class.opacity-40]="!addPropertyForm.get('latitude')?.value" [class.pointer-events-none]="!addPropertyForm.get('latitude')?.value">
+          <div class="form-group">
+            <label for="propertyType">
+              <span class="flex items-center gap-2">
+                <span class="material-icons text-sm text-fire-red">home_work</span>
+                Property Type *
+              </span>
+            </label>
+            <select 
+              id="propertyType"
+              formControlName="propertyType"
+              [class.error]="addPropertyForm.get('propertyType')?.invalid && addPropertyForm.get('propertyType')?.touched">
+              <option value="">Select type</option>
+              @for (type of propertyTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+            @if (addPropertyForm.get('propertyType')?.invalid && addPropertyForm.get('propertyType')?.touched) {
+              <span class="error-message">
+                <span class="material-icons text-sm">error</span>
+                {{ getFieldError('propertyType') }}
+              </span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="constructionType">
+              <span class="flex items-center gap-2">
+                <span class="material-icons text-sm text-fire-red">construction</span>
+                Construction Type *
+              </span>
+            </label>
+            <select 
+              id="constructionType"
+              formControlName="constructionType"
+              [class.error]="addPropertyForm.get('constructionType')?.invalid && addPropertyForm.get('constructionType')?.touched">
+              <option value="">Select type</option>
+              @for (type of constructionTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+            @if (addPropertyForm.get('constructionType')?.invalid && addPropertyForm.get('constructionType')?.touched) {
+              <span class="error-message">
+                <span class="material-icons text-sm">error</span>
+                {{ getFieldError('constructionType') }}
+              </span>
+            }
+          </div>
+
+          <div class="form-group full-width">
+            <label for="areaSqft">
+              <span class="flex items-center gap-2">
+                <span class="material-icons text-sm text-fire-red">square_foot</span>
+                Built-up Area (sq ft) *
+              </span>
+            </label>
+            <input 
+              id="areaSqft"
+              type="number" 
+              formControlName="areaSqft"
+              placeholder="e.g. 1500"
+              [class.error]="addPropertyForm.get('areaSqft')?.invalid && addPropertyForm.get('areaSqft')?.touched">
+            @if (addPropertyForm.get('areaSqft')?.invalid && addPropertyForm.get('areaSqft')?.touched) {
+              <span class="error-message">
+                <span class="material-icons text-sm">error</span>
+                {{ getFieldError('areaSqft') }}
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Validation notice -->
+      @if (!addPropertyForm.get('latitude')?.value && addPropertyForm.touched) {
+        <div class="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg text-sm font-medium">
+          <span class="material-icons text-amber-500">warning</span>
+          Please drop a pin on the map first to verify your property's location.
+        </div>
+      }
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
         <button 
           type="button" 
           (click)="closeAddModal()" 
@@ -278,10 +389,10 @@
           [disabled]="isLoading() || addPropertyForm.invalid">
           @if (isLoading()) {
             <span class="material-icons animate-spin text-sm">refresh</span>
-            <span>Adding...</span>
+            <span>Registering...</span>
           } @else {
             <span class="material-icons text-sm">add_home</span>
-            <span>Add Property</span>
+            <span>Register Property</span>
           }
         </button>
       </div>

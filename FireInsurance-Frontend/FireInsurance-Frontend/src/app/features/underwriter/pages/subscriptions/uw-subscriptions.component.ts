@@ -219,7 +219,7 @@ export class UwSubscriptionsComponent implements OnInit {
   }
 
   canApprove(sub: UwSubscription): boolean {
-    const readyStatuses = ['INSPECTED', 'SURVEYOR_COMPLETED', 'SURVEY_COMPLETED', 'UNDER_REVIEW'];
+    const readyStatuses = ['INSPECTED', 'SURVEYOR_COMPLETED', 'SURVEY_COMPLETED'];
     return readyStatuses.includes(sub.status);
   }
 

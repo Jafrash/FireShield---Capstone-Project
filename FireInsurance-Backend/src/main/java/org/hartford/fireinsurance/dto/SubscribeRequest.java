@@ -12,6 +12,7 @@ public class SubscribeRequest {
     private String previousLossHistory;
     private Boolean insuranceDeclinedBefore;
     private Double propertyValue;
+    private Boolean declarationAccepted;
 
     public SubscribeRequest() {}
     public Long getPropertyId() { return propertyId; }
@@ -38,4 +39,7 @@ public class SubscribeRequest {
     public void setInsuranceDeclinedBefore(Boolean insuranceDeclinedBefore) { this.insuranceDeclinedBefore = insuranceDeclinedBefore; }
     public Double getPropertyValue() { return propertyValue; }
     public void setPropertyValue(Double propertyValue) { this.propertyValue = propertyValue; }
+
+    public Boolean getDeclarationAccepted() { return declarationAccepted; }
+    public void setDeclarationAccepted(Boolean declarationAccepted) { this.declarationAccepted = declarationAccepted; }
 }

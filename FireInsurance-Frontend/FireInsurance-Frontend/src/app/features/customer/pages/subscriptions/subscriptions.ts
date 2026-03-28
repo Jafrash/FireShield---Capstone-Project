@@ -352,7 +352,7 @@ export class SubscriptionsComponent implements OnInit {
       return 'text-green-700';
     }
     if (kind === 'ADJUSTMENT') {
-      return 'text-amber-700';
+      return 'text-fire-red';
     }
     return 'text-gray-900';
   }

@@ -12,6 +12,13 @@ public class InspectionRequest {
     private Double constructionRisk;
     private Double hazardRisk;
     private Double recommendedPremium;
+    private String constructionType;
+    private String roofType;
+    private String occupancyType;
+    private String electricalAuditStatus;
+    private Boolean hazardousMaterialsPresent;
+    private Double adjacentBuildingDistance;
+    private String internalProtectionNotes;
 
     public InspectionRequest() {}
 
@@ -47,4 +54,25 @@ public class InspectionRequest {
 
     public Double getRecommendedPremium() { return recommendedPremium; }
     public void setRecommendedPremium(Double recommendedPremium) { this.recommendedPremium = recommendedPremium; }
+
+    public String getConstructionType() { return constructionType; }
+    public void setConstructionType(String constructionType) { this.constructionType = constructionType; }
+
+    public String getRoofType() { return roofType; }
+    public void setRoofType(String roofType) { this.roofType = roofType; }
+
+    public String getOccupancyType() { return occupancyType; }
+    public void setOccupancyType(String occupancyType) { this.occupancyType = occupancyType; }
+
+    public String getElectricalAuditStatus() { return electricalAuditStatus; }
+    public void setElectricalAuditStatus(String electricalAuditStatus) { this.electricalAuditStatus = electricalAuditStatus; }
+
+    public Boolean getHazardousMaterialsPresent() { return hazardousMaterialsPresent; }
+    public void setHazardousMaterialsPresent(Boolean hazardousMaterialsPresent) { this.hazardousMaterialsPresent = hazardousMaterialsPresent; }
+
+    public Double getAdjacentBuildingDistance() { return adjacentBuildingDistance; }
+    public void setAdjacentBuildingDistance(Double adjacentBuildingDistance) { this.adjacentBuildingDistance = adjacentBuildingDistance; }
+
+    public String getInternalProtectionNotes() { return internalProtectionNotes; }
+    public void setInternalProtectionNotes(String internalProtectionNotes) { this.internalProtectionNotes = internalProtectionNotes; }
 }

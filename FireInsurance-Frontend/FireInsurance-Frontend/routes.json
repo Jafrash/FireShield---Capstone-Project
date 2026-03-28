@@ -4,5 +4,6 @@
   "/api/policies*": "/policies$1",
   "/api/claims*": "/claims$1",
   "/api/inspections*": "/inspections$1",
-  "/api/documents*": "/documents$1"
+  "/api/documents*": "/documents$1",
+  "/api/notifications*": "/notifications$1"
 }

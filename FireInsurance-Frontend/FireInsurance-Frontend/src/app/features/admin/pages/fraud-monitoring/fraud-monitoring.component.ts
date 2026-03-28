@@ -54,12 +54,13 @@ export class FraudMonitoringComponent implements OnInit {
 
     this.adminService.getFraudStatistics().subscribe({
       next: (stats) => {
+        console.log('[FRAUD-STATS] Received:', stats);
         this.fraudStats.set(stats);
         this.isStatsLoading.set(false);
       },
       error: (error) => {
         console.error('Error loading fraud statistics:', error);
-        this.statsError.set('Failed to load fraud statistics');
+        this.statsError.set('Failed to load real-time fraud statistics. Please ensure the backend is running with the latest updates.');
         this.isStatsLoading.set(false);
       }
     });

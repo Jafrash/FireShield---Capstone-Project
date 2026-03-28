@@ -86,4 +86,9 @@ public class ClaimInspectionService {
         return claimInspectionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Claim Inspection not found"));
     }
+    public ClaimInspection getByClaim(Long claimId) {
+        Claim claim = claimService.getClaimById(claimId);
+        return claimInspectionRepository.findByClaim(claim)
+                .orElseThrow(() -> new RuntimeException("Claim Inspection not found for claim: " + claimId));
+    }
 }

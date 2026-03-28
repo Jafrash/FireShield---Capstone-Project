@@ -205,79 +205,160 @@
       </div>
 
       @if (!claimIdForUpload()) {
-      <form [formGroup]="fileClaimForm" (ngSubmit)="fileClaim()" class="p-6">
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Select Active Subscription <span
-                class="text-red-500">*</span></label>
-            <select formControlName="subscriptionId"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32] focus:bg-white transition-colors"
-              [class.border-red-500]="fileClaimForm.get('subscriptionId')?.invalid && fileClaimForm.get('subscriptionId')?.touched">
-              <option value="0">Select a subscription</option>
-              @for (sub of activeSubscriptions(); track sub.subscriptionId) {
-              <option [value]="sub.subscriptionId">{{ sub.policyName }} — Property #{{ sub.propertyId }}</option>
-              }
-            </select>
-            @if (fileClaimForm.get('subscriptionId')?.invalid && fileClaimForm.get('subscriptionId')?.touched) {
-            <p class="text-red-500 text-xs mt-1">{{ getFieldError('subscriptionId') }}</p>
-            }
-          </div>
+      <form [formGroup]="fileClaimForm" (ngSubmit)="fileClaim()" class="p-6 overflow-y-auto max-h-[75vh] custom-scrollbar">
+        <div class="space-y-8">
+          <!-- Section 1: Policy & Incident Context -->
+          <div class="space-y-4">
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              <span class="material-icons text-sm">policy</span>
+              Policy & Incident Context
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Active Subscription *</label>
+                <select formControlName="subscriptionId"
+                  class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C72B32] focus:bg-white text-sm transition-all"
+                  [class.border-red-500]="isFieldInvalid('subscriptionId')">
+                  <option value="0">Select a subscription</option>
+                  @for (sub of activeSubscriptions(); track sub.subscriptionId) {
+                  <option [value]="sub.subscriptionId">{{ sub.policyName }} — #{{ sub.propertyId }}</option>
+                  }
+                </select>
+                @if (isFieldInvalid('subscriptionId')) {
+                  <p class="text-red-500 text-[10px] font-bold mt-1 text-right">{{ getFieldError('subscriptionId') }}</p>
+                }
+              </div>
 
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Incident Date <span
-                class="text-red-500">*</span></label>
-            <input type="date" formControlName="incidentDate" [max]="getCurrentDate()"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32] focus:bg-white transition-colors"
-              [class.border-red-500]="fileClaimForm.get('incidentDate')?.invalid && fileClaimForm.get('incidentDate')?.touched">
-            @if (fileClaimForm.get('incidentDate')?.invalid && fileClaimForm.get('incidentDate')?.touched) {
-            <p class="text-red-500 text-xs mt-1">{{ getFieldError('incidentDate') }}</p>
-            }
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Estimated Loss Amount (₹) <span
-                class="text-red-500">*</span></label>
-            <div class="relative">
-              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
-              <input type="number" formControlName="claimAmount" placeholder="50000"
-                class="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32] focus:bg-white transition-colors"
-                [class.border-red-500]="fileClaimForm.get('claimAmount')?.invalid && fileClaimForm.get('claimAmount')?.touched">
+              <div>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Incident Date *</label>
+                <input type="date" formControlName="incidentDate" [max]="getCurrentDate()"
+                  class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C72B32] focus:bg-white text-sm transition-all"
+                  [class.border-red-500]="isFieldInvalid('incidentDate')">
+                @if (isFieldInvalid('incidentDate')) {
+                  <p class="text-red-500 text-[10px] font-bold mt-1 text-right">{{ getFieldError('incidentDate') }}</p>
+                }
+              </div>
             </div>
-            @if (fileClaimForm.get('claimAmount')?.invalid && fileClaimForm.get('claimAmount')?.touched) {
-            <p class="text-red-500 text-xs mt-1">{{ getFieldError('claimAmount') }}</p>
-            }
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Cause of Fire *</label>
+                <select formControlName="causeOfFire"
+                  class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C72B32] focus:bg-white text-sm transition-all"
+                  [class.border-red-500]="isFieldInvalid('causeOfFire')">
+                  <option value="">Select Cause</option>
+                  <option value="Short Circuit">Electrical Short Circuit</option>
+                  <option value="Kitchen Fire">Kitchen / Cooking Incident</option>
+                  <option value="Accidental">Accidental (Candles/Smoking)</option>
+                  <option value="Natural">Natural (Lightning)</option>
+                  <option value="Unknown">Unknown (Investigation Req.)</option>
+                  <option value="Arson">Third Party Malicious Act</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Loss Category *</label>
+                <select formControlName="lossType"
+                  class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C72B32] focus:bg-white text-sm transition-all">
+                  <option value="BUILDING">Building Structure Only</option>
+                  <option value="CONTENTS">Household Contents / Stock Only</option>
+                  <option value="BOTH">Building & Contents Combined</option>
+                </select>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Description <span
-                class="text-red-500">*</span></label>
-            <textarea formControlName="description" rows="4"
-              placeholder="Please describe the fire incident and damages in detail..."
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32] focus:bg-white transition-colors resize-none"
-              [class.border-red-500]="fileClaimForm.get('description')?.invalid && fileClaimForm.get('description')?.touched"></textarea>
-            @if (fileClaimForm.get('description')?.invalid && fileClaimForm.get('description')?.touched) {
-            <p class="text-red-500 text-xs mt-1">{{ getFieldError('description') }}</p>
-            }
+          <!-- Section 2: Legal & Reporting Verification -->
+          <div class="space-y-4">
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              <span class="material-icons text-sm">gavel</span>
+              Legal & Reporting Verification
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Police FIR Number *</label>
+                <input type="text" formControlName="firNumber" placeholder="e.g. FIR/2024/789"
+                  class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C72B32] focus:bg-white text-sm transition-all"
+                  [class.border-red-500]="isFieldInvalid('firNumber')">
+              </div>
+              
+              <div>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Police Station Name *</label>
+                <input type="text" formControlName="policeStation" placeholder="Locality of filing"
+                  class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C72B32] focus:bg-white text-sm transition-all">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Fire Brigade Ref # (Optional)</label>
+                <input type="text" formControlName="fireBrigadeReportNumber" placeholder="Investigation Report ID"
+                  class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C72B32] focus:bg-white text-sm transition-all">
+              </div>
+              
+              <div>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Claimant Contact *</label>
+                <input type="text" formControlName="contactPhoneNumber" placeholder="10-digit primary mobile"
+                  class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C72B32] focus:bg-white text-sm transition-all"
+                  [class.border-red-500]="isFieldInvalid('contactPhoneNumber')">
+              </div>
+            </div>
           </div>
 
-          <div class="p-3 bg-fire-cream text-fire-red-700 rounded-lg text-sm border border-fire-red/20 flex gap-2">
-            <span class="material-icons text-fire-red shrink-0 text-sm mt-0.5">info</span>
+          <!-- Section 3: Damage Assessment -->
+          <div class="space-y-4">
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              <span class="material-icons text-sm">assessment</span>
+              Damage Assessment
+            </h3>
+            
             <div>
-              <strong>Important:</strong> Once your claim is filed, it will be reviewed by an admin. A surveyor may be
-              assigned to inspect and verify the damages.
+              <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Estimated Loss Amount (₹) *</label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-black">₹</span>
+                <input type="number" formControlName="claimAmount" placeholder="Total projected repair/replacement cost"
+                  class="w-full pl-9 pr-4 py-3 bg-white border-2 border-gray-100 rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 text-lg font-black transition-all"
+                  [class.border-red-500]="isFieldInvalid('claimAmount')">
+              </div>
+              @if (isFieldInvalid('claimAmount')) {
+                <p class="text-red-500 text-[10px] font-bold mt-1 text-right">{{ getFieldError('claimAmount') }}</p>
+              }
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Event Description & Witness Details *</label>
+              <textarea formControlName="description" rows="3"
+                placeholder="Briefly explain WHAT happened and WHEN..."
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:bg-white text-sm transition-all resize-none mb-3"
+                [class.border-red-500]="isFieldInvalid('description')"></textarea>
+              
+              <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 italic">Third Party Witness Details (Optional)</label>
+              <textarea formControlName="witnessDetails" rows="2"
+                placeholder="Names and contact info of witnesses present at the scene..."
+                class="w-full px-4 py-3 bg-gray-50 border border-dashed border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-400 focus:bg-white text-xs transition-all resize-none italic"></textarea>
+            </div>
+
+            <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 flex gap-3">
+              <span class="material-icons text-amber-600 shrink-0 text-lg">policy</span>
+              <p class="text-[10px] text-amber-900 leading-relaxed">
+                <strong>Legal Statment:</strong> I declare that the above statements are true to the best of my knowledge. Underwriting rules and fraud detection algorithms will verify FIR and brigade records. Providing false information is a punishable offense under the Insurance Act.
+              </p>
             </div>
           </div>
         </div>
 
-        <div class="mt-6 flex justify-end gap-3 pt-5 border-t border-gray-100">
+        <div class="mt-8 flex items-center justify-between pt-6 border-t border-gray-100">
           <button type="button" (click)="closeFileClaimModal()"
-            class="px-5 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
-            [disabled]="isLoading()">Cancel</button>
+            class="px-6 py-2.5 text-gray-500 font-bold text-xs uppercase tracking-widest hover:text-gray-900 transition-colors"
+            [disabled]="isLoading()">Discard</button>
+          
           <button type="submit"
-            class="flex items-center gap-2 px-6 py-2.5 bg-[#C72B32] hover:bg-[#6A1630] text-white rounded-lg font-medium shadow-sm transition-colors disabled:opacity-50"
+            class="flex items-center gap-2 px-8 py-3 bg-gray-900 hover:bg-black text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-gray-200 transition-all disabled:opacity-50 hover:-translate-y-0.5"
             [disabled]="isLoading() || fileClaimForm.invalid">
-            @if (isLoading()) { <span class="material-icons animate-spin text-sm">autorenew</span> }
-            {{ isLoading() ? 'Filing...' : 'File Claim' }}
+            @if (isLoading()) { <span class="material-icons animate-spin text-sm">refresh</span> }
+            {{ isLoading() ? 'Processing...' : 'Submit Claim' }}
           </button>
         </div>
       </form>

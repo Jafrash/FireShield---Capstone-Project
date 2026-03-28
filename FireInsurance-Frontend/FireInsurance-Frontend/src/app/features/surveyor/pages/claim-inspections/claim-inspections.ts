@@ -162,8 +162,8 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
 
 @if (showReportModal() && selectedInspection()) {
   <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" (click)="closeReportModal()">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
-      <div class="bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-4 rounded-t-xl">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl" (click)="$event.stopPropagation()">
+      <div class="bg-gradient-to-r from-orange-600 to-red-700 px-6 py-4 rounded-t-xl">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="p-2 bg-white/20 rounded-lg"><span class="material-icons text-white">local_fire_department</span></div>
@@ -175,71 +175,159 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
           <button (click)="closeReportModal()" class="text-white/70 hover:text-white"><span class="material-icons">close</span></button>
         </div>
       </div>
-      <div class="p-6">
+
+      <div class="px-6 py-4 overflow-y-auto max-h-[75vh]">
         <!-- Policy & Claim Context Information -->
-        <div class="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <h3 class="text-sm font-semibold text-gray-700 mb-3">Policy & Claim Context</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="mb-5 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center justify-between">
+            <span>Policy & Claim Context</span>
+            <span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-sm text-[10px] uppercase font-bold tracking-wider border border-orange-200">
+              #CLM-{{ selectedInspection()!.claimId }}
+            </span>
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
             <div>
-              <div class="text-gray-500 text-xs font-medium">Customer Information</div>
-              <div class="font-semibold text-gray-900">{{ selectedInspection()!.customerName || 'Customer Name Not Available' }}</div>
-              <div class="text-xs text-gray-600">{{ selectedInspection()!.customerEmail || 'No email provided' }}</div>
-              <div class="text-xs text-gray-600">{{ selectedInspection()!.customerPhone || 'No phone provided' }}</div>
+              <div class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-0.5">Customer Information</div>
+              <div class="font-bold text-gray-900">{{ selectedInspection()!.customerName || 'N/A' }}</div>
+              <div class="text-xs text-gray-600 flex items-center gap-1"><span class="material-icons text-[10px]">email</span> {{ selectedInspection()!.customerEmail || 'No email' }}</div>
             </div>
             @if (selectedInspection()!.requestedClaimAmount != null) {
               <div>
-                <div class="text-gray-500 text-xs font-medium">Customer's Claim Request</div>
-                <div class="font-semibold text-blue-700">₹{{ getPolicyCoverageAmount(selectedInspection()!.requestedClaimAmount!) }}</div>
-                <div class="text-xs text-blue-600 font-medium">Amount Requested by Customer</div>
+                <div class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-0.5">Customer's Claim Request</div>
+                <div class="font-bold text-blue-700">₹{{ getPolicyCoverageAmount(selectedInspection()!.requestedClaimAmount!) }}</div>
+                <div class="text-[10px] text-blue-600 font-medium italic">Amount Requested by Customer</div>
               </div>
             }
             <div>
-              <div class="text-gray-500 text-xs font-medium">Policy & Maximum Coverage</div>
+              <div class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-0.5">Policy & Maximum Coverage</div>
               @if (selectedInspection()!.policyName && selectedInspection()!.maxCoverage != null) {
-                <div class="font-semibold text-gray-900">{{ selectedInspection()!.policyName }}</div>
-                <div class="text-xs text-green-700 font-medium">Max Coverage: ₹{{ getPolicyCoverageAmount(selectedInspection()!.maxCoverage!) }}</div>
+                <div class="font-bold text-gray-900">{{ selectedInspection()!.policyName }}</div>
+                <div class="text-[10px] text-green-700 font-bold">Limit: ₹{{ getPolicyCoverageAmount(selectedInspection()!.maxCoverage!) }}</div>
               } @else {
-                <div class="text-gray-500 italic">Policy details being processed</div>
+                <div class="text-gray-400 italic text-xs">Policy details unavailable</div>
               }
             </div>
             @if (selectedInspection()!.claimDescription) {
-              <div>
-                <div class="text-gray-500 text-xs font-medium">Claim Description</div>
-                <div class="text-gray-700 text-sm">{{ selectedInspection()!.claimDescription }}</div>
+              <div class="col-span-1 md:col-span-2 mt-1">
+                <div class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">Claim Description</div>
+                <div class="text-gray-700 text-xs bg-white p-2 border border-orange-100 rounded italic">{{ selectedInspection()!.claimDescription }}</div>
               </div>
             }
           </div>
         </div>
 
-        <form [formGroup]="reportForm" class="space-y-5">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Estimated Loss Amount (₹) <span class="text-red-500">*</span></label>
-            <div class="relative">
-              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
-              <input type="number" formControlName="estimatedLoss" min="0"
-                class="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-colors"
-                placeholder="e.g. 75000" />
+        <form [formGroup]="reportForm" class="space-y-6">
+          <!-- Cause of Loss -->
+          <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <h3 class="text-sm font-bold text-gray-700 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
+              <span class="material-icons text-fire-red text-sm">warning</span> Cause Verification
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Primary Cause of Fire <span class="text-red-500">*</span></label>
+                <select formControlName="causeOfFire"
+                  class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-fire-red transition-all font-medium text-sm">
+                  <option [value]="''">Select Cause</option>
+                  <option value="SHORT_CIRCUIT">Electrical Short Circuit</option>
+                  <option value="LP_GAS_EXPLOSION">LP Gas Leak/Explosion</option>
+                  <option value="KITCHEN_FIRE">Kitchen/Cooking Fire</option>
+                  <option value="NATURAL_CALAMITY">Natural Calamity (Lightning/Wildfire)</option>
+                  <option value="ARSON">Arson/Malicious Damage</option>
+                  <option value="EXTERNAL_SPREAD">Spread from External Property</option>
+                  <option value="OTHER">Other Causes</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Under-Insurance Detected?</label>
+                <div class="flex items-center mt-2">
+                  <input type="checkbox" formControlName="underInsuranceDetected" id="underInsurance"
+                    class="h-4 w-4 text-fire-red border-gray-300 rounded focus:ring-fire-red" />
+                  <label for="underInsurance" class="ml-2 text-xs font-medium text-gray-700 leading-tight">
+                    Yes (Property undervalued at inception)
+                  </label>
+                </div>
+              </div>
             </div>
-            @if (reportForm.get('estimatedLoss')?.touched && reportForm.get('estimatedLoss')?.invalid) {
-              <p class="text-red-500 text-xs mt-1">Valid estimated loss is required.</p>
-            }
           </div>
+
+          <!-- Loss Breakdown -->
+          <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <h3 class="text-sm font-bold text-gray-700 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2">
+              <span class="material-icons text-blue-600 text-sm">calculate</span> Loss Breakdown & Financials
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Building Loss</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">₹</span>
+                  <input type="number" formControlName="buildingLoss" (input)="onLossChange()"
+                    class="w-full pl-6 pr-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-fire-red text-sm" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Contents Loss</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">₹</span>
+                  <input type="number" formControlName="contentsLoss" (input)="onLossChange()"
+                    class="w-full pl-6 pr-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-fire-red text-sm" />
+                </div>
+              </div>
+              <div class="bg-gray-100 p-2 rounded-lg border border-dashed border-gray-300">
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Total Estimated Loss</label>
+                <div class="text-lg font-black text-gray-900">₹{{ reportForm.get('estimatedLoss')?.value | number:'1.0-0' }}</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Salvage Value <span class="text-xs font-normal text-gray-400">(Deduction)</span></label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-red-400 font-bold text-xs">-₹</span>
+                  <input type="number" formControlName="salvageValue" (input)="onLossChange()"
+                    class="w-full pl-8 pr-3 py-2 bg-white border border-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-fire-red text-sm" placeholder="Residual value of remains" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Fire Brigade Expenses</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-green-500 font-bold text-xs">+₹</span>
+                  <input type="number" formControlName="fireBrigadeExpenses" (input)="onLossChange()"
+                    class="w-full pl-8 pr-3 py-2 bg-white border border-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-fire-red text-sm" placeholder="Claimed by authority" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Professional Recommendation -->
+            <div class="mt-6 p-4 bg-fire-red/5 border border-fire-red/20 rounded-xl">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="text-xs font-black text-fire-red-700 uppercase tracking-widest">Recommended Settlement</h4>
+                  <p class="text-[10px] text-fire-red-600 italic">Net assessment based on surveyed loss and salvage</p>
+                </div>
+                <div class="text-2xl font-black text-fire-red">₹{{ reportForm.get('recommendedSettlement')?.value | number:'1.0-0' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Documentation & Report -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Damage Assessment Report <span class="text-red-500">*</span></label>
-            <textarea formControlName="damageReport" rows="6"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-colors resize-none"
-              placeholder="Describe fire damage extent, cause, claim validity, and your recommendation..."></textarea>
+            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Detailed Investigation Report <span class="text-red-500 font-bold">*</span></label>
+            <textarea formControlName="damageReport" rows="5"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-fire-red focus:bg-white transition-all resize-none text-sm placeholder:italic"
+              placeholder="Provide a comprehensive technical report including fire origin, policy compliance, and professional opinion..."></textarea>
             @if (reportForm.get('damageReport')?.touched && reportForm.get('damageReport')?.invalid) {
-              <p class="text-red-500 text-xs mt-1">Report must be at least 30 characters.</p>
+              <p class="text-red-500 text-xs mt-1.5 font-medium animate-pulse">Professional report must be at least 30 characters.</p>
             }
           </div>
+
           @if (errorMessage()) {
-            <div class="flex gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
-              <span class="material-icons text-sm mt-0.5">error</span>{{ errorMessage() }}
+            <div class="flex gap-2 bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm font-medium">
+              <span class="material-icons text-sm">report_problem</span>{{ errorMessage() }}
             </div>
           }
           
-          <div class="mt-4">
+          <div class="mt-4 pt-4 border-t border-gray-100">
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Inspection Documentation</h3>
             <app-inspection-document-upload
               [inspectionId]="selectedInspection()!.inspectionId"
               [isClaimInspection]="true"
@@ -247,12 +335,13 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
           </div>
         </form>
       </div>
-      <div class="px-6 pb-6 flex gap-3 justify-end">
-        <button type="button" (click)="closeReportModal()" class="px-5 py-2.5 text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</button>
+
+      <div class="px-8 py-5 border-t border-gray-100 flex gap-4 justify-end bg-gray-50/80 rounded-b-xl shadow-inner-lg">
+        <button type="button" (click)="closeReportModal()" class="px-6 py-2.5 text-gray-700 font-bold bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all shadow-sm">Cancel</button>
         <button type="button" (click)="submitReport()" [disabled]="isSubmitting() || reportForm.invalid"
-          class="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white font-medium rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          @if (isSubmitting()) { <span class="material-icons animate-spin text-sm">autorenew</span> } @else { <span class="material-icons text-sm">verified</span> }
-          {{ isSubmitting() ? 'Submitting...' : 'Submit Verification' }}
+          class="flex items-center gap-2 px-8 py-2.5 bg-fire-red text-white font-bold rounded-lg hover:bg-fire-red-700 hover:-translate-y-0.5 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+          @if (isSubmitting()) { <span class="material-icons animate-spin text-sm">sync</span> } @else { <span class="material-icons text-sm">verified</span> }
+          {{ isSubmitting() ? 'Submitting Report...' : 'Finalize Verification' }}
         </button>
       </div>
     </div>
@@ -276,9 +365,33 @@ export class ClaimInspectionsComponent implements OnInit {
   activeFilter = signal<string>('ALL');
 
   reportForm: FormGroup = this.fb.group({
-    estimatedLoss: [null, [Validators.required, Validators.min(0), Validators.max(100000000), CustomValidators.positiveNumber()]],
-    damageReport: ['', [Validators.required, Validators.minLength(30), Validators.maxLength(2000), CustomValidators.noWhitespace()]]
+    estimatedLoss: [0, [Validators.required, Validators.min(0), Validators.max(100000000), CustomValidators.positiveNumber()]],
+    damageReport: ['', [Validators.required, Validators.minLength(30), Validators.maxLength(5000), CustomValidators.noWhitespace()]],
+    // Breakdown fields (UI only for calculation)
+    buildingLoss: [0, [Validators.min(0)]],
+    contentsLoss: [0, [Validators.min(0)]],
+    // Professional fields (Mapped to backend)
+    causeOfFire: ['', [Validators.required]],
+    salvageValue: [0, [Validators.min(0)]],
+    fireBrigadeExpenses: [0, [Validators.min(0)]],
+    underInsuranceDetected: [false],
+    recommendedSettlement: [0, [Validators.required, Validators.min(0)]]
   });
+
+  onLossChange(): void {
+    const building = this.reportForm.get('buildingLoss')?.value || 0;
+    const contents = this.reportForm.get('contentsLoss')?.value || 0;
+    const salvage = this.reportForm.get('salvageValue')?.value || 0;
+    const expenses = this.reportForm.get('fireBrigadeExpenses')?.value || 0;
+
+    const totalLoss = building + contents;
+    const netSettlement = Math.max(0, (totalLoss - salvage) + expenses);
+
+    this.reportForm.patchValue({
+      estimatedLoss: totalLoss,
+      recommendedSettlement: netSettlement
+    }, { emitEvent: false });
+  }
 
   ngOnInit(): void { this.loadInspections(); }
 
@@ -298,7 +411,17 @@ export class ClaimInspectionsComponent implements OnInit {
 
   openReportModal(inspection: ClaimInspectionItem): void {
     this.selectedInspection.set(inspection);
-    this.reportForm.reset({ estimatedLoss: null, damageReport: '' });
+    this.reportForm.reset({
+      estimatedLoss: 0,
+      buildingLoss: 0,
+      contentsLoss: 0,
+      damageReport: '',
+      causeOfFire: '',
+      salvageValue: 0,
+      fireBrigadeExpenses: 0,
+      underInsuranceDetected: false,
+      recommendedSettlement: 0
+    });
     this.showReportModal.set(true);
     this.errorMessage.set('');
   }

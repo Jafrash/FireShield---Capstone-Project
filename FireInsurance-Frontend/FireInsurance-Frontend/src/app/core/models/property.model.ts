@@ -6,6 +6,9 @@ export interface Property {
   constructionType: string;
   areaSqft: number;
   riskScore: number;
+  latitude?: number;
+  longitude?: number;
+  zipCode?: string;
   inspectionStatus?: InspectionStatus;
   inspectionDate?: string;
   surveyorId?: number;

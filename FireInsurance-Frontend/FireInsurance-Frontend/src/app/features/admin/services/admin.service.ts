@@ -379,4 +379,9 @@ export class AdminService {
   deleteDocument(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/documents/${id}`);
   }
+
+  // Claim Inspection Report
+  getClaimInspectionByClaimId(claimId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/claim-inspections/claim/${claimId}`);
+  }
 }

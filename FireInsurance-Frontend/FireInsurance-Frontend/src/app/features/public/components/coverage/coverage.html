@@ -1,15 +1,15 @@
-<div class="section bg-gradient-to-b from-gray-50 to-white">
-  <div class="container-custom">
+<div class="section bg-gradient-to-b from-[#1a1c23] to-gray-50 pt-16 pb-32">
+  <div class="container-custom relative z-10">
     <!-- Section Header -->
-    <div class="text-center mb-16 animate-fade-in-down">
-      <span class="inline-block px-4 py-2 bg-gradient-to-r from-fire-red/10 to-fire-orange/10 rounded-full text-fire-red text-sm font-bold tracking-wider uppercase mb-4 border border-fire-red/20">
-        💼 Coverage Plans
+    <div class="text-center mb-20 animate-fade-in-down">
+      <span class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-fire-red/20 to-fire-orange/20 rounded-full text-fire-orange text-sm font-bold tracking-widest uppercase mb-6 border border-fire-red/30 shadow-[0_0_20px_rgba(255,107,53,0.15)]">
+        <span class="material-icons text-fire-red text-[18px]">verified_user</span> Coverage Plans
       </span>
-      <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-        Available Coverage Options
+      <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-6">
+        Choose Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-fire-yellow via-fire-orange to-fire-red">Shield</span>
       </h2>
-      <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-        We offer a variety of plans tailored to secure your property effectively against fire damage.
+      <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+        Select from our premium tier plans, engineered to protect your most valuable assets with instant, no-hassle claims processing.
       </p>
     </div>
 
@@ -17,7 +17,7 @@
     @if (isLoading()) {
       <div class="flex justify-center items-center py-20">
         <div class="relative">
-          <div class="spinner w-16 h-16"></div>
+          <div class="w-16 h-16 border-4 border-fire-orange/20 border-t-fire-orange rounded-full animate-spin"></div>
           <div class="absolute inset-0 flex items-center justify-center">
             <span class="material-icons text-fire-red text-xl animate-pulse">local_fire_department</span>
           </div>
@@ -28,13 +28,13 @@
     <!-- Error State -->
     @if (errorMessage()) {
       <div class="max-w-lg mx-auto animate-fade-in-up">
-        <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 flex items-start gap-4 shadow-md">
+        <div class="bg-red-950/40 backdrop-blur-md border border-red-500/30 rounded-2xl p-6 flex items-start gap-4 shadow-[0_10px_30px_rgba(220,38,38,0.2)]">
           <div class="flex-shrink-0">
-            <span class="material-icons text-red-500 text-3xl">error_outline</span>
+            <span class="material-icons text-fire-red text-3xl">error_outline</span>
           </div>
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-red-800 mb-1">Error Loading Coverage</h3>
-            <p class="text-red-600">{{ errorMessage() }}</p>
+            <h3 class="text-lg font-bold text-red-200 mb-1">Coverage Error</h3>
+            <p class="text-red-400 font-medium">{{ errorMessage() }}</p>
           </div>
         </div>
       </div>
@@ -42,66 +42,77 @@
 
     <!-- Policies Grid -->
     @if (!isLoading() && policies.length > 0) {
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
         @for (policy of policies; track policy.policyId; let idx = $index) {
           <div
-            class="card-premium animate-fade-in-up group"
-            [style.animation-delay]="(idx * 100) + 'ms'"
+            class="relative group bg-white rounded-[2rem] p-1 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.15)] hover:shadow-[0_25px_50px_-12px_rgba(255,107,53,0.25)] transition-all duration-500 transform hover:-translate-y-2 animate-fade-in-up"
+            [style.animation-delay]="(idx * 150) + 'ms'"
           >
-            <!-- Header with Gradient -->
-            <div class="text-center pb-8 border-b-2 border-gray-100">
-              <!-- Policy Badge -->
-              <div class="inline-block px-4 py-1 bg-gradient-to-r from-fire-red/10 to-fire-orange/10 rounded-full text-fire-red text-xs font-bold tracking-wider uppercase mb-4 border border-fire-red/20">
-                Popular Choice
+            <!-- Border Glow / Gradient effect using a wrapper -->
+            <div class="absolute inset-0 rounded-[2rem] bg-gradient-to-b from-fire-orange/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            
+            <div class="relative bg-white rounded-[1.8rem] h-full flex flex-col justify-between overflow-hidden border border-gray-100/50 group-hover:border-fire-orange/30 transition-colors">
+              
+              <!-- Card Background glow -->
+              <div class="absolute top-0 right-0 w-32 h-32 bg-fire-orange/10 rounded-bl-full filter blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+              <div class="p-8">
+                <!-- Popular Choice Badge -->
+                <div class="mb-6 h-8">
+                  @if (idx === 1 || policy.policyName.includes('Valued') || policy.policyName.includes('SFSP')) {
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-fire-red to-fire-orange text-white text-[11px] font-bold tracking-widest uppercase rounded-full shadow-lg">
+                      <span class="material-icons text-[14px]">star</span> Most Popular
+                    </span>
+                  }
+                </div>
+
+                <!-- Policy Name -->
+                <h3 class="text-2xl font-extrabold text-gray-900 mb-6 drop-shadow-sm min-h-[64px]">
+                  {{ policy.policyName }}
+                </h3>
+
+                <!-- Pricing -->
+                <div class="flex items-baseline mb-6 border-b border-gray-100 pb-8">
+                  <span class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-fire-red to-fire-orange">
+                    ₹{{ policy.basePremium | number:'1.0-0' }}
+                  </span>
+                  <span class="text-sm font-bold text-gray-400 ml-2 uppercase tracking-wide">/year</span>
+                </div>
+
+                <!-- Features list (mapped from backend duration/coverage details) -->
+                <ul class="space-y-4 mb-8">
+                  <li class="flex items-start gap-4 text-gray-600 font-medium">
+                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span class="material-icons text-green-600 text-[14px]">check</span>
+                    </div>
+                    <span>{{ policy.durationMonths }} Month Coverage</span>
+                  </li>
+                  <li class="flex items-start gap-4 text-gray-600 font-medium">
+                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span class="material-icons text-green-600 text-[14px]">check</span>
+                    </div>
+                    <span>Up to ₹{{ policy.maxCoverageAmount | number:'1.0-0' }}</span>
+                  </li>
+                  <li class="flex items-start gap-4 text-gray-600 font-medium italic">
+                    <div class="w-6 h-6 rounded-full bg-fire-orange/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span class="material-icons text-fire-orange text-[14px]">info</span>
+                    </div>
+                    <span class="text-sm leading-relaxed">{{ policy.coverageDetails }}</span>
+                  </li>
+                </ul>
               </div>
 
-              <!-- Policy Name -->
-              <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-                {{ policy.policyName }}
-              </h3>
-
-              <!-- Pricing -->
-              <div class="flex items-baseline justify-center mb-2">
-                <span class="text-5xl md:text-6xl font-extrabold text-gradient-premium">
-                  ₹{{ policy.basePremium | number:'1.0-0' }}
-                </span>
-                <span class="text-xl font-medium text-gray-500 ml-2">/year</span>
+              <!-- CTA Button Section -->
+              <div class="p-8 pt-0 mt-auto">
+                <a
+                  routerLink="/auth/register"
+                  class="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-fire-red hover:from-fire-red to-fire-orange hover:to-[#ff7f4d] shadow-[0_8px_16px_rgba(255,107,53,0.2)] hover:shadow-[0_12px_24px_rgba(255,107,53,0.35)] focus:ring-4 focus:ring-fire-orange/30 transition-all transform hover:-translate-y-0.5 active:scale-[0.98] group/btn cursor-pointer"
+                >
+                  <span class="material-icons group-hover/btn:rotate-12 transition-transform text-[20px]">local_fire_department</span>
+                  <span class="tracking-wide">Get Started</span>
+                  <span class="material-icons group-hover/btn:translate-x-1 transition-transform text-[20px]">arrow_forward</span>
+                </a>
               </div>
-
-              <!-- Duration & Coverage -->
-              <p class="text-sm text-gray-600 font-medium">
-                <span class="inline-flex items-center gap-1">
-                  <span class="material-icons text-sm">schedule</span>
-                  {{ policy.durationMonths }} months
-                </span>
-                <span class="mx-2">•</span>
-                <span class="inline-flex items-center gap-1">
-                  <span class="material-icons text-sm">shield</span>
-                  Up to ₹{{ policy.maxCoverageAmount | number:'1.0-0' }}
-                </span>
-              </p>
-            </div>
-
-            <!-- Policy Details -->
-            <div class="pt-8">
-              <p class="text-gray-700 leading-relaxed mb-8 text-center italic">
-                "{{ policy.coverageDetails }}"
-              </p>
-
-              <!-- CTA Button -->
-              <a
-                routerLink="/auth/register"
-                class="btn btn-md w-full bg-gradient-to-r from-fire-red to-fire-orange text-white shadow-md hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 group/btn cursor-pointer"
-              >
-                <span class="material-icons group-hover/btn:rotate-12 transition-transform">local_fire_department</span>
-                Get Started
-                <span class="material-icons group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
-              </a>
-            </div>
-
-            <!-- Premium Badge Indicator -->
-            <div class="absolute top-4 right-4 w-12 h-12 bg-gradient-to-br from-fire-orange to-fire-ember rounded-full flex items-center justify-center shadow-lg animate-glow opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <span class="material-icons text-white text-xl">star</span>
             </div>
           </div>
         }
@@ -110,20 +121,20 @@
 
     <!-- Empty State -->
     @if (!isLoading() && policies.length === 0 && !errorMessage()) {
-      <div class="max-w-2xl mx-auto animate-fade-in-up">
-        <div class="empty-state-card">
-          <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-            <span class="material-icons text-5xl text-gray-400">inventory_2</span>
+      <div class="max-w-xl mx-auto animate-fade-in-up">
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-12 text-center shadow-2xl">
+          <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-white/10 to-transparent rounded-full flex items-center justify-center border border-white/20">
+            <span class="material-icons text-5xl text-gray-300">inventory_2</span>
           </div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-3">No Coverage Options Available</h3>
-          <p class="text-gray-600 mb-8">
-            We're currently updating our coverage plans. Please check back later or contact our support team for assistance.
+          <h3 class="text-2xl font-bold text-white mb-3 tracking-tight">Policies Updating</h3>
+          <p class="text-gray-400 mb-8 leading-relaxed">
+            We are currently optimizing our coverage structures. Please check back very soon for tailored protections.
           </p>
           <a
             routerLink="/auth/login"
-            class="btn btn-md bg-gradient-to-r from-fire-red to-fire-orange text-white shadow-md hover:shadow-xl hover:scale-105 cursor-pointer inline-flex"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-gray-800 bg-white hover:bg-gray-50 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
           >
-            <span class="material-icons">contact_support</span>
+            <span class="material-icons text-[18px]">contact_support</span>
             Contact Support
           </a>
         </div>

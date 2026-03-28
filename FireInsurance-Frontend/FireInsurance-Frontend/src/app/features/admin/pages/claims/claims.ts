@@ -75,6 +75,13 @@ export class ClaimsComponent implements OnInit {
   analysisErrorMessage = signal<string>('');
   showFraudAnalysisModal = signal<boolean>(false);
 
+  // Surveyor Report State
+  showSurveyReportModal = signal<boolean>(false);
+  selectedClaimForSurvey = signal<Claim | null>(null);
+  surveyReport = signal<any | null>(null);
+  isSurveyLoading = signal<boolean>(false);
+  surveyErrorMessage = signal<string>('');
+
   ngOnInit(): void {
     this.loadClaims();
     this.loadUnderwriters();
@@ -266,7 +273,13 @@ export class ClaimsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error assigning underwriter to claim:', err);
-        const msg = err.error?.message || 'Failed to assign underwriter.';
+        // Handle both object-based and text-based error responses
+        let msg = 'Failed to assign underwriter.';
+        if (typeof err.error === 'string') {
+          msg = err.error;
+        } else if (err.error?.message) {
+          msg = err.error.message;
+        }
         alert(msg);
       }
     });
@@ -387,6 +400,32 @@ export class ClaimsComponent implements OnInit {
         this.isAnalysisLoading.set(false);
       }
     });
+  }
+
+  viewSurveyReport(claim: Claim): void {
+    this.selectedClaimForSurvey.set(claim);
+    this.isSurveyLoading.set(true);
+    this.surveyErrorMessage.set('');
+    this.showSurveyReportModal.set(true);
+
+    this.adminService.getClaimInspectionByClaimId(claim.claimId).subscribe({
+      next: (report) => {
+        this.surveyReport.set(report);
+        this.isSurveyLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading survey report:', err);
+        this.surveyErrorMessage.set('Survey report not found or system error. Ensure the surveyor has submitted the report.');
+        this.isSurveyLoading.set(false);
+      }
+    });
+  }
+
+  closeSurveyModal(): void {
+    this.showSurveyReportModal.set(false);
+    this.selectedClaimForSurvey.set(null);
+    this.surveyReport.set(null);
+    this.surveyErrorMessage.set('');
   }
 
   closeDocsModal(): void {

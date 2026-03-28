@@ -367,17 +367,69 @@ import { ValidationMessages } from '../../../../shared/helpers/validation-messag
               <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" formControlName="fireSafetyAvailable"> Fire safety available</label>
               <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" formControlName="sprinklerSystem"> Sprinkler system available</label>
               <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" formControlName="fireExtinguishers"> Fire extinguishers available</label>
-              <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Distance from Fire Station (km)</label>
-                <input type="number" formControlName="distanceFromFireStation" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg" min="0" step="0.1">
+              <label class="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" formControlName="hazardousMaterialsPresent"> Hazardous materials present</label>
+            </div>
+
+            <!-- Enhanced COPE Fields -->
+            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-4">
+              <h4 class="text-sm font-bold text-gray-800 border-b border-gray-200 pb-2">COPE Risk Assessment</h4>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">Construction Type</label>
+                  <select formControlName="constructionType" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm">
+                    <option value="FRAME">Frame (Combustible)</option>
+                    <option value="JOISTED_MASONRY">Joisted Masonry</option>
+                    <option value="NON_COMBUSTIBLE">Non-Combustible</option>
+                    <option value="FIRE_RESISTIVE">Fire Resistive</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">Roof Type</label>
+                  <select formControlName="roofType" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm">
+                    <option value="ASPHALT">Asphalt Shingles</option>
+                    <option value="METAL">Metal</option>
+                    <option value="TILE">Concrete/Clay Tile</option>
+                    <option value="CONCRETE">Reinforced Concrete</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">Occupancy Tier</label>
+                  <select formControlName="occupancyType" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm">
+                    <option value="RESIDENTIAL">Residential</option>
+                    <option value="COMMERCIAL">Commercial Office/Retail</option>
+                    <option value="INDUSTRIAL">Industrial/Manufacturing</option>
+                    <option value="WAREHOUSE">Warehouse/Storage</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">Electrical Audit</label>
+                  <select formControlName="electricalAuditStatus" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm">
+                    <option value="PASS">Pass (Compliant)</option>
+                    <option value="FAIL">Fail (Hazards Found)</option>
+                    <option value="PENDING">Pending Minor Repairs</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Construction Risk (0-1)</label>
-                <input type="number" formControlName="constructionRisk" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32]" min="0" max="1" step="0.1">
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">Dist. to Stn (km)</label>
+                  <input type="number" formControlName="distanceFromFireStation" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm" min="0" step="0.1">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">Adj. Bldg Dist (m)</label>
+                  <input type="number" formControlName="adjacentBuildingDistance" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm" min="0" step="1">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 mb-1">Hazard Risk (0-1)</label>
+                  <input type="number" formControlName="hazardRisk" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm" min="0" max="1" step="0.1">
+                </div>
               </div>
+
               <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Hazard Risk (0-1)</label>
-                <input type="number" formControlName="hazardRisk" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C72B32]" min="0" max="1" step="0.1">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Internal Protection Notes</label>
+                <textarea formControlName="internalProtectionNotes" rows="2" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm resize-none" placeholder="Notes on fire doors, secondary exits, etc..."></textarea>
               </div>
             </div>
           }
@@ -439,7 +491,14 @@ export class PropertyInspectionsComponent implements OnInit {
     fireExtinguishers: [false],
     distanceFromFireStation: [null, [Validators.min(0)]],
     constructionRisk: [null, [Validators.min(0), Validators.max(1)]],
-    hazardRisk: [null, [Validators.min(0), Validators.max(1)]]
+    hazardRisk: [null, [Validators.min(0), Validators.max(1)]],
+    constructionType: ['FIRE_RESISTIVE'],
+    roofType: ['CONCRETE'],
+    occupancyType: ['RESIDENTIAL'],
+    electricalAuditStatus: ['PASS'],
+    hazardousMaterialsPresent: [false],
+    adjacentBuildingDistance: [null, [Validators.min(0)]],
+    internalProtectionNotes: ['', [Validators.maxLength(1000)]]
   });
 
   ngOnInit(): void { this.loadInspections(); }
@@ -471,7 +530,14 @@ export class PropertyInspectionsComponent implements OnInit {
         fireExtinguishers: inspection.existingRiskData.fireExtinguishers || false,
         distanceFromFireStation: inspection.existingRiskData.distanceFromFireStation || null,
         constructionRisk: inspection.existingRiskData.constructionRisk || null,
-        hazardRisk: inspection.existingRiskData.hazardRisk || null
+        hazardRisk: inspection.existingRiskData.hazardRisk || null,
+        constructionType: (inspection as any).existingRiskData?.constructionType || 'FIRE_RESISTIVE',
+        roofType: (inspection as any).existingRiskData?.roofType || 'CONCRETE',
+        occupancyType: (inspection as any).existingRiskData?.occupancyType || 'RESIDENTIAL',
+        electricalAuditStatus: (inspection as any).existingRiskData?.electricalAuditStatus || 'PASS',
+        hazardousMaterialsPresent: (inspection as any).existingRiskData?.hazardousMaterialsPresent || false,
+        adjacentBuildingDistance: (inspection as any).existingRiskData?.adjacentBuildingDistance || null,
+        internalProtectionNotes: (inspection as any).existingRiskData?.internalProtectionNotes || ''
       });
 
       // Disable form fields for duplicate properties (they can't edit the assessment)
@@ -492,7 +558,14 @@ export class PropertyInspectionsComponent implements OnInit {
         fireExtinguishers: false,
         distanceFromFireStation: null,
         constructionRisk: null,
-        hazardRisk: null
+        hazardRisk: null,
+        constructionType: 'FIRE_RESISTIVE',
+        roofType: 'CONCRETE',
+        occupancyType: 'RESIDENTIAL',
+        electricalAuditStatus: 'PASS',
+        hazardousMaterialsPresent: false,
+        adjacentBuildingDistance: null,
+        internalProtectionNotes: ''
       });
 
       // Ensure fields are enabled for new inspections

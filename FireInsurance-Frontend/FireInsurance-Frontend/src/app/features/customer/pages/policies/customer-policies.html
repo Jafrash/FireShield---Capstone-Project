@@ -700,26 +700,57 @@
   </div>
 }
 
-<!-- Apply for Policy Modal -->
+<!-- Apply for Policy Modal — 3-Step Wizard -->
 @if (showApplyModal() && selectedPolicy()) {
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl" (click)="$event.stopPropagation()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col" (click)="$event.stopPropagation()">
+
       <!-- Modal Header -->
-      <div class="bg-gradient-to-r from-[#C72B32] to-[#A0214F] p-6 text-white rounded-t-2xl">
-        <div class="flex items-start justify-between">
+      <div class="bg-gradient-to-r from-[#C72B32] to-[#A0214F] p-5 text-white rounded-t-2xl flex-shrink-0">
+        <div class="flex items-start justify-between mb-4">
           <div>
-            <h2 class="text-2xl font-bold mb-1">Apply for Policy</h2>
-            <p class="text-sm opacity-90">{{ selectedPolicy()!.policyName }}</p>
+            <h2 class="text-xl font-bold mb-0.5">Apply for Policy</h2>
+            <p class="text-sm opacity-80">{{ selectedPolicy()!.policyName }}</p>
           </div>
-          <button (click)="closeApplyModal()" 
-                  class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
+          <button (click)="closeApplyModal()" class="text-white hover:bg-white/20 rounded-full p-1.5 transition-colors">
             <span class="material-icons">close</span>
           </button>
         </div>
+        <!-- Step Indicator (Hide after submission) -->
+        @if (!isUploadStep()) {
+          <div class="flex items-center gap-2">
+            @for (step of [1, 2, 3]; track step) {
+              <div class="flex items-center gap-2 flex-1">
+                <div class="flex items-center gap-1.5">
+                  <div class="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition-all"
+                       [ngClass]="currentStep() > step ? 'bg-white text-[#C72B32]' : currentStep() === step ? 'bg-white text-[#C72B32] ring-2 ring-white/50' : 'bg-white/20 text-white'">
+                    @if (currentStep() > step) {
+                      <span class="material-icons text-sm">check</span>
+                    } @else {
+                      {{ step }}
+                    }
+                  </div>
+                  <span class="text-xs font-medium hidden sm:block"
+                        [ngClass]="currentStep() === step ? 'text-white' : 'text-white/60'">
+                    {{ step === 1 ? 'Property & Sum Insured' : step === 2 ? 'Underwriting Details' : 'Declaration & Docs' }}
+                  </span>
+                </div>
+                @if (step < 3) {
+                  <div class="flex-1 h-0.5 rounded-full" [ngClass]="currentStep() > step ? 'bg-white' : 'bg-white/30'"></div>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="flex items-center gap-2">
+            <span class="material-icons text-2xl">verified</span>
+            <span class="font-bold underline decoration-2 underline-offset-4">Application Complete</span>
+          </div>
+        }
       </div>
 
-      <!-- Modal Body -->
-      <form [formGroup]="applicationForm" (ngSubmit)="submitApplication()" class="p-6">
+      <!-- Modal Body — scrollable -->
+      <div class="overflow-y-auto flex-1 p-6">
         @if (errorMessage() && showApplyModal()) {
           <div class="alert alert-error mb-4">
             <span class="material-icons text-sm">error</span>
@@ -728,179 +759,382 @@
         }
 
         @if (!isUploadStep()) {
-          <!-- Policy Info Display -->
-          <div class="bg-fire-cream rounded-lg p-4 mb-6 border border-fire-orange/20">
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <p class="text-xs text-fire-red font-semibold mb-1">Premium Quote</p>
-                <p class="text-sm font-bold text-fire-red-800">Calculated after property review</p>
+          <form [formGroup]="applicationForm">
+
+          <!-- ========== STEP 1: Property & Sum Insured ========== -->
+          @if (currentStep() === 1 && !isUploadStep()) {
+            <div class="space-y-5">
+              <!-- Property Selection -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="material-icons text-sm align-middle mr-1">home</span>
+                  Select Property to Insure *
+                </label>
+                <select formControlName="propertyId" class="form-input"
+                        [ngClass]="{'border-red-500': applicationForm.get('propertyId')?.invalid && applicationForm.get('propertyId')?.touched}">
+                  <option [value]="null">Choose a property...</option>
+                  @for (property of properties(); track property.propertyId) {
+                    <option [value]="property.propertyId">
+                      {{ property.address }} ({{ property.propertyType }})
+                    </option>
+                  }
+                </select>
+                @if (applicationForm.get('propertyId')?.invalid && applicationForm.get('propertyId')?.touched) {
+                  <p class="form-error">Please select a property</p>
+                }
+                @if (properties().length === 0) {
+                  <p class="text-sm text-orange-600 mt-1 flex items-center gap-1">
+                    <span class="material-icons text-sm">info</span>
+                    You need to add a property first.
+                    <a routerLink="/customer/properties" class="underline hover:text-orange-700">Add Property</a>
+                  </p>
+                }
               </div>
-              <div>
-                <p class="text-xs text-fire-red font-semibold mb-1">Max Coverage</p>
-                <p class="text-xl font-bold text-fire-red-800">₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}</p>
+
+              <!-- Sum Insured -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="material-icons text-sm align-middle mr-1">account_balance</span>
+                  Sum Insured (₹) *
+                </label>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3 text-xs text-blue-800 flex gap-2">
+                  <span class="material-icons text-blue-500 text-sm flex-shrink-0 mt-0.5">info</span>
+                  <span><strong>Sum Insured = Reinstatement / Rebuild cost of the structure</strong>, not the market price of the land or property.</span>
+                </div>
+                <!-- Quick-fill chips -->
+                <div class="flex gap-2 mb-3 flex-wrap">
+                  <button type="button" class="px-3 py-1.5 rounded-full border border-gray-300 text-xs font-medium hover:border-[#C72B32] hover:text-[#C72B32] transition-colors"
+                          (click)="setCoverage(getSumInsuredRecommendations(selectedPolicy()!).minimum)">
+                    Min · ₹{{ formatCurrency(getSumInsuredRecommendations(selectedPolicy()!).minimum) }}
+                  </button>
+                  <button type="button" class="px-3 py-1.5 rounded-full border-2 border-green-500 bg-green-50 text-green-800 text-xs font-semibold hover:bg-green-100 transition-colors"
+                          (click)="setCoverage(getSumInsuredRecommendations(selectedPolicy()!).recommended)">
+                    ✓ Recommended · ₹{{ formatCurrency(getSumInsuredRecommendations(selectedPolicy()!).recommended) }}
+                  </button>
+                  <button type="button" class="px-3 py-1.5 rounded-full border border-gray-300 text-xs font-medium hover:border-[#C72B32] hover:text-[#C72B32] transition-colors"
+                          (click)="setCoverage(getSumInsuredRecommendations(selectedPolicy()!).maximum)">
+                    Max · ₹{{ formatCurrency(getSumInsuredRecommendations(selectedPolicy()!).maximum) }}
+                  </button>
+                </div>
+                <input type="number" formControlName="requestedCoverage" class="form-input"
+                       [ngClass]="{'border-red-500': applicationForm.get('requestedCoverage')?.invalid && applicationForm.get('requestedCoverage')?.touched}"
+                       placeholder="Enter sum insured amount">
+                @if (applicationForm.get('requestedCoverage')?.invalid && applicationForm.get('requestedCoverage')?.touched) {
+                  <p class="form-error">
+                    @if (applicationForm.get('requestedCoverage')?.hasError('required')) { Sum insured is required }
+                    @if (applicationForm.get('requestedCoverage')?.hasError('min')) { Amount must be greater than 0 }
+                    @if (applicationForm.get('requestedCoverage')?.hasError('max')) { Cannot exceed ₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }} }
+                  </p>
+                }
+                <!-- Live premium estimate -->
+                @if (applicationForm.get('requestedCoverage')?.value > 0 && applicationForm.get('requestedCoverage')?.valid) {
+                  <div class="mt-3 p-3 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg flex items-center justify-between">
+                    <div>
+                      <p class="text-xs text-amber-700 font-semibold">Indicative Annual Premium</p>
+                      <p class="text-xs text-amber-600">Final premium set after inspection</p>
+                    </div>
+                    <p class="text-lg font-bold text-amber-900">₹{{ formatCurrency(calculateEstimatedPremium(selectedPolicy()!, applicationForm.get('requestedCoverage')!.value)) }}</p>
+                  </div>
+                }
               </div>
             </div>
-          </div>
+          }
 
-          <!-- Property Selection -->
-          <div class="form-group mb-4">
-            <label class="form-label">
-              <span class="material-icons text-sm align-middle mr-1">home</span>
-              Select Property to Insure *
-            </label>
-            <select formControlName="propertyId" 
-                    class="form-input"
-                    [ngClass]="{'border-red-500': applicationForm.get('propertyId')?.invalid && applicationForm.get('propertyId')?.touched}">
-              <option [value]="null">Choose a property...</option>
-              @for (property of properties(); track property.propertyId) {
-                <option [value]="property.propertyId">
-                  {{ property.address }} ({{ property.propertyType }})
-                </option>
+          <!-- ========== STEP 2: Underwriting Details ========== -->
+          @if (currentStep() === 2 && !isUploadStep()) {
+            <div class="space-y-5">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- Construction Type -->
+                <div class="form-group">
+                  <label class="form-label text-xs">Construction Type *</label>
+                  <select formControlName="constructionType" class="form-input"
+                          [ngClass]="{'border-red-500': applicationForm.get('constructionType')?.invalid && applicationForm.get('constructionType')?.touched}">
+                    <option value="">Select type</option>
+                    <option value="RCC">RCC (Reinforced Cement Concrete)</option>
+                    <option value="BRICK">Brick / Masonry</option>
+                    <option value="WOOD">Wood / Timber</option>
+                    <option value="STEEL">Steel Frame</option>
+                    <option value="MIXED">Mixed Construction</option>
+                  </select>
+                  @if (applicationForm.get('constructionType')?.invalid && applicationForm.get('constructionType')?.touched) {
+                    <p class="form-error">Required</p>
+                  }
+                </div>
+
+                <!-- Roof Type -->
+                <div class="form-group">
+                  <label class="form-label text-xs">Roof Type *</label>
+                  <select formControlName="roofType" class="form-input"
+                          [ngClass]="{'border-red-500': applicationForm.get('roofType')?.invalid && applicationForm.get('roofType')?.touched}">
+                    <option value="">Select type</option>
+                    <option value="RCC_SLAB">RCC Slab</option>
+                    <option value="MANGALORE_TILES">Mangalore / Clay Tiles</option>
+                    <option value="METAL_SHEET">Metal / GI Sheet</option>
+                    <option value="ASBESTOS">Asbestos Sheet</option>
+                    <option value="THATCHED">Thatched / Grass</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                  @if (applicationForm.get('roofType')?.invalid && applicationForm.get('roofType')?.touched) {
+                    <p class="form-error">Required</p>
+                  }
+                </div>
+
+                <!-- Number of Floors -->
+                <div class="form-group">
+                  <label class="form-label text-xs">No. of Floors *</label>
+                  <input type="number" formControlName="numberOfFloors" class="form-input" min="1" placeholder="e.g. 2"
+                         [ngClass]="{'border-red-500': applicationForm.get('numberOfFloors')?.invalid && applicationForm.get('numberOfFloors')?.touched}">
+                  @if (applicationForm.get('numberOfFloors')?.invalid && applicationForm.get('numberOfFloors')?.touched) {
+                    <p class="form-error">Required (min. 1)</p>
+                  }
+                </div>
+
+                <!-- Occupancy Type -->
+                <div class="form-group">
+                  <label class="form-label text-xs">Occupancy Type *</label>
+                  <select formControlName="occupancyType" class="form-input"
+                          [ngClass]="{'border-red-500': applicationForm.get('occupancyType')?.invalid && applicationForm.get('occupancyType')?.touched}">
+                    <option value="">Select type</option>
+                    <option value="RESIDENTIAL">Residential</option>
+                    <option value="COMMERCIAL">Commercial</option>
+                    <option value="INDUSTRIAL">Industrial</option>
+                  </select>
+                  @if (applicationForm.get('occupancyType')?.invalid && applicationForm.get('occupancyType')?.touched) {
+                    <p class="form-error">Required</p>
+                  }
+                </div>
+
+                <!-- Declared Property Value -->
+                <div class="form-group md:col-span-2">
+                  <label class="form-label text-xs">Declared Property Value (₹) *</label>
+                  <p class="text-xs text-gray-500 mb-1">Market / resale value of the property (land + structure)</p>
+                  <input type="number" formControlName="propertyValue" class="form-input" min="1" placeholder="e.g. 5000000"
+                         [ngClass]="{'border-red-500': applicationForm.get('propertyValue')?.invalid && applicationForm.get('propertyValue')?.touched}">
+                  @if (applicationForm.get('propertyValue')?.invalid && applicationForm.get('propertyValue')?.touched) {
+                    <p class="form-error">Required</p>
+                  }
+                </div>
+              </div>
+
+              <!-- Conditional: shown only for COMMERCIAL / INDUSTRIAL -->
+              @if (isIndustrialOrCommercial()) {
+                <div class="border border-amber-200 rounded-xl bg-amber-50 p-4 space-y-3">
+                  <p class="text-xs font-semibold text-amber-800 flex items-center gap-1">
+                    <span class="material-icons text-sm">factory</span>
+                    Commercial / Industrial Details
+                  </p>
+                  <div class="form-group">
+                    <label class="form-label text-xs">Nature of Manufacturing Process / Business Activity</label>
+                    <textarea formControlName="manufacturingProcess" class="form-input" rows="2"
+                              placeholder="Describe the primary business or manufacturing operations conducted on the premises"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label text-xs">Hazardous Materials / Goods Stored on Premises</label>
+                    <textarea formControlName="hazardousGoods" class="form-input" rows="2"
+                              placeholder="e.g. LPG cylinders, chemicals, flammable liquids, etc. Write 'None' if not applicable"></textarea>
+                  </div>
+                </div>
               }
-            </select>
-            @if (applicationForm.get('propertyId')?.invalid && applicationForm.get('propertyId')?.touched) {
-              <p class="form-error">Please select a property</p>
-            }
-            @if (properties().length === 0) {
-              <p class="text-sm text-orange-600 mt-1 flex items-center gap-1">
-                <span class="material-icons text-sm">info</span>
-                You need to add a property first. 
-                <a routerLink="/customer/properties" class="underline hover:text-orange-700">Add Property</a>
-              </p>
-            }
-          </div>
 
-          <!-- Requested Coverage Amount -->
-          <div class="form-group mb-6">
-            <label class="form-label">
-              <span class="material-icons text-sm align-middle mr-1">account_balance</span>
-              Requested Coverage Amount (₹) *
-            </label>
-            <input type="number" 
-                   formControlName="requestedCoverage" 
-                   class="form-input"
-                   [ngClass]="{'border-red-500': applicationForm.get('requestedCoverage')?.invalid && applicationForm.get('requestedCoverage')?.touched}"
-                   placeholder="Enter amount (max ₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }})">
-            @if (applicationForm.get('requestedCoverage')?.invalid && applicationForm.get('requestedCoverage')?.touched) {
-              <p class="form-error">
-                @if (applicationForm.get('requestedCoverage')?.hasError('required')) {
-                  Coverage amount is required
+              <!-- Previous Loss History — Yes/No toggle -->
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="text-sm font-semibold text-gray-800 mb-3">Have you had any prior fire losses or insurance claims?</p>
+                <div class="flex gap-3 mb-3">
+                  <button type="button" (click)="setLossHistory(false)"
+                          class="flex-1 py-2 rounded-lg text-sm font-medium border-2 transition-all"
+                          [ngClass]="!hasLossHistory() ? 'border-green-500 bg-green-50 text-green-800' : 'border-gray-200 text-gray-600 hover:border-gray-300'">
+                    No
+                  </button>
+                  <button type="button" (click)="setLossHistory(true)"
+                          class="flex-1 py-2 rounded-lg text-sm font-medium border-2 transition-all"
+                          [ngClass]="hasLossHistory() ? 'border-[#C72B32] bg-red-50 text-[#C72B32]' : 'border-gray-200 text-gray-600 hover:border-gray-300'">
+                    Yes
+                  </button>
+                </div>
+                @if (hasLossHistory()) {
+                  <div class="form-group">
+                    <label class="form-label text-xs">Please provide details of prior losses/claims</label>
+                    <textarea formControlName="previousLossHistory" class="form-input" rows="2"
+                              placeholder="Year, amount, cause of loss, claim settled/pending..."></textarea>
+                  </div>
                 }
-                @if (applicationForm.get('requestedCoverage')?.hasError('min')) {
-                  Amount must be greater than 0
-                }
-                @if (applicationForm.get('requestedCoverage')?.hasError('max')) {
-                  Amount cannot exceed ₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}
-                }
-              </p>
-            }
-            <p class="text-xs text-gray-500 mt-1">
-              <span class="material-icons text-xs align-middle">info</span>
-              Maximum coverage available: ₹{{ formatCurrency(selectedPolicy()!.maxCoverageAmount) }}
-            </p>
-          </div>
+              </div>
 
-          <!-- Optional Proposal Details for Underwriting -->
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-            <p class="text-sm font-semibold text-gray-800 mb-3">Underwriting Details (Optional but Recommended)</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label class="form-label text-xs">Construction Type</label>
-                <input type="text" formControlName="constructionType" class="form-input" placeholder="RCC / Wood / Steel">
+              <!-- Insurance Declined Before — Yes/No toggle -->
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="text-sm font-semibold text-gray-800 mb-3">Has fire insurance for this property been declined, cancelled, or refused by any insurer before?</p>
+                <div class="flex gap-3">
+                  <button type="button" (click)="setDeclinedBefore(false)"
+                          class="flex-1 py-2 rounded-lg text-sm font-medium border-2 transition-all"
+                          [ngClass]="!hasDeclinedBefore() ? 'border-green-500 bg-green-50 text-green-800' : 'border-gray-200 text-gray-600 hover:border-gray-300'">
+                    No
+                  </button>
+                  <button type="button" (click)="setDeclinedBefore(true)"
+                          class="flex-1 py-2 rounded-lg text-sm font-medium border-2 transition-all"
+                          [ngClass]="hasDeclinedBefore() ? 'border-amber-500 bg-amber-50 text-amber-800' : 'border-gray-200 text-gray-600 hover:border-gray-300'">
+                    Yes
+                  </button>
+                </div>
+                @if (hasDeclinedBefore()) {
+                  <div class="mt-2 p-2 rounded-lg bg-amber-100 border border-amber-300 flex gap-2 text-xs text-amber-800">
+                    <span class="material-icons text-sm text-amber-600">warning</span>
+                    This information will be reviewed by our underwriting team and may affect your application.
+                  </div>
+                }
               </div>
-              <div>
-                <label class="form-label text-xs">Roof Type</label>
-                <input type="text" formControlName="roofType" class="form-input" placeholder="Concrete / Metal sheet">
-              </div>
-              <div>
-                <label class="form-label text-xs">No. of Floors</label>
-                <input type="number" formControlName="numberOfFloors" class="form-input" min="1" placeholder="e.g. 2">
-              </div>
-              <div>
-                <label class="form-label text-xs">Occupancy Type</label>
-                <input type="text" formControlName="occupancyType" class="form-input" placeholder="Residential / Commercial / Industrial">
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label text-xs">Manufacturing Process</label>
-                <textarea formControlName="manufacturingProcess" class="form-input" rows="2" placeholder="If applicable, describe process"></textarea>
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label text-xs">Hazardous Goods</label>
-                <textarea formControlName="hazardousGoods" class="form-input" rows="2" placeholder="Fuel, chemicals, gas cylinders, etc."></textarea>
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label text-xs">Previous Loss History</label>
-                <textarea formControlName="previousLossHistory" class="form-input" rows="2" placeholder="Any prior fire losses/claims"></textarea>
-              </div>
-              <div>
-                <label class="form-label text-xs">Property Value (₹)</label>
-                <input type="number" formControlName="propertyValue" class="form-input" min="1" placeholder="e.g. 5000000">
-              </div>
-              <label class="flex items-center gap-2 mt-6 text-sm text-gray-700">
-                <input type="checkbox" formControlName="insuranceDeclinedBefore">
-                Insurance declined before
-              </label>
+
             </div>
-          </div>
+          }
 
-          <!-- Important Note -->
-          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <div class="flex gap-2">
-              <span class="material-icons text-yellow-600 text-xl">info</span>
-              <div class="flex-1">
-                <p class="text-sm font-semibold text-yellow-900 mb-1">Important Information</p>
-                <p class="text-xs text-yellow-800">
-                  Your application will be reviewed by our admin team. A property inspection may be required before policy activation. 
-                  Your final premium will be shared only after underwriting review based on your property details and requested coverage.
+          <!-- ========== STEP 3: Declaration & Documents ========== -->
+          @if (currentStep() === 3 && !isUploadStep()) {
+            <div class="space-y-5">
+
+              <!-- Required Documents by Occupancy -->
+              <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <p class="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+                  <span class="material-icons text-blue-600">folder_open</span>
+                  Documents Required for Your Application
                 </p>
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2 text-sm text-gray-800"><span class="material-icons text-blue-500 text-sm">description</span> Property ownership proof (Sale deed / Registry)</li>
+                  <li class="flex items-center gap-2 text-sm text-gray-800"><span class="material-icons text-blue-500 text-sm">photo_camera</span> Property photographs — min. 4 (exterior + interior)</li>
+                  <li class="flex items-center gap-2 text-sm text-gray-800"><span class="material-icons text-blue-500 text-sm">receipt</span> Valuation / reinstatement cost estimate</li>
+                  <li class="flex items-center gap-2 text-sm text-gray-800"><span class="material-icons text-blue-500 text-sm">assignment</span> Building completion / occupancy certificate</li>
+                  <li class="flex items-center gap-2 text-sm text-gray-800"><span class="material-icons text-blue-500 text-sm">electric_bolt</span> Electrical safety certificate</li>
+                  @if (isIndustrialOrCommercial()) {
+                    <li class="flex items-center gap-2 text-sm text-gray-800"><span class="material-icons text-amber-500 text-sm">local_fire_department</span> Fire NOC (No Objection Certificate)</li>
+                    <li class="flex items-center gap-2 text-sm text-gray-800"><span class="material-icons text-amber-500 text-sm">inventory</span> Stock / inventory list</li>
+                  }
+                  @if (applicationForm.get('occupancyType')?.value === 'INDUSTRIAL') {
+                    <li class="flex items-center gap-2 text-sm text-gray-800"><span class="material-icons text-red-500 text-sm">precision_manufacturing</span> List of machinery and plant assets</li>
+                    <li class="flex items-center gap-2 text-sm text-gray-800"><span class="material-icons text-red-500 text-sm">warning</span> Hazardous materials handling license (if applicable)</li>
+                  }
+                </ul>
+              </div>
+
+              <!-- Document Upload -->
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <app-document-upload
+                  [title]="'Upload Required Policy Documents'"
+                  [documentType]="'POLICY_APPLICATION_DOCUMENT'"
+                  [linkedEntityType]="'POLICY_SUBSCRIPTION'"
+                  [linkedEntityId]="propertyIdForUpload() ?? applicationForm.get('propertyId')!.value"
+                  [requiredDocuments]="isIndustrialOrCommercial()
+                    ? ['Ownership proof', 'Property photographs (4+)', 'Valuation estimate', 'Occupancy certificate', 'Electrical certificate', 'Fire NOC', 'Stock/inventory list']
+                    : ['Ownership proof', 'Property photographs (4+)', 'Valuation estimate', 'Occupancy certificate', 'Electrical certificate']">
+                </app-document-upload>
+              </div>
+
+              <!-- Legal Declaration (Hide after submission) -->
+              @if (!isUploadStep()) {
+                <div class="border-2 rounded-xl p-4" [ngClass]="declarationAccepted() ? 'border-green-400 bg-green-50' : 'border-gray-300 bg-gray-50'">
+                  <p class="text-sm text-gray-700 leading-relaxed mb-4">
+                    <strong class="text-gray-900">Declaration:</strong> I hereby declare that all information provided in this application is true and correct to the best of my knowledge and belief.
+                    I understand that any misrepresentation, concealment, or suppression of material facts may result in rejection of this application, cancellation of the policy, and/or repudiation of any claim.
+                  </p>
+                  <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" class="mt-0.5 w-4 h-4 accent-[#C72B32]"
+                           [checked]="declarationAccepted()"
+                           (change)="declarationAccepted.set($any($event.target).checked)">
+                    <span class="text-sm font-semibold text-gray-800">
+                      I have read and agree to the above declaration and consent to FireShield processing this application.
+                    </span>
+                  </label>
+                </div>
+              }
+
+            </div>
+          }
+        </form>
+      }
+
+          <!-- ========== SUCCESS & DOCUMENT UPLOAD STEP (after submission) ========== -->
+          @if (isUploadStep()) {
+            <div class="animate-fadeIn space-y-6">
+              <!-- Animated Success Banner -->
+              <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-green-100/30 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                <div class="relative z-10 flex items-center gap-5">
+                  <div class="w-14 h-14 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg transform scale-110">
+                    <span class="material-icons text-3xl">check_circle</span>
+                  </div>
+                  <div>
+                    <h3 class="text-xl font-bold text-green-900 mb-1">Application Submitted!</h3>
+                    <p class="text-sm text-green-700 leading-relaxed font-medium">Your request has been received and is now being processed.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Card: Documents -->
+              <div class="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-2">
+                <div class="bg-gray-50/50 rounded-xl p-4 sm:p-6 transition-all">
+                  <div class="flex items-center gap-2 mb-4 text-gray-500">
+                    <span class="material-icons text-sm">attachment</span>
+                    <span class="text-xs font-bold uppercase tracking-wider">Required Evidence</span>
+                  </div>
+                  
+                  <app-document-upload
+                    [title]="'Upload Property Documents'"
+                    [documentType]="'POLICY_APPLICATION_DOCUMENT'"
+                    [linkedEntityType]="'POLICY_SUBSCRIPTION'"
+                    [linkedEntityId]="propertyIdForUpload()!"
+                    [requiredDocuments]="['Ownership proof', 'Property photographs', 'Valuation estimate', 'Occupancy certificate', 'Electrical certificate']">
+                  </app-document-upload>
+                  
+                  <div class="mt-4 p-3 bg-amber-50 border border-amber-100 rounded-xl flex items-start gap-3">
+                    <span class="material-icons text-amber-500 text-lg">info</span>
+                    <p class="text-xs text-amber-800 leading-relaxed">
+                      You can also upload these documents later from your <strong>My Policies</strong> page or through the <strong>Account Center</strong>.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          }
 
-          <!-- Form Actions -->
-          <div class="flex gap-3">
-            <button type="button" 
-                    (click)="closeApplyModal()" 
-                    class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors"
-                    [disabled]="isSubmitting()">
-              Cancel
+      </div>
+
+      <!-- Modal Footer — sticky -->
+      <div class="flex-shrink-0 border-t border-gray-200 p-4 bg-gray-50 rounded-b-2xl flex gap-3 justify-between">
+        @if (!isUploadStep()) {
+          <button type="button" (click)="currentStep() > 1 ? prevStep() : closeApplyModal()"
+                  class="px-5 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center gap-1.5">
+            <span class="material-icons text-sm">{{ currentStep() > 1 ? 'arrow_back' : 'close' }}</span>
+            {{ currentStep() > 1 ? 'Back' : 'Cancel' }}
+          </button>
+
+          @if (currentStep() < 3) {
+            <button type="button" (click)="nextStep()"
+                    class="px-6 py-2.5 bg-[#C72B32] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors flex items-center gap-1.5">
+              Continue
+              <span class="material-icons text-sm">arrow_forward</span>
             </button>
-            <button type="submit" 
-                    class="flex-1 px-6 py-3 bg-[#C72B32] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    [disabled]="applicationForm.invalid || isSubmitting() || properties().length === 0">
+          } @else {
+            <button type="button" (click)="submitApplication()"
+                    [disabled]="!declarationAccepted() || isSubmitting() || properties().length === 0"
+                    class="px-6 py-2.5 bg-[#C72B32] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
               @if (isSubmitting()) {
                 <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span>Submitting...</span>
+                Submitting...
               } @else {
                 <span class="material-icons text-sm">send</span>
-                <span>Submit Application</span>
+                Submit Application
               }
             </button>
-          </div>
+          }
         } @else {
-          <!-- Document Upload Step View -->
-          <div class="animate-fadeIn">
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-2">
-              <app-document-upload
-                [title]="'Upload Required Policy Documents'"
-                [documentType]="'POLICY_APPLICATION_DOCUMENT'"
-                [linkedEntityType]="'POLICY_SUBSCRIPTION'"
-                [linkedEntityId]="propertyIdForUpload()!"
-                [requiredDocuments]="['Property valuation proof', 'Insurance proposal form']"
-              ></app-document-upload>
-            </div>
-
-            <div class="flex justify-end gap-3 mt-4 border-t border-gray-100 pt-5">
-              <button type="button" 
-                      (click)="closeApplyModal()" 
-                      class="px-6 py-3 bg-[#C72B32] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors flex items-center gap-2 shadow-md">
-                <span class="material-icons text-sm">done_all</span>
-                Finish Application
-              </button>
-            </div>
-          </div>
+          <div></div>
+          <button type="button" (click)="closeApplyModal()"
+                  class="px-6 py-3 bg-[#C72B32] text-white rounded-lg font-medium hover:bg-[#A0214F] transition-colors flex items-center gap-2 shadow-md">
+            <span class="material-icons text-sm">done_all</span>
+            Finish Application
+          </button>
         }
-      </form>
+      </div>
+
     </div>
   </div>
 }
+

@@ -1,0 +1,15 @@
+{
+  "/nominatim": {
+    "target": "https://nominatim.openstreetmap.org",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/nominatim": ""
+    },
+    "headers": {
+      "Accept-Language": "en",
+      "User-Agent": "FireShield-Insurance-App/1.0"
+    },
+    "logLevel": "info"
+  }
+}

@@ -208,7 +208,33 @@ public class AdminController {
     @GetMapping("/fraud/statistics")
     public ResponseEntity<FraudStatisticsResponse> getFraudStatistics() {
         try {
-            FraudStatisticsResponse stats = generateMockFraudStatistics();
+            List<Claim> claims = claimService.getAllClaims();
+            long totalClaims = claims.size();
+            long totalFraudCases = claims.stream().filter(c -> c.getFraudScore() != null && c.getFraudScore() > 0).count();
+            long highRiskClaims = claims.stream().filter(c -> org.hartford.fireinsurance.model.RiskLevel.HIGH.equals(c.getRiskLevel())).count();
+            long mediumRiskClaims = claims.stream().filter(c -> org.hartford.fireinsurance.model.RiskLevel.MEDIUM.equals(c.getRiskLevel())).count();
+            long lowRiskClaims = claims.stream().filter(c -> org.hartford.fireinsurance.model.RiskLevel.LOW.equals(c.getRiskLevel()) && c.getFraudScore() != null && c.getFraudScore() > 0).count();
+            
+            long totalSiuInvestigations = claims.stream().filter(c -> c.getSiuInvestigator() != null).count();
+            long activeSiuInvestigations = claims.stream().filter(c -> "UNDER_INVESTIGATION".equals(c.getSiuStatus())).count();
+            long completedSiuInvestigations = claims.stream().filter(c -> "COMPLETED".equals(c.getSiuStatus()) || "SIU_CLEARED".equals(c.getSiuStatus()) || "FRAUD_CONFIRMED".equals(c.getSiuStatus())).count();
+            long fraudConfirmedCases = claims.stream().filter(c -> "FRAUD_CONFIRMED".equals(c.getSiuStatus())).count();
+            long clearedCases = claims.stream().filter(c -> "SIU_CLEARED".equals(c.getSiuStatus())).count();
+            
+            double averageFraudScore = claims.stream().mapToDouble(c -> c.getFraudScore() != null ? c.getFraudScore() : 0.0).average().orElse(0.0);
+            double totalClaimsValue = claims.stream().mapToDouble(c -> c.getClaimAmount() != null ? c.getClaimAmount() : 0.0).sum();
+            double fraudulentClaimsValue = claims.stream()
+                    .filter(c -> org.hartford.fireinsurance.model.RiskLevel.HIGH.equals(c.getRiskLevel()))
+                    .mapToDouble(c -> c.getClaimAmount() != null ? c.getClaimAmount() : 0.0)
+                    .sum();
+            double fraudPercentage = totalClaims > 0 ? (double) totalFraudCases / totalClaims * 100 : 0.0;
+            
+            FraudStatisticsResponse stats = new FraudStatisticsResponse(
+                totalFraudCases, highRiskClaims, mediumRiskClaims, lowRiskClaims,
+                totalSiuInvestigations, activeSiuInvestigations, completedSiuInvestigations,
+                fraudConfirmedCases, clearedCases, averageFraudScore,
+                totalClaimsValue, fraudulentClaimsValue, fraudPercentage
+            );
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -218,7 +244,23 @@ public class AdminController {
     @GetMapping("/fraud/distribution")
     public ResponseEntity<List<FraudDistributionResponse>> getFraudDistribution() {
         try {
-            List<FraudDistributionResponse> distribution = generateMockFraudDistribution();
+            List<Claim> claims = claimService.getAllClaims();
+            long totalFraudCases = claims.stream().filter(c -> c.getFraudScore() != null && c.getFraudScore() > 0).count();
+            
+            long highCount = claims.stream().filter(c -> org.hartford.fireinsurance.model.RiskLevel.HIGH.equals(c.getRiskLevel())).count();
+            double highValue = claims.stream().filter(c -> org.hartford.fireinsurance.model.RiskLevel.HIGH.equals(c.getRiskLevel())).mapToDouble(c -> c.getClaimAmount() != null ? c.getClaimAmount() : 0.0).sum();
+            
+            long medCount = claims.stream().filter(c -> org.hartford.fireinsurance.model.RiskLevel.MEDIUM.equals(c.getRiskLevel())).count();
+            double medValue = claims.stream().filter(c -> org.hartford.fireinsurance.model.RiskLevel.MEDIUM.equals(c.getRiskLevel())).mapToDouble(c -> c.getClaimAmount() != null ? c.getClaimAmount() : 0.0).sum();
+            
+            long lowCount = claims.stream().filter(c -> org.hartford.fireinsurance.model.RiskLevel.LOW.equals(c.getRiskLevel()) && c.getFraudScore() != null && c.getFraudScore() > 0).count();
+            double lowValue = claims.stream().filter(c -> org.hartford.fireinsurance.model.RiskLevel.LOW.equals(c.getRiskLevel()) && c.getFraudScore() != null && c.getFraudScore() > 0).mapToDouble(c -> c.getClaimAmount() != null ? c.getClaimAmount() : 0.0).sum();
+            
+            List<FraudDistributionResponse> distribution = java.util.Arrays.asList(
+                new FraudDistributionResponse("HIGH", highCount, totalFraudCases > 0 ? (double) highCount / totalFraudCases * 100 : 0.0, highValue),
+                new FraudDistributionResponse("MEDIUM", medCount, totalFraudCases > 0 ? (double) medCount / totalFraudCases * 100 : 0.0, medValue),
+                new FraudDistributionResponse("LOW", lowCount, totalFraudCases > 0 ? (double) lowCount / totalFraudCases * 100 : 0.0, lowValue)
+            );
             return ResponseEntity.ok(distribution);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -228,7 +270,26 @@ public class AdminController {
     @GetMapping("/fraud/siu-workload")
     public ResponseEntity<List<SiuWorkloadResponse>> getSiuWorkload() {
         try {
-            List<SiuWorkloadResponse> workload = generateMockSiuWorkload();
+            List<SiuInvestigator> investigators = siuService.getAllSiuInvestigators();
+            List<Claim> allClaims = claimService.getAllClaims();
+            
+            List<SiuWorkloadResponse> workload = investigators.stream().map(inv -> {
+                Long active = allClaims.stream().filter(c -> inv.equals(c.getSiuInvestigator()) && "UNDER_INVESTIGATION".equals(c.getSiuStatus())).count();
+                Long completed = allClaims.stream().filter(c -> inv.equals(c.getSiuInvestigator()) && ("COMPLETED".equals(c.getSiuStatus()) || "SIU_CLEARED".equals(c.getSiuStatus()) || "FRAUD_CONFIRMED".equals(c.getSiuStatus()))).count();
+                Long confirmed = allClaims.stream().filter(c -> inv.equals(c.getSiuInvestigator()) && "FRAUD_CONFIRMED".equals(c.getSiuStatus())).count();
+                Long cleared = allClaims.stream().filter(c -> inv.equals(c.getSiuInvestigator()) && "SIU_CLEARED".equals(c.getSiuStatus())).count();
+                Double avgDays = Double.valueOf(15.0); // Mocking average days for now as it's not tracked
+                return new SiuWorkloadResponse(
+                    inv.getInvestigatorId(),
+                    inv.getUser().getUsername(),
+                    active,
+                    completed,
+                    confirmed,
+                    cleared,
+                    avgDays
+                );
+            }).toList();
+            
             return ResponseEntity.ok(workload);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -238,8 +299,13 @@ public class AdminController {
     @GetMapping("/fraud/trends")
     public ResponseEntity<List<FraudTrendResponse>> getFraudTrends() {
         try {
-            List<FraudTrendResponse> trends = generateMockFraudTrends();
-            return ResponseEntity.ok(trends);
+            // Re-use mock trends for now as temporal aggregation is complex without a dedicated analytics service,
+            // but ensure it's not totally static if no data exists.
+            List<Claim> claims = claimService.getAllClaims();
+            if (claims.isEmpty()) {
+                return ResponseEntity.ok(java.util.Collections.emptyList());
+            }
+            return ResponseEntity.ok(generateMockFraudTrends());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }

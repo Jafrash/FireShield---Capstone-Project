@@ -1,277 +1,301 @@
-<div class="min-h-screen bg-warmgray flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-  <div class="sm:mx-auto sm:w-full sm:max-w-md">
-    <div class="flex justify-center mb-6">
-      <div class="w-24 h-24 hover:scale-110 transition-transform duration-300">
-        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-xl">
-          <path d="M24 4L8 10V22C8 32.38 14.64 42.1 24 44C33.36 42.1 40 32.38 40 22V10L24 4Z" fill="#C72B32"/>
-          <path d="M24 14L16 20V32H32V20L24 14Z" fill="white" fill-opacity="0.8"/>
-          <path d="M24 22C24 22 20 26 20 28.5C20 30.7091 21.7909 32.5 24 32.5C26.2091 32.5 28 30.7091 28 28.5C28 26 24 22 24 22Z" fill="#FB923C"/>
-          <path d="M24 25C24 25 22 28 22 29.5C22 30.6046 22.8954 31.5 24 31.5C25.1046 31.5 26 30.6046 26 29.5C26 28 24 25 24 25Z" fill="#FDE047"/>
-        </svg>
+<div class="min-h-screen flex w-full bg-white font-sans overflow-hidden">
+  
+  <!-- Left Side: Branding / Visual (Hidden on mobile, 50% on Desktop) -->
+  <div class="hidden lg:flex w-1/2 relative bg-fire-charcoal items-center justify-center p-12 overflow-hidden shadow-2xl">
+    <!-- Abstract background elements -->
+    <div class="absolute inset-0 z-0">
+      <div class="absolute inset-0 bg-gradient-to-br from-fire-charcoal via-[#1a1c23] to-[#3a1a1c]"></div>
+      <!-- Glowing Orbs -->
+      <div class="absolute w-[600px] h-[600px] bg-fire-orange/20 rounded-full blur-[100px] -top-32 -left-32 animate-[pulse_6s_ease-in-out_infinite]"></div>
+      <div class="absolute w-[500px] h-[500px] bg-fire-red/20 rounded-full blur-[100px] bottom-[-10%] right-[-10%] animate-[pulse_8s_ease-in-out_infinite_1s]"></div>
+      <!-- Grid overlay -->
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')] opacity-50"></div>
+    </div>
+    
+    <!-- Branding Content -->
+    <div class="relative z-10 w-full max-w-xl text-white">
+      <!-- Floating Glass Icon -->
+      <div class="inline-flex p-5 rounded-2xl bg-white/5 backdrop-blur-xl mb-12 border border-white/10 shadow-[0_8px_32px_0_rgba(255,107,53,0.3)] animate-[bounce-in_1s_ease-out]">
+        <span class="material-icons text-[40px] bg-gradient-to-br from-fire-yellow to-fire-orange bg-clip-text text-transparent transform scale-110">local_fire_department</span>
+      </div>
+      
+      <h1 class="text-5xl xl:text-6xl font-extrabold mb-6 tracking-tight leading-[1.15]">
+        Join the future of insurance with
+        <span class="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-fire-yellow via-fire-orange to-fire-red pb-2">
+          FireShield
+        </span>
+      </h1>
+      
+      <p class="text-lg xl:text-xl text-gray-300 font-medium leading-relaxed mb-16 max-w-lg">
+        Create your account in minutes. Get instantaneous quotes, lightning fast claims processing, and 24/7 peace of mind.
+      </p>
+      
+      <!-- Trust badges -->
+      <div class="flex gap-10 items-center border-t border-white/10 pt-10">
+        <div class="flex items-center gap-4 group">
+          <div class="w-12 h-12 rounded-full bg-fire-orange/10 flex items-center justify-center text-fire-orange border border-fire-orange/20 group-hover:scale-110 transition-transform">
+            <span class="material-icons">verified_user</span>
+          </div>
+          <div>
+            <p class="font-bold text-white text-sm">Top Rated</p>
+            <p class="text-xs text-gray-400 font-medium tracking-wide">SUPPORT</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 group">
+          <div class="w-12 h-12 rounded-full bg-fire-red/10 flex items-center justify-center text-fire-red border border-fire-red/20 group-hover:scale-110 transition-transform">
+            <span class="material-icons">bolt</span>
+          </div>
+          <div>
+            <p class="font-bold text-white text-sm">Instant</p>
+            <p class="text-xs text-gray-400 font-medium tracking-wide">APPROVALS</p>
+          </div>
+        </div>
       </div>
     </div>
-    <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
-      Create an Account
-    </h2>
-    <p class="mt-2 text-center text-sm text-gray-600">
-      Or
-      <a routerLink="/auth/login" class="font-semibold text-fire-red hover:text-fire-red/80 transition-colors">
-        sign in to your existing account
-      </a>
-    </p>
   </div>
 
-  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
-    <div class="bg-white py-8 px-4 shadow-xl shadow-fire-red/5 sm:rounded-2xl sm:px-10 border border-gray-100 relative overflow-hidden">
-      <!-- Decorative top border -->
-      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-fire-red to-fire-orange"></div>
+  <!-- Right Side: Registration Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative bg-gray-50/50 overflow-y-auto">
+    
+    <!-- Mobile background styling ONLY -->
+    <div class="absolute inset-0 lg:hidden bg-gradient-to-br from-fire-cream/40 via-white to-fire-cream/40 z-0"></div>
+    <div class="absolute top-0 w-full h-1.5 lg:hidden bg-gradient-to-r from-fire-red via-fire-orange to-fire-yellow z-10 shadow-sm"></div>
 
-      <!-- Role Selection Toggle -->
-      <div class="flex justify-center mb-8">
-        <div class="inline-flex bg-gray-100 rounded-lg p-1 space-x-1">
-          <button type="button" 
-                  (click)="setRole('CUSTOMER')"
-                  [class]="roleSelection() === 'CUSTOMER' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
-                  class="px-6 py-2.5 rounded-md text-sm font-semibold transition-all">
-            <div class="flex items-center gap-2">
-              <span class="material-icons text-[18px]">person</span>
-              Customer
-            </div>
-          </button>
-          <button type="button" 
-                  (click)="setRole('SURVEYOR')"
-                  [class]="roleSelection() === 'SURVEYOR' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
-                  class="px-6 py-2.5 rounded-md text-sm font-semibold transition-all">
-            <div class="flex items-center gap-2">
-              <span class="material-icons text-[18px]">engineering</span>
-              Surveyor
-            </div>
-          </button>
+    <div class="w-full max-w-[540px] relative z-10 bg-white rounded-[2rem] shadow-[0_0_50px_-12px_rgba(0,0,0,0.08)] border border-gray-100 p-8 sm:p-12 my-8">
+      
+      <!-- Mobile Logo Header -->
+      <div class="lg:hidden text-center mb-10">
+        <div class="inline-flex justify-center items-center w-16 h-16 rounded-2xl bg-gradient-to-br from-fire-red to-fire-orange shadow-[0_8px_16px_rgba(255,107,53,0.3)] mb-5">
+          <span class="material-icons text-3xl text-white">local_fire_department</span>
         </div>
+        <h2 class="text-2xl font-extrabold text-fire-charcoal tracking-tight">FireShield</h2>
       </div>
 
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Header -->
+      <div class="mb-10 text-center lg:text-left">
+        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">Create an Account</h2>
+        <p class="text-gray-500 font-medium text-[15px]">
+          Already have an account? 
+          <a routerLink="/auth/login" class="text-fire-orange font-bold hover:text-fire-red transition-colors ml-1">
+            Sign in here
+          </a>
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-1">
-            <label for="firstName" class="block text-sm font-semibold text-gray-700">First Name</label>
+        <!-- Alerts -->
+        @if (errorMessage()) {
+          <div class="bg-red-50 border border-red-100 text-red-700 px-4 py-3.5 rounded-xl flex items-start gap-3 text-sm animate-[fadeIn_0.3s_ease-out]">
+            <span class="material-icons text-red-500 flex-shrink-0 text-[20px]">error_outline</span>
+            <span class="font-semibold leading-tight">{{ errorMessage() }}</span>
+          </div>
+        }
+        
+        @if (successMessage()) {
+          <div class="bg-green-50 border border-green-100 text-green-800 px-4 py-3.5 rounded-xl flex items-start gap-3 text-sm animate-[fadeIn_0.3s_ease-out]">
+            <span class="material-icons text-green-500 flex-shrink-0 text-[20px]">check_circle</span>
+            <span class="font-semibold leading-tight">{{ successMessage() }}</span>
+          </div>
+        }
+
+        <!-- 2 Column Layout: Name -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="space-y-1.5 relative group">
+            <label for="firstName" class="text-[12px] font-bold text-gray-700 ml-1 uppercase tracking-wide">First Name</label>
             <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">person</span>
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+                <span class="material-icons text-[20px]">person_outline</span>
               </div>
-              <input id="firstName" type="text" formControlName="firstName"
-                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-                [class.border-red-300]="hasError('firstName', 'required')"
-                placeholder="John">
+              <input id="firstName" type="text" formControlName="firstName" placeholder="John"
+                class="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm"
+                [class.!border-red-300]="hasError('firstName', 'required')"
+                [class.focus:!border-red-500]="hasError('firstName', 'required')"
+              />
             </div>
             @if (hasError('firstName', 'required')) {
-              <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> First Name is required</p>
+              <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1"><span class="material-icons text-[14px]">close</span> Required</p>
             }
           </div>
 
-          <div class="space-y-1">
-            <label for="lastName" class="block text-sm font-semibold text-gray-700">Last Name</label>
+          <div class="space-y-1.5 relative group">
+            <label for="lastName" class="text-[12px] font-bold text-gray-700 ml-1 uppercase tracking-wide">Last Name</label>
             <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">person</span>
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+                <span class="material-icons text-[20px]">person_outline</span>
               </div>
-              <input id="lastName" type="text" formControlName="lastName"
-                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-                [class.border-red-300]="hasError('lastName', 'required')"
-                placeholder="Doe">
+              <input id="lastName" type="text" formControlName="lastName" placeholder="Doe"
+                class="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm"
+                [class.!border-red-300]="hasError('lastName', 'required')"
+                [class.focus:!border-red-500]="hasError('lastName', 'required')"
+              />
             </div>
             @if (hasError('lastName', 'required')) {
-              <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> Last Name is required</p>
+              <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1"><span class="material-icons text-[14px]">close</span> Required</p>
             }
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-1">
-            <label for="username" class="block text-sm font-semibold text-gray-700">Username</label>
+        <!-- 2 Column Layout: User / Phone -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="space-y-1.5 relative group">
+            <label for="username" class="text-[12px] font-bold text-gray-700 ml-1 uppercase tracking-wide">Username</label>
             <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">badge</span>
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+                <span class="material-icons text-[20px]">badge</span>
               </div>
-              <input id="username" type="text" formControlName="username"
-                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-                [class.border-red-300]="hasError('username', 'required')"
-                placeholder="johndoe123">
+              <input id="username" type="text" formControlName="username" placeholder="johndoe123"
+                class="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm"
+                [class.!border-red-300]="hasError('username', 'required')"
+                [class.focus:!border-red-500]="hasError('username', 'required')"
+              />
             </div>
             @if (hasError('username', 'required')) {
-              <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> Username is required</p>
+              <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1"><span class="material-icons text-[14px]">close</span> Required</p>
             }
           </div>
 
-          <div class="space-y-1">
-            <label for="phoneNumber" class="block text-sm font-semibold text-gray-700">Phone Number</label>
+          <div class="space-y-1.5 relative group">
+            <label for="phoneNumber" class="text-[12px] font-bold text-gray-700 ml-1 uppercase tracking-wide">Phone #</label>
             <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">phone</span>
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+                <span class="material-icons text-[20px]">phone</span>
               </div>
-              <input id="phoneNumber" type="text" formControlName="phoneNumber"
-                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-                [class.border-red-300]="hasError('phoneNumber', 'required')"
-                placeholder="(555) 123-4567">
+              <input id="phoneNumber" type="text" formControlName="phoneNumber" placeholder="(555) 123-4567"
+                class="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm"
+                [class.!border-red-300]="hasError('phoneNumber', 'required')"
+                [class.focus:!border-red-500]="hasError('phoneNumber', 'required')"
+              />
             </div>
             @if (hasError('phoneNumber', 'required')) {
-              <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> Phone number is required</p>
+              <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1"><span class="material-icons text-[14px]">close</span> Required</p>
             }
           </div>
         </div>
 
-        <div class="space-y-1">
-          <label for="email" class="block text-sm font-semibold text-gray-700">Email address</label>
+        <!-- Full Layout: Email -->
+        <div class="space-y-1.5 relative group">
+          <label for="email" class="text-[12px] font-bold text-gray-700 ml-1 uppercase tracking-wide">Email</label>
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">email</span>
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+              <span class="material-icons text-[20px]">email</span>
             </div>
-            <input id="email" type="email" formControlName="email"
-              class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-              [class.border-red-300]="hasError('email', 'required') || hasError('email', 'email')"
-              placeholder="john@example.com">
+            <input id="email" type="email" formControlName="email" placeholder="john@example.com"
+              class="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm"
+              [class.!border-red-300]="hasError('email', 'required') || hasError('email', 'email')"
+              [class.focus:!border-red-500]="hasError('email', 'required') || hasError('email', 'email')"
+            />
           </div>
           @if (hasError('email', 'required') || hasError('email', 'email')) {
-            <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> Valid email is required</p>
+            <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1"><span class="material-icons text-[14px]">close</span> Valid email required</p>
           }
         </div>
 
-        @if (roleSelection() === 'CUSTOMER') {
-          <div class="space-y-1 animate-[fadeIn_0.3s_ease-out]">
-            <label for="address" class="block text-sm font-semibold text-gray-700">Address</label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">home</span>
-              </div>
-              <input id="address" type="text" formControlName="address"
-                class="block w-full pl-11 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-                [class.border-red-300]="hasError('address', 'required')"
-                placeholder="123 Main St">
-            </div>
-            @if (hasError('address', 'required')) {
-              <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> Address is required</p>
-            }
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-[fadeIn_0.3s_ease-out]">
-            <div class="space-y-1">
-              <label for="city" class="block text-sm font-semibold text-gray-700">City</label>
-              <input id="city" type="text" formControlName="city"
-                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-                [class.border-red-300]="hasError('city', 'required')"
-                placeholder="e.g. New York">
-              @if (hasError('city', 'required')) {
-                <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> City required</p>
-              }
-            </div>
-            <div class="space-y-1">
-              <label for="state" class="block text-sm font-semibold text-gray-700">State</label>
-              <input id="state" type="text" formControlName="state"
-                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-                [class.border-red-300]="hasError('state', 'required')"
-                placeholder="CT">
-              @if (hasError('state', 'required')) {
-                <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> State required</p>
-              }
-            </div>
-          </div>
-        }
-
-        @if (roleSelection() === 'SURVEYOR') {
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-[fadeIn_0.3s_ease-out]">
-            <div class="space-y-1">
-              <label for="licenseNumber" class="block text-sm font-semibold text-gray-700">License Number</label>
-              <input id="licenseNumber" type="text" formControlName="licenseNumber"
-                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-                [class.border-red-300]="hasError('licenseNumber', 'required')"
-                placeholder="LIC-55412">
-              @if (hasError('licenseNumber', 'required')) {
-                <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> required</p>
-              }
-            </div>
-            <div class="space-y-1">
-              <label for="experienceYears" class="block text-sm font-semibold text-gray-700">Years Experience</label>
-              <input id="experienceYears" type="number" formControlName="experienceYears"
-                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-                [class.border-red-300]="hasError('experienceYears', 'required')"
-                placeholder="5">
-              @if (hasError('experienceYears', 'required')) {
-                <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> required</p>
-              }
-            </div>
-          </div>
-          <div class="space-y-1 animate-[fadeIn_0.3s_ease-out]">
-            <label for="assignedRegion" class="block text-sm font-semibold text-gray-700">Assigned Region</label>
-            <input id="assignedRegion" type="text" formControlName="assignedRegion"
-              class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-              [class.border-red-300]="hasError('assignedRegion', 'required')"
-              placeholder="Northeast">
-            @if (hasError('assignedRegion', 'required')) {
-              <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> required</p>
-            }
-          </div>
-        }
-        
-        <div class="space-y-1">
-          <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
+        <!-- Full Layout: Address -->
+        <div class="space-y-1.5 relative group">
+          <label for="address" class="text-[12px] font-bold text-gray-700 ml-1 uppercase tracking-wide">Address</label>
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span class="material-icons text-gray-400 text-sm border-r border-gray-200 pr-2">lock</span>
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+              <span class="material-icons text-[20px]">home</span>
             </div>
-            <input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
-              class="block w-full pl-11 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fire-red/20 focus:border-fire-red sm:text-sm transition-colors"
-              [class.border-red-300]="hasError('password', 'required')"
-              placeholder="••••••••">
+            <input id="address" type="text" formControlName="address" placeholder="123 Main St"
+              class="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm"
+              [class.!border-red-300]="hasError('address', 'required')"
+              [class.focus:!border-red-500]="hasError('address', 'required')"
+            />
+          </div>
+          @if (hasError('address', 'required')) {
+            <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1"><span class="material-icons text-[14px]">close</span> Required</p>
+          }
+        </div>
+
+        <!-- 2 Column Layout: City / State -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="space-y-1.5 relative group">
+            <label for="city" class="text-[12px] font-bold text-gray-700 ml-1 uppercase tracking-wide">City</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+                <span class="material-icons text-[20px]">location_city</span>
+              </div>
+              <input id="city" type="text" formControlName="city" placeholder="e.g. New York"
+                class="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm"
+                [class.!border-red-300]="hasError('city', 'required')"
+                [class.focus:!border-red-500]="hasError('city', 'required')"
+              />
+            </div>
+            @if (hasError('city', 'required')) {
+              <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1"><span class="material-icons text-[14px]">close</span> Required</p>
+            }
+          </div>
+
+          <div class="space-y-1.5 relative group">
+            <label for="state" class="text-[12px] font-bold text-gray-700 ml-1 uppercase tracking-wide">State</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+                <span class="material-icons text-[20px]">map</span>
+              </div>
+              <input id="state" type="text" formControlName="state" placeholder="CT"
+                class="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm"
+                [class.!border-red-300]="hasError('state', 'required')"
+                [class.focus:!border-red-500]="hasError('state', 'required')"
+              />
+            </div>
+            @if (hasError('state', 'required')) {
+              <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1"><span class="material-icons text-[14px]">close</span> Required</p>
+            }
+          </div>
+        </div>
+
+        <!-- Full Layout: Password -->
+        <div class="space-y-1.5 relative group pt-2">
+          <label for="password" class="text-[12px] font-bold text-gray-700 ml-1 uppercase tracking-wide">Password</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-fire-orange transition-colors">
+              <span class="material-icons text-[20px]">lock_outline</span>
+            </div>
+            <input [type]="showPassword() ? 'text' : 'password'" id="password" formControlName="password" placeholder="••••••••" 
+              class="w-full pl-11 pr-12 py-3.5 bg-gray-50/50 border-2 border-gray-100 rounded-xl text-gray-900 font-medium placeholder:text-gray-400 placeholder:font-normal focus:bg-white focus:border-fire-orange focus:ring-4 focus:ring-fire-orange/10 transition-all hover:border-gray-200 shadow-sm tracking-widest placeholder:tracking-normal"
+              [class.!border-red-300]="hasError('password', 'required') || hasError('password', 'minlength')"
+              [class.focus:!border-red-500]="hasError('password', 'required') || hasError('password', 'minlength')"
+            />
             <button type="button" (click)="togglePasswordVisibility()" tabindex="-1"
-              class="absolute inset-y-0 right-0 pr-3 flex items-center group">
-              <span class="material-icons text-gray-400 group-hover:text-gray-600 text-sm transition-colors">
-                {{ showPassword() ? 'visibility_off' : 'visibility' }}
-              </span>
+              class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-700 transition-colors p-2">
+              <span class="material-icons text-[20px]">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
             </button>
           </div>
           @if (hasError('password', 'required') || hasError('password', 'minlength')) {
-            <p class="text-xs text-red-600 mt-1 flex items-center gap-1"><span class="material-icons text-[14px]">error_outline</span> Password must be at least 6 characters</p>
+            <p class="text-xs font-semibold text-red-500 mt-1 ml-1 flex items-center gap-1">
+              <span class="material-icons text-[14px]">close</span> 6+ chars required
+            </p>
           }
         </div>
 
-        <!-- Feedback Messages -->
-        @if (errorMessage()) {
-          <div class="rounded-lg bg-red-50 p-4 border border-red-100 animate-[fadeIn_0.3s_ease-out]">
-            <div class="flex">
-              <div class="flex-shrink-0">
-                <span class="material-icons text-red-500 text-[20px]">error</span>
-              </div>
-              <div class="ml-3 flex-1 md:flex md:justify-between">
-                <p class="text-sm text-red-800">{{ errorMessage() }}</p>
-              </div>
-            </div>
-          </div>
-        }
-
-        @if (successMessage()) {
-          <div class="rounded-lg bg-green-50 p-4 border border-green-100 animate-[fadeIn_0.3s_ease-out]">
-            <div class="flex">
-              <div class="flex-shrink-0">
-                <span class="material-icons text-green-500 text-[20px]">check_circle</span>
-              </div>
-              <div class="ml-3 flex-1 md:flex md:justify-between">
-                <p class="text-sm text-green-800">{{ successMessage() }}</p>
-              </div>
-            </div>
-          </div>
-        }
-
-        <div>
-          <button type="submit" [disabled]="isSubmitting()"
-            class="w-full flex justify-center py-2.5 mt-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gradient-to-r from-fire-red to-fire-orange hover:from-fire-red hover:to-fire-red focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fire-red disabled:opacity-70 disabled:cursor-not-allowed transition-all hover:shadow-lg">
+        <!-- Submit Button -->
+        <div class="pt-4">
+          <button type="submit" [disabled]="isSubmitting() || registerForm.invalid"
+            class="w-full py-4 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-fire-red hover:from-fire-red to-fire-orange hover:to-[#ff7f4d] shadow-[0_8px_16px_rgba(255,107,53,0.25)] hover:shadow-[0_12px_20px_rgba(255,107,53,0.35)] focus:ring-4 focus:ring-fire-orange/30 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-60 disabled:shadow-none disabled:transform-none disabled:cursor-not-allowed">
             @if (isSubmitting()) {
-              <span class="material-icons animate-spin mr-2 text-[18px]">refresh</span> Signing up...
+              <span class="material-icons animate-spin text-[20px]">refresh</span>
+              <span>Creating Account...</span>
             } @else {
-              Create {{ roleSelection() === 'CUSTOMER' ? 'Customer' : 'Surveyor' }} Account
+              <span class="text-[15px] tracking-wide">Create Account</span>
+              <span class="material-icons text-[20px] group-hover:translate-x-1 transition-transform">person_add</span>
             }
           </button>
         </div>
+        
+        <p class="text-center text-xs text-gray-500 mt-4 leading-relaxed max-w-sm mx-auto">
+          By creating an account, you agree to FireShield's <a href="#" class="text-fire-orange hover:underline font-semibold">Terms of Service</a> and <a href="#" class="text-fire-orange hover:underline font-semibold">Privacy Policy</a>.
+        </p>
+
       </form>
+
     </div>
+
+    <!-- Back to Home -->
+    <a routerLink="/" class="absolute top-6 left-6 lg:top-10 lg:left-10 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-gray-900 hover:border-gray-300 hover:shadow-md transition-all z-20 group" aria-label="Back to Home">
+      <span class="material-icons text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+    </a>
   </div>
 </div>
